@@ -23,7 +23,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
-    "format": "prettier \"src/**/*.@(js|ts|tsx)\" --write --config ./.prettierrc"
+    "fix": "npm run lint -- --fix",
+    "format": "prettier \"src/**/*.@(js|ts|tsx)\" --write --config ./.prettierrc",
+    "pre-push": "npm run lint -- --since  && npm run build -- --since"
   },
   "babel": {
     "presets": [
@@ -35,11 +37,6 @@
       "react-app",
       "react-app/jest"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint && npm run format"
-    }
   },
   "browserslist": {
     "production": [
@@ -57,6 +54,7 @@
     "@babel/core": "^7.23.9",
     "@babel/eslint-parser": "^7.23.9",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "commitlint": "^19.2.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-react-app": "^7.0.1",
@@ -67,6 +65,15 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^9.0.11",
-    "prettier": "^3.2.4"
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.4",
+    "lerna": "^4.0.0",
+    "lerna-changelog": "^2.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "npm run pre-push"
+    }
   }
 }
