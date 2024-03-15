@@ -1,0 +1,12 @@
+{
+    "packages": [
+      "src/*"
+    ],
+    "npmClient": "npm",
+    "version": "1.2.0",
+    "useWorkspaces": true,
+    "nohoist": [
+      "eslint"
+    ]
+  }
+  
