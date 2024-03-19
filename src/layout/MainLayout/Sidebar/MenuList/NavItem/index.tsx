@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types';
 import {
-  ForwardRefExoticComponent,
   LegacyRef,
-  RefAttributes,
   forwardRef,
-  useEffect,
+  useEffect
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';

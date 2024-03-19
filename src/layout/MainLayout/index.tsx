@@ -74,7 +74,12 @@ const MainLayout = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        overflow: 'hidden',
+        display: 'flex',
+      }}
+    >
       <CssBaseline />
       {/* header */}
       <AppBar
