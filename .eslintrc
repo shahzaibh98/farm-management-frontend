@@ -12,7 +12,6 @@
     }
   },
   "rules":{
-    "react/react-in-jsx-scope": "off",
     "prettier/prettier": "error",
     "no-unused-vars": "error", 
     "block-scoped-var": "error",
@@ -62,9 +61,7 @@
         "node/no-missing-require": "off",
         "node/shebang": "off",
         "no-dupe-class-members": "off",
-        "require-atomic-updates": "off",
-        "react/react-in-jsx-scope": "off",
-        "react/display-name": "off"
+        "require-atomic-updates": "off"
       },
       "parserOptions": {
         "ecmaVersion": 2018,
