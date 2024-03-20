@@ -6,7 +6,6 @@
     "src/*"
   ],
   "dependencies": {
-    "@bitnoi.se/react-scheduler": "^0.1.5",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
@@ -15,7 +14,6 @@
     "@mui/material": "^5.15.7",
     "@mui/system": "^5.15.7",
     "@mui/utils": "^5.15.7",
-    "@mui/x-date-pickers": "^6.19.7",
     "@tabler/icons-react": "^2.46.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -24,10 +22,8 @@
     "@types/node": "^16.18.89",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
-    "antd": "^5.15.3",
     "apexcharts": "^3.45.2",
     "axios": "^1.6.8",
-    "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "formik": "^2.4.5",
     "framer-motion": "^11.0.3",

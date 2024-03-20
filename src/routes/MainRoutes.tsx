@@ -3,7 +3,6 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import Schedular from 'pages/calender';
 
 // dashboard routing
 const DashboardDefault = Loadable(
@@ -12,9 +11,6 @@ const DashboardDefault = Loadable(
 
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
-
-// schedular page routing
-const SchedularPage = Loadable(lazy(() => import('pages/calender')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -32,7 +28,7 @@ const MainRoutes = {
     },
     {
       path: 'task',
-      element: <SchedularPage />,
+      element: <div>Task Page will be here</div>,
     },
     {
       path: 'utils',
