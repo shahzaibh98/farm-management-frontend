@@ -21,6 +21,7 @@
     "eol-last": "error",
     "prefer-arrow-callback": "error",
     "no-trailing-spaces": "error",
+    "react/react-in-jsx-scope": "off",
     "quotes": [
       "warn",
       "single",
