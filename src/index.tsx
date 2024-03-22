@@ -7,7 +7,9 @@ import './index.css';
 import store from './redux';
 import reportWebVitals from './reportWebVitals';
 import { theme } from './theme/index';
-import ErrorBoundary from './error-boundary';
+import { ErrorBoundary } from './pages/error/index';
+// core styles are required for all packages
+import '@mantine/core/styles.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

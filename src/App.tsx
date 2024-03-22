@@ -1,6 +1,9 @@
+import { RouterProvider } from 'react-router-dom';
 import './App.css';
+import { authRouter } from './routes';
+
 function App() {
-  return <div className="underline bold text-3xl">Farm Management</div>;
+  return <RouterProvider router={authRouter} />;
 }
 
 export default App;
