@@ -70,7 +70,6 @@ const authRouter = createBrowserRouter(
         },
       ],
     },
-
     {
       path: '/livestock',
       element: <CustomAppShell />,
