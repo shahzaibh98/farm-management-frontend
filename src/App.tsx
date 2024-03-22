@@ -1,29 +1,9 @@
-import { useSelector } from 'react-redux';
+import { RouterProvider } from 'react-router-dom';
+import './App.css';
+import { authRouter } from './routes';
 
-import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, StyledEngineProvider } from '@mui/material';
-
-// routing
-import Routes from 'routes';
-
-// defaultTheme
-import themes from 'themes';
-
-// ==============================|| APP ||============================== //
-
-const App = () => {
-  const customization = useSelector(
-    (state: { customization: any }) => state.customization
-  );
-
-  return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={themes(customization)}>
-        <CssBaseline />
-        <Routes />
-      </ThemeProvider>
-    </StyledEngineProvider>
-  );
-};
+function App() {
+  return <RouterProvider router={authRouter} />;
+}
 
 export default App;

@@ -1,31 +1,30 @@
-import { createRoot } from 'react-dom/client';
-
-// third party
-import { BrowserRouter } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
+import App from './App';
+import './index.css';
+import store from './redux';
+import reportWebVitals from './reportWebVitals';
+import { theme } from './theme/index';
+import { ErrorBoundary } from './pages/error/index';
+// core styles are required for all packages
+import '@mantine/core/styles.css';
 
-// project imports
-import * as serviceWorker from 'serviceWorker';
-import App from 'App';
-import { store } from 'store';
-
-// style + assets
-import 'assets/scss/style.scss';
-import config from './config';
-
-// ==============================|| REACT DOM RENDER  ||============================== //
-
-const container = document.getElementById('root');
-const root = createRoot(container!); // createRoot(container!) if you use TypeScript
-root.render(
-  <Provider store={store}>
-    <BrowserRouter basename={config.basename}>
-      <App />
-    </BrowserRouter>
-  </Provider>
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
 );
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+root.render(
+  <React.StrictMode>
+    <MantineProvider defaultColorScheme={'light'} theme={theme}>
+      <ErrorBoundary>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </ErrorBoundary>
+    </MantineProvider>
+  </React.StrictMode>
+);
+
+reportWebVitals();
