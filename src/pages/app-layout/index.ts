@@ -1,3 +1,3 @@
-import CustomAppShell from './app-layout';
+import AppShell from './app-layout';
 
-export { CustomAppShell };
+export { AppShell };

@@ -36,7 +36,7 @@ export const theme: MantineThemeOverride = {
       'rgb(132, 98, 44)', // --color-secondary-dark: rgb(132, 98, 44); /* Used for secondary button background  */
       'rgba(188, 141, 66, 0.15)', // --color-secondary-light: rgba(188, 141, 66, 0.15)
       'rgb(201,166, 77)',
-      '',
+      'rgb(201, 166, 77, 0.75)',
       '',
       '',
       '',
@@ -52,23 +52,24 @@ export const theme: MantineThemeOverride = {
       'rgba(255, 255, 255, 0.2)', //--color-light-020: rgba(255, 255, 255, 0.2)
       'rgba(255, 255, 255, 0.14)',
       'rgba(255, 255, 255, 0.44)',
-      '',
+      'rgba(255, 255, 255, 0.55)',
       '',
       '',
       '',
     ],
     // Dark colors
     darkColors: [
-      'rgb(29, 43, 57)',
-      'rgba(29, 43, 57, 0.75)',
-      'rgba(29, 43, 57, 0.65)',
-      'rgba(29, 43, 57, 0.45)',
-      'rgba(29, 43, 57, 0.25)',
-      'rgba(29, 43, 57, 0.15)',
+      'rgb(29, 43, 57)', // 0 --color-dark-color: rgb(29, 43, 57);
+      'rgba(29, 43, 57, 0.75)', // 1 --color-dark-color: rgba(29, 43, 57, 0.75);
+      'rgba(29, 43, 57, 0.65)', // 2 --color-dark-dark : rgba(29, 43, 57, 0.65);
+      'rgba(29, 43, 57, 0.45)', // 3 --color-dark-dark : rgba(29, 43, 57, 0.45);
+      'rgba(29, 43, 57, 0.25)', // 4 --color-dark-dark : rgba(29, 43, 57, 0.25);
+      'rgba(29, 43, 57, 0.15)', // 5 --color-dark-dark : rgba(29, 43, 57, 0.15);
       'rgba(29, 43, 57, 0.03)', // index[6] background color for section
-      'rgba(29, 43, 57, 0.01)',
+      'rgba(29, 43, 57, 0.01)', // index[7] background color for section
       'rgba(29, 43, 57, 0.02)',
       'rgba(29, 43, 57, 0.08)',
+      'rgba(0, 0, 0, 0.4)',
     ],
     // Info colors
     infoColors: [

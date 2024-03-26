@@ -3,3 +3,4 @@
 /src/setupTests.ts
 /build/*
 /node_modules/*
+/tailwind.config.ts

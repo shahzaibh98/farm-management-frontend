@@ -3,11 +3,10 @@ import {
   Container,
   Image,
   SimpleGrid,
-  Text,
   useMantineTheme,
 } from '@mantine/core';
 import { Error404Image, Error500Image } from '../../assets/images';
-import { CustomText } from '../../components/text';
+import { Text } from '../../concave.agri/components';
 
 const ErrorPage = ({ errorNumber = 404 }: { errorNumber?: number }) => {
   const theme = useMantineTheme();
@@ -19,15 +18,11 @@ const ErrorPage = ({ errorNumber = 404 }: { errorNumber?: number }) => {
           className="hidden md:block"
         />
         <div className="flex flex-col justify-center ml-4">
-          <CustomText
-            size="xl"
-            c={theme.colors.secondaryColors[0]}
-            tt="uppercase"
-          >
+          <Text size="xl" c={theme.colors.secondaryColors[0]} tt="uppercase">
             {errorNumber === 404
               ? 'Something is not right...'
               : 'Something bad just happened...'}
-          </CustomText>
+          </Text>
           <Text className="text-gray-500 text-lg">
             {errorNumber === 404
               ? 'Page you are trying to open does not exist. You may have mistyped the address, or the page has been moved to another URL.'
@@ -40,13 +35,9 @@ const ErrorPage = ({ errorNumber = 404 }: { errorNumber?: number }) => {
             className="mt-6 w-full md:w-auto"
             color={theme.colors.secondaryColors[0]}
           >
-            <CustomText
-              size="md"
-              c={theme.colors.secondaryColors[0]}
-              tt="capitalize"
-            >
+            <Text size="md" c={theme.colors.secondaryColors[0]} tt="capitalize">
               Get back to home page
-            </CustomText>
+            </Text>
           </Button>
         </div>
       </SimpleGrid>
