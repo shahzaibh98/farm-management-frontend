@@ -1,18 +1,31 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../../layout';
+import { Burger, Group, AppShell as MantineAppShell } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 
-const CustomAppShell = () => {
+export function AppShell() {
+  const [opened, { toggle }] = useDisclosure();
+
   return (
-    <div className="w-screen h-screen fixed">
-      <div className="flex h-full bg-skin-secondary">
-        <div className="w-[20%] md:w-[8%] lg:w-[15%] h-full  bg-skin-fill bg-gray-100">
-          <Navbar />
-        </div>
-        <main className="w-[80%] md:w-[92%] lg:w-[85%] h-full bg-skin-light">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+    <MantineAppShell
+      withBorder={false}
+      header={{ height: { base: 48, sm: 60, lg: 0, md: 0 } }}
+      navbar={{ width: 240, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+      transitionDuration={500}
+      transitionTimingFunction="ease"
+    >
+      <MantineAppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+        </Group>
+      </MantineAppShell.Header>
+      <MantineAppShell.Navbar>
+        <Navbar />
+      </MantineAppShell.Navbar>
+      <MantineAppShell.Main>
+        <Outlet />
+      </MantineAppShell.Main>
+    </MantineAppShell>
   );
-};
-export default CustomAppShell;
+}
+export default AppShell;

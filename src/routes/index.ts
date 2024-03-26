@@ -1,4 +1,3 @@
-import authRouter from './auth-routes';
-import PrivateRoute from './check-routes';
+import authRouter from './routes';
 
-export { authRouter, PrivateRoute };
+export { authRouter };

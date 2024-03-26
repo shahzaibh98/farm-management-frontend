@@ -1,4 +1,4 @@
-import { Code, Group } from '@mantine/core';
+import { Code, Group, useMantineTheme } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import {
   IconBuildingWarehouse,
@@ -10,21 +10,22 @@ import {
   IconSwitchHorizontal,
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { PiPawPrint } from 'react-icons/pi';
+import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
 import { Link } from 'react-router-dom';
-import { CustomText } from '../components/text';
+import { Text } from '../concave.agri/components';
 import { extractFirstWord } from '../utils/common/function';
 
 const data = [
   { link: '/', label: 'Dashboard', icon: IconDashboard },
   { link: '/task', label: 'Task', icon: IconListDetails },
-  { link: '/livestock', label: 'LiveStock', icon: PiPawPrint },
+  { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
   { link: '/crop', label: 'Crop', icon: IconCarrot },
   { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
   { link: '/financial', label: 'Financial', icon: IconReceipt2 },
 ];
 
 function Navbar() {
+  const theme = useMantineTheme();
   const [value, setValue] = useLocalStorage({
     key: 'active-tab',
     defaultValue: 'dashboard',
@@ -34,10 +35,10 @@ function Navbar() {
   const currentUrl = extractFirstWord(url);
   const links = data.map(item => (
     <Link
-      className={`flex items-center text-md font-medium rounded-md px-8 py-4 mb-2 ${
+      className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
         item.label === active || item.link === `/${currentUrl}`
-          ? 'bg-gray-500 text-[]'
-          : 'text-gray-700'
+          ? 'bg-secondaryColors-100 text-darkColors-100'
+          : 'text-lightColors-100'
       }`}
       to={item.link}
       key={item.label}
@@ -50,18 +51,25 @@ function Navbar() {
       <span>{item.label}</span>
     </Link>
   ));
-
   return (
-    <div className="flex flex-col h-full mx-2">
+    <div
+      className={`flex flex-col h-full`}
+      style={{
+        color: theme.colors.lightColors[6],
+        backgroundColor: theme.colors.darkColors[0],
+      }}
+    >
       <div className="h-[11%] overflow-hidden mt-8 ml-4">
         <Group>
-          <Code>
-            <CustomText fw={700}>F.M v1.0</CustomText>
+          <Code color={theme.colors.secondaryColors[3]}>
+            <Text fw={700} c={theme.colors.darkColors[0]}>
+              F.M v1.0
+            </Text>
           </Code>
         </Group>
       </div>
       <div className="h-[82%] overflow-y-auto">
-        <div className="flex flex-col">{links}</div>
+        <div className="flex flex-col p-2">{links}</div>
       </div>
       <div className="h-[30%] lg:h-[7%] items-center border-t-2 border-t-skin-light flex justify-around gap-5 py-1 flex-wrap">
         <a
