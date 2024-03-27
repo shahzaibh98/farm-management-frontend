@@ -1,3 +1,4 @@
+import { DocumentTitle } from '../../concave.agri/components/title';
 import { EventCalendar } from '../../layout';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
@@ -13,6 +14,7 @@ export const taskRoutes = [
         index: true,
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Task" />
             <div>Task Routes</div>
           </PrivateRoute>
         ),
@@ -21,6 +23,7 @@ export const taskRoutes = [
         path: 'add',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Task - Add" />
             <div>Task Add</div>
           </PrivateRoute>
         ),
@@ -29,6 +32,7 @@ export const taskRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Task - View" />
             <div>Task View</div>
           </PrivateRoute>
         ),
@@ -37,6 +41,7 @@ export const taskRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Task - Edit" />
             <div>Task Edit</div>
           </PrivateRoute>
         ),

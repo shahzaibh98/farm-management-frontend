@@ -61,8 +61,11 @@ function Navbar() {
     >
       <div className="h-[11%] overflow-hidden mt-8 ml-4">
         <Group>
-          <Code color={theme.colors.secondaryColors[3]}>
-            <Text fw={700} c={theme.colors.darkColors[0]}>
+          <Code
+            color={theme.colors.secondaryColors[3]}
+            c={theme.colors.darkColors[0]}
+          >
+            <Text fw={550} c={theme.colors.darkColors[0]}>
               F.M v1.0
             </Text>
           </Code>
@@ -74,14 +77,14 @@ function Navbar() {
       <div className="h-[30%] lg:h-[7%] items-center border-t-2 border-t-skin-light flex justify-around gap-5 py-1 flex-wrap">
         <a
           href="#"
-          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100"
+          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
           onClick={event => event.preventDefault()}
         >
           <IconSwitchHorizontal className="w-6 h-6" stroke={1.5} />
         </a>
         <a
           href="#"
-          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100"
+          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
           onClick={event => event.preventDefault()}
         >
           <IconLogout className="w-6 h-6" stroke={1.5} />

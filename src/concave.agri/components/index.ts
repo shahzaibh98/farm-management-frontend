@@ -12,6 +12,7 @@ import { Text } from './text';
 import { NumberInput, TextInput } from './inputField';
 import { AutoComplete, MultiSelect, Select } from './dropdown';
 import { Checkbox } from './checkbox';
+import { Table } from './table';
 
 export {
   BreadCrumbs,
@@ -34,4 +35,5 @@ export {
   MultiSelect,
   Select,
   Checkbox,
+  Table,
 };

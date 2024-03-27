@@ -1,3 +1,4 @@
+import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
@@ -12,6 +13,7 @@ export const livestockRoutes = [
         index: true,
         element: (
           <PrivateRoute>
+            <DocumentTitle title="LiveStock" />
             <div>LiveStock</div>
           </PrivateRoute>
         ),
@@ -20,6 +22,7 @@ export const livestockRoutes = [
         path: 'add',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="LiveStock - Add" />
             <div>LiveStock Add</div>
           </PrivateRoute>
         ),
@@ -28,6 +31,7 @@ export const livestockRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="LiveStock - View" />
             <div>LiveStock View</div>
           </PrivateRoute>
         ),
@@ -36,6 +40,7 @@ export const livestockRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="LiveStock - Edit" />
             <div>LiveStock Edit</div>
           </PrivateRoute>
         ),

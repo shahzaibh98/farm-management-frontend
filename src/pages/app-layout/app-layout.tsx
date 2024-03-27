@@ -1,10 +1,16 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../../layout';
-import { Burger, Group, AppShell as MantineAppShell } from '@mantine/core';
+import {
+  Burger,
+  Group,
+  AppShell as MantineAppShell,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 export function AppShell() {
   const [opened, { toggle }] = useDisclosure();
+  const theme = useMantineTheme();
 
   return (
     <MantineAppShell
@@ -14,7 +20,7 @@ export function AppShell() {
       transitionDuration={500}
       transitionTimingFunction="ease"
     >
-      <MantineAppShell.Header>
+      <MantineAppShell.Header color={theme.colors.secondaryColors[3]}>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
         </Group>
