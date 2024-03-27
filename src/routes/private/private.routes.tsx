@@ -6,7 +6,7 @@ const PrivateRoute = ({ children }: any) => {
   //   (state: any) => state?.userInfo?.isAuthenticated
   // );
 
-  const isAuthenticated = true;
+  const isAuthenticated = false;
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

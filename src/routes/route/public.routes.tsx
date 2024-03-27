@@ -1,3 +1,4 @@
+import { AuthenticationForm } from '../../pages/authentication/login-sign-up';
 import { ErrorPage } from '../../pages/error';
 import { PublicRoute } from '../private';
 
@@ -6,7 +7,7 @@ export const publicRoutes = [
     path: '/login',
     element: (
       <PublicRoute>
-        <div>Login</div>
+        <AuthenticationForm />
       </PublicRoute>
     ),
     errorElement: <ErrorPage />,
