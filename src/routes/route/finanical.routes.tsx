@@ -1,3 +1,4 @@
+import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
@@ -12,6 +13,7 @@ export const financialRoutes = [
         index: true,
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Financial" />
             <div>Financial</div>
           </PrivateRoute>
         ),
@@ -20,6 +22,7 @@ export const financialRoutes = [
         path: 'add',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Financial - Add" />
             <div>Financial Add</div>
           </PrivateRoute>
         ),
@@ -28,6 +31,7 @@ export const financialRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Financial - View" />
             <div>Financial View</div>
           </PrivateRoute>
         ),
@@ -36,6 +40,7 @@ export const financialRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
+            <DocumentTitle title="Financial - Edit" />
             <div>Financial Edit</div>
           </PrivateRoute>
         ),

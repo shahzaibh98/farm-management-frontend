@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts3D from 'highcharts/highcharts-3d';
 import Highcharts from 'highcharts/highstock';
@@ -6,6 +5,7 @@ import drilldown from 'highcharts/modules/drilldown';
 import Export from 'highcharts/modules/export-data';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import showNoData from 'highcharts/modules/no-data-to-display';
+import { useEffect } from 'react';
 
 const ThreeDChart = ({
   chartType = 'column',
