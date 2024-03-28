@@ -14,6 +14,8 @@ import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
 import { Link } from 'react-router-dom';
 import { Text } from '../concave.agri/components';
 import { extractFirstWord } from '../utils/common/function';
+import { useDispatch } from 'react-redux';
+import { clearUserInfo } from '../redux/actions/user';
 
 const data = [
   { link: '/', label: 'Dashboard', icon: IconDashboard },
@@ -26,6 +28,8 @@ const data = [
 
 function Navbar() {
   const theme = useMantineTheme();
+  const dispatch = useDispatch();
+
   const [value, setValue] = useLocalStorage({
     key: 'active-tab',
     defaultValue: 'dashboard',
@@ -33,6 +37,7 @@ function Navbar() {
   const [active, setActive] = useState(value);
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
+
   const links = data.map(item => (
     <Link
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
@@ -76,16 +81,16 @@ function Navbar() {
       </div>
       <div className="h-[30%] lg:h-[7%] items-center border-t-2 border-t-skin-light flex justify-around gap-5 py-1 flex-wrap">
         <a
-          href="#"
+          href=""
           className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
           onClick={event => event.preventDefault()}
         >
           <IconSwitchHorizontal className="w-6 h-6" stroke={1.5} />
         </a>
         <a
-          href="#"
           className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
-          onClick={event => event.preventDefault()}
+          onClick={() => dispatch(clearUserInfo())}
+          href=""
         >
           <IconLogout className="w-6 h-6" stroke={1.5} />
         </a>
