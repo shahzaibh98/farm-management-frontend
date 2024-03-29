@@ -53,7 +53,12 @@ export function LoginPage() {
           dispatch(setUserInfo(res));
         })
         .catch(error => {
-          console.log(error);
+          setNotification({
+            isSuccess: false,
+            message: error.message,
+            title: 'Something went wrong',
+            isEnable: true,
+          });
         });
     },
   });
@@ -64,12 +69,13 @@ export function LoginPage() {
 
   return (
     <Container size={420} className="my-10">
+      <Text>{notification?.isEnable}</Text>
       {notification.isEnable && (
         <Notification
           title={notification.title}
           withClose
           color={notification.isSuccess ? theme.colors.primaryColors[0] : 'red'}
-          handleClose={handleNotificationClose}
+          handleCloseNotification={handleNotificationClose}
         >
           <Text fw={500}>{notification.message}</Text>
         </Notification>

@@ -13,16 +13,12 @@ const axiosInstance = axios.create({
 
 // Common function to handle HTTP requests
 const requestData = async <T>(method: string, url: string, data?: any) => {
-  try {
-    const response = await axiosInstance.request<T>({
-      method,
-      url,
-      data,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  const response = await axiosInstance.request<T>({
+    method,
+    url,
+    data,
+  });
+  return response.data;
 };
 
 // GET request

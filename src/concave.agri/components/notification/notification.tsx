@@ -6,6 +6,7 @@ interface NotificationProps {
   color?: string;
   title: string;
   children: React.ReactNode;
+  handleCloseNotification: () => void;
   [key: string]: any; // Allow rest props
 }
 
@@ -13,6 +14,7 @@ const Notification = ({
   icon,
   color,
   title,
+  handleCloseNotification,
   children,
   ...rest
 }: NotificationProps) => {
@@ -20,7 +22,7 @@ const Notification = ({
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      handleClose();
+      handleCloseNotification();
       setIsVisible(false); // Set visibility to false after 5 seconds
     }, 5000);
 
@@ -29,7 +31,7 @@ const Notification = ({
 
   const handleClose = () => {
     setIsVisible(false); // Close the notification manually
-    handleClose();
+    handleCloseNotification();
   };
 
   return (
