@@ -6,45 +6,93 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useFormik } from 'formik';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { fetchData, postData } from '../../api/api';
-import { Button, Paper, Text, TextInput } from '../../concave.agri/components';
+import { postData } from '../../api/api';
+import {
+  Button,
+  Notification,
+  Paper,
+  Text,
+  TextInput,
+} from '../../concave.agri/components';
 import { SignUpPageProps } from '../../types/signup.type';
-export function SignUpPage() {
-  useEffect(() => {
-    fetchData('farm').then(response => console.log(response));
-  }, []);
+import notification from '../../concave.agri/components/notification/notification';
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from '../../redux/actions/user';
 
+const initialNotification = {
+  isSuccess: true,
+  isEnable: false,
+  title: '',
+  message: '',
+};
+export function SignUpPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const theme = useMantineTheme();
+
+  const [notification, setNotification] = useState(initialNotification);
 
   const formik = useFormik({
     initialValues: {
       email: '',
       password: '',
+      confirmPassword: '',
       farmId: '',
       fcmToken: '',
-      firstName: '',
-      lastName: '',
-      currentPassword: '',
+      name: '',
+      farmTitle: '',
     },
     validationSchema: Yup.object({
       email: Yup.string().email('Invalid email').required('Required'),
       password: Yup.string().required('Required'),
-      firstName: Yup.string().required('Required'),
-      lastName: Yup.string().required('Required'),
+      confirmPassword: Yup.string().required('Required'),
+      name: Yup.string().required('Required'),
+      farmTitle: Yup.string().required('Required'),
     }),
     onSubmit: (values: SignUpPageProps) => {
-      postData('auth/email/register', {}).then(response => {
-        console.log(response);
-      });
+      if (values.password !== values.confirmPassword) {
+        setNotification({
+          isSuccess: false,
+          message: 'Current and Confirm Password does not match',
+          title: 'Validation Error',
+          isEnable: true,
+        });
+        return;
+      }
+      postData('users', values)
+        .then(res => {
+          dispatch(setUserInfo(res));
+        })
+        .catch(error => {
+          setNotification({
+            isSuccess: false,
+            message: error.message,
+            title: 'Something went wrong',
+            isEnable: true,
+          });
+        });
     },
   });
 
+  const handleNotificationClose = () => {
+    setNotification(initialNotification);
+  };
+
   return (
     <Container size={420} className="my-10">
+      {notification.isEnable && (
+        <Notification
+          title={notification.title}
+          withClose
+          color={notification.isSuccess ? theme.colors.primaryColors[0] : 'red'}
+          handleCloseNotification={handleNotificationClose}
+        >
+          <Text fw={500}>{notification.message}</Text>
+        </Notification>
+      )}
       <Title className="font-bold text-2xl text-center text-secondaryColors-100">
         Welcome to Concave Farm!
       </Title>
@@ -72,27 +120,27 @@ export function SignUpPage() {
             }
           />
           <TextInput
-            label="First Name"
-            placeholder="Enter your First Name"
+            label="Full Name"
+            placeholder="Enter your Full Name"
             required
-            value={formik.values.firstName}
-            onChange={(value: string) =>
-              formik.setFieldValue('firstName', value)
-            }
+            value={formik.values.name}
+            onChange={(value: string) => formik.setFieldValue('name', value)}
             error={
-              formik.touched.email && formik.errors.email && formik.errors.email
+              formik.touched.name && formik.errors.name && formik.errors.name
             }
           />
           <TextInput
-            label="Last Name"
-            placeholder="Enter your Last Name"
+            label="Farm Title"
+            placeholder="Enter your farm title"
             required
-            value={formik.values.lastName}
+            value={formik.values.farmTitle}
             onChange={(value: string) =>
-              formik.setFieldValue('lastName', value)
+              formik.setFieldValue('farmTitle', value)
             }
             error={
-              formik.touched.email && formik.errors.email && formik.errors.email
+              formik.touched.farmTitle &&
+              formik.errors.farmTitle &&
+              formik.errors.farmTitle
             }
           />
           <PasswordInput
@@ -115,20 +163,20 @@ export function SignUpPage() {
             placeholder="Re-enter your password"
             required
             className="mt-4"
-            value={formik.values.currentPassword}
+            value={formik.values.confirmPassword}
             onChange={event =>
-              formik.setFieldValue('currentPassword', event.target.value)
+              formik.setFieldValue('confirmPassword', event.target.value)
             }
             error={
-              formik.touched.currentPassword &&
-              formik.errors.currentPassword &&
-              formik.errors.currentPassword
+              formik.touched.confirmPassword &&
+              formik.errors.confirmPassword &&
+              formik.errors.confirmPassword
             }
           />
           <Button
             type="submit"
             fullWidth
-            className="mt-6"
+            className="mt-10"
             style={{ backgroundColor: theme.colors.secondaryColors[3] }}
           >
             CREATE ACCOUNT

@@ -48,7 +48,7 @@ export function LoginPage() {
       password: Yup.string().required('Required'),
     }),
     onSubmit: (values: LoginPageProps) => {
-      postData('auth/email/login', { ...values, fcmToken: 'Fcm Token' })
+      postData('/users/login', { ...values, fcmToken: 'Fcm Token' })
         .then(res => {
           dispatch(setUserInfo(res));
         })
@@ -69,7 +69,6 @@ export function LoginPage() {
 
   return (
     <Container size={420} className="my-10">
-      <Text>{notification?.isEnable}</Text>
       {notification.isEnable && (
         <Notification
           title={notification.title}

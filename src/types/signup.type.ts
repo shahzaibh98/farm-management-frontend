@@ -3,7 +3,7 @@ export interface SignUpPageProps {
   password: string;
   farmId?: string;
   fcmToken?: string;
-  firstName: string;
-  lastName: string;
-  currentPassword: string;
+  confirmPassword: string;
+  name: string;
+  farmTitle: string;
 }

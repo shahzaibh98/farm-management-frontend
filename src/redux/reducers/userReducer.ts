@@ -62,11 +62,9 @@ const userInfoReducer = (
     case REFRESH_ACCESS_TOKEN:
       // Handle refreshing access token
       sessionStorage.setItem('token', action.payload.token);
-      sessionStorage.setItem('refreshToken', action.payload.refreshToken);
       return {
         ...state,
         token: action.payload.token,
-        refreshToken: action.payload.refreshToken,
       };
     default:
       return state;
