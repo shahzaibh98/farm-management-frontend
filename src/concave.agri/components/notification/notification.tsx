@@ -6,6 +6,7 @@ interface NotificationProps {
   color?: string;
   title: string;
   children: React.ReactNode;
+  handleCloseNotification: () => void;
   [key: string]: any; // Allow rest props
 }
 
@@ -13,6 +14,7 @@ const Notification = ({
   icon,
   color,
   title,
+  handleCloseNotification,
   children,
   ...rest
 }: NotificationProps) => {
@@ -20,6 +22,7 @@ const Notification = ({
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      handleCloseNotification();
       setIsVisible(false); // Set visibility to false after 5 seconds
     }, 5000);
 
@@ -28,21 +31,27 @@ const Notification = ({
 
   const handleClose = () => {
     setIsVisible(false); // Close the notification manually
+    handleCloseNotification();
   };
 
   return (
     <>
-      {isVisible && ( // Render the notification only if it's visible
-        <MantineNotification
-          title={title}
-          icon={icon}
-          color={color}
-          withCloseButton
-          onClose={handleClose} // Call handleClose when close button is clicked
-          {...rest} // Spread rest props
-        >
-          {children}
-        </MantineNotification>
+      {isVisible && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <MantineNotification
+              className="w-96"
+              title={title}
+              icon={icon}
+              color={color}
+              withCloseButton
+              onClose={handleClose}
+              {...rest}
+            >
+              {children}
+            </MantineNotification>
+          </div>
+        </div>
       )}
     </>
   );

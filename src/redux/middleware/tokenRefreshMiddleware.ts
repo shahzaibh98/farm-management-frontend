@@ -15,7 +15,7 @@ const tokenRefreshMiddleware = (store: { dispatch: (arg0: any) => void }) => {
   };
 
   // Start token refresh only if refresh token is available in session storage
-  const refreshToken = sessionStorage.getItem('refreshToken');
+  const refreshToken = sessionStorage.getItem('token');
   if (refreshToken) {
     startTokenRefresh();
   }
