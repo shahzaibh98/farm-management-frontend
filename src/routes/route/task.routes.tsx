@@ -2,6 +2,7 @@ import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
+import { Demo } from '../../pages/task/task';
 
 export const taskRoutes = [
   {
@@ -14,7 +15,7 @@ export const taskRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Task" />
-            <div>Task Routes</div>
+            {/* <div>Task Routes</div> */}
           </PrivateRoute>
         ),
       },
@@ -24,6 +25,7 @@ export const taskRoutes = [
           <PrivateRoute>
             <DocumentTitle title="Task - Add" />
             <div>Task Add</div>
+            <Demo />
           </PrivateRoute>
         ),
       },
