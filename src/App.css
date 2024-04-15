@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+.addtaskModal .mantine-Modal-inner {
+  display: block !important;
+}
+.addtaskModal .mantine-Modal-content {
+  width: 80% !important;
+  margin: 0 auto;
+}

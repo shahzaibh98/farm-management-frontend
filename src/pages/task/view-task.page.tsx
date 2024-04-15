@@ -397,9 +397,10 @@ const TaskView = () => {
         opened={isModalOpen}
         onClose={toggleModal}
         title="Add Task"
-        size="md"
+        size="lg"
+        className='addtaskModal'
       >
-        <Center>
+        <Center className='addtaskModalCenter'>
           <Demo /> {/* Render the Demo component inside the modal */}
         </Center>
       </Modal>
