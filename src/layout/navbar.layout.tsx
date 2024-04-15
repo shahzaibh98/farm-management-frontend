@@ -9,13 +9,12 @@ import {
   IconReceipt2,
   IconSwitchHorizontal,
 } from '@tabler/icons-react';
-import { useState } from 'react';
 import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Text } from '../concave.agri/components';
-import { extractFirstWord } from '../utils/common/function';
-import { useDispatch } from 'react-redux';
 import { clearUserInfo } from '../redux/actions/user';
+import { extractFirstWord } from '../utils/common/function';
 
 const data = [
   { link: '/', label: 'Dashboard', icon: IconDashboard },
@@ -30,27 +29,18 @@ function Navbar() {
   const theme = useMantineTheme();
   const dispatch = useDispatch();
 
-  const [value, setValue] = useLocalStorage({
-    key: 'active-tab',
-    defaultValue: 'dashboard',
-  });
-  const [active, setActive] = useState(value);
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
 
   const links = data.map(item => (
     <Link
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
-        item.label === active || item.link === `/${currentUrl}`
+        item.link === `/${currentUrl}`
           ? 'bg-secondaryColors-100 text-darkColors-100'
           : 'text-lightColors-100'
       }`}
       to={item.link}
       key={item.label}
-      onClick={() => {
-        setActive(item.label);
-        setValue(item.label);
-      }}
     >
       <item.icon className="w-6 h-6 mr-2" stroke={'1.5'} />
       <span>{item.label}</span>
