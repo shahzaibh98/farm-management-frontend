@@ -70,6 +70,7 @@ export const theme: MantineThemeOverride = {
       'rgba(29, 43, 57, 0.02)',
       'rgba(29, 43, 57, 0.08)',
       'rgba(0, 0, 0, 0.4)',
+      'rgba(0, 0, 0, 0.7)',
     ],
     // Info colors
     infoColors: [
