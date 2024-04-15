@@ -4,18 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import {
   DatePicker,
   Paper,
-  SearchForm,
   Select,
   Table,
   Text,
 } from '../../concave.agri/components';
 
+import { useSearchParams } from 'react-router-dom';
 import { SearchButton } from '../../concave.agri/components/searchbar';
+import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+import useScreenSize from '../../hooks/useScreenSize';
 import { TableMenu } from '../../layout';
 import GenericHeader from '../../layout/header.layout';
-import { paginationInfoValue } from '../../utils/common/constant.function';
-import { useSearchParams } from 'react-router-dom';
+import SearchComponent from '../../layout/searchBar.layout';
 import { SearchValuesType } from '../../types/view-task.type';
+import { paginationInfoValue } from '../../utils/common/constant.function';
 import { initialSearchValues } from './initial.values';
 
 const TaskView = () => {
@@ -24,6 +26,7 @@ const TaskView = () => {
   /////////////////////////////////////////////////// */
 
   const navigate = useNavigate();
+  const { isSmallScreen } = useScreenSize();
 
   /* /////////////////////////////////////////////////
                       State
@@ -183,6 +186,11 @@ const TaskView = () => {
             }));
   };
 
+  const handleResetButtonClick = () => {
+    setSearchParams({});
+    setSearchValues(initialSearchValues);
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -294,22 +302,18 @@ const TaskView = () => {
       />
       <Paper
         shadow="xs"
-        className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%]"
+        className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >
-        <Grid className="mr-2 mt-2">
-          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
-            <SearchForm
-              id="simple-search"
-              placeholder="Search by title..."
-              value={searchValues.searchValue}
-              onChange={(event: { target: { value: any } }) =>
-                setValuesById({ searchValue: event.target.value })
-              }
-              onSearchButtonClick={() => console.log('Search is clicked')}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+        <SearchComponent
+          searchValue={searchValues.searchValue}
+          setValuesById={setValuesById}
+          handleSearchButtonClick={handleSearchButtonClick}
+          handleResetButtonClick={handleResetButtonClick}
+          isSmallScreen={isSmallScreen}
+        />
+        <Grid className="mt-2">
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
               placeholder="Assigned To"
               data={['Me', 'Farm user 1', 'Farm user 2', 'Farm user 3']}
@@ -318,9 +322,8 @@ const TaskView = () => {
               onChange={value => setValuesById({ assignedTo: value })}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
-              className="mr-2"
               placeholder="Associated To"
               data={[]}
               value={searchValues.associatedTo ?? ''}
@@ -328,9 +331,9 @@ const TaskView = () => {
               onChange={value => setValuesById({ associatedTo: value })}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
-              className="ml-2"
               placeholder="Progress"
               data={['In Progress', 'Pending', 'Completed']}
               clearable
@@ -338,7 +341,7 @@ const TaskView = () => {
               onChange={value => setValuesById({ progress: value })}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
               placeholder="Upcoming Task"
               data={[
@@ -355,8 +358,8 @@ const TaskView = () => {
               onChange={value => setValuesById({ upcomingTask: value })}
             />
           </Grid.Col>
-          {true && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+          {searchValues?.upcomingTask === 'Custom Range' && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
               <DatePicker
                 type="range"
                 placeholder="Select a date range"
@@ -369,11 +372,15 @@ const TaskView = () => {
               />
             </Grid.Col>
           )}
-          <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
-            <SearchButton
-              onSearchButtonClick={() => handleSearchButtonClick()}
-            />
-          </Grid.Col>
+
+          {isSmallScreen && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <div className="flex flex-row justify-between">
+                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                <ResetButton onResetButtonClick={handleResetButtonClick} />
+              </div>
+            </Grid.Col>
+          )}
         </Grid>
 
         <Table

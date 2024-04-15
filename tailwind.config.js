@@ -108,8 +108,10 @@ module.exports = {
       },
       'red': {
         light: '#FFE0E0', // Light red (slightly darker)
+        lightDark: '#ffb09c',
         DEFAULT: '#F44336', // Original red
         dark: '#B71C1C', // Dark red
+
       },
       yellow: {
         light: '#FFF5C2', // Light yellow (slightly darker)
