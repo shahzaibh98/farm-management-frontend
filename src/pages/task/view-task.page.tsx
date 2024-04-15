@@ -1,15 +1,15 @@
 import { Center, Grid } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { CiCalendarDate, CiViewTable } from 'react-icons/ci';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   DatePicker,
   Paper,
   Select,
   Table,
+  Tabs,
   Text,
 } from '../../concave.agri/components';
-
-import { useSearchParams } from 'react-router-dom';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
 import useScreenSize from '../../hooks/useScreenSize';
@@ -79,8 +79,20 @@ const TaskView = () => {
     });
   };
 
+  const initialPaginationFromQueryParams = () => {
+    const rowPerPage =
+      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+
+    const currentPage = Number(
+      searchParams.get('currentPage') ||
+        paginationInfoValue.currentPage?.toString()
+    );
+    setPaginationInfo({ ...paginationInfoValue, rowPerPage, currentPage });
+  };
+
   useEffect(() => {
     initializeStateFromQueryParams();
+    initialPaginationFromQueryParams();
   }, [searchParams]);
 
   // Function to set values based on identifiers
@@ -92,7 +104,7 @@ const TaskView = () => {
   };
 
   const handleSetParams = () => {
-    const newParams = new URLSearchParams();
+    const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(searchValues).forEach(([key, value]) => {
       if (key === 'dateRange') {
         if (value[0]) {
@@ -115,79 +127,59 @@ const TaskView = () => {
     handleFetchDataByFilter();
   };
 
-  const defaultData = [
-    {
-      id: 1,
-      title: 'Task 1',
-      assigned_to: 'John Doe',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-10',
-    },
-    {
-      id: 2,
-      title: 'Task 2',
-      assigned_to: 'Jane Smith',
-      associated_to: 'Project Y',
-      priority: 'Medium',
-      status: 'Pending',
-      due_date: '2024-04-15',
-    },
-    {
-      id: 3,
-      title: 'Task 3',
-      assigned_to: 'Alice Johnson',
-      associated_to: 'Project Z',
-      priority: 'Low',
-      status: 'Completed',
-      due_date: '2024-04-20',
-    },
-    {
-      id: 4,
-      title: 'Task 4',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
-    },
-    {
-      id: 5,
-      title: 'Task 5',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
-    },
-  ];
-
   const handlePagination = (actionType: string, value?: any) => {
-    actionType === 'next'
-      ? setPaginationInfo(prevState => ({
-          ...prevState,
-          currentPage: prevState.currentPage + 1,
-        }))
-      : actionType === 'previous'
-        ? setPaginationInfo(prevState => ({
-            ...prevState,
-            currentPage: prevState.currentPage - 1,
-          }))
-        : actionType === 'goto'
-          ? setPaginationInfo(prevState => ({
-              ...prevState,
-              currentPage: value,
-            }))
-          : actionType === 'rowPerPage' &&
-            setPaginationInfo(prevState => ({
-              ...prevState,
-              rowPerPage: value,
-            }));
+    const newParams = new URLSearchParams(searchParams.toString());
+    const currentPage = paginationInfo.currentPage;
+
+    if (actionType === 'next') {
+      setPaginationInfo(prevState => ({
+        ...prevState,
+        currentPage: prevState.currentPage + 1,
+      }));
+      currentPage > 2
+        ? newParams.delete('currentPage')
+        : newParams.set('currentPage', (currentPage + 1).toString());
+    } else if (actionType === 'previous') {
+      setPaginationInfo(prevState => ({
+        ...prevState,
+        currentPage: prevState.currentPage - 1,
+      }));
+      currentPage > 2
+        ? newParams.delete('currentPage')
+        : newParams.set('currentPage', (currentPage - 1).toString());
+    } else if (actionType === 'goto') {
+      setPaginationInfo(prevState => ({
+        ...prevState,
+        currentPage: value,
+      }));
+      value > 2
+        ? newParams.delete('currentPage')
+        : newParams.set('currentPage', value);
+    } else if (actionType === 'rowPerPage') {
+      setPaginationInfo(prevState => ({
+        ...prevState,
+        rowPerPage: value,
+      }));
+      if (value === '10' || value === '50' || value === '100') {
+        newParams.set('rowPerPage', value);
+      } else {
+        newParams.delete('rowPerPage');
+      }
+    }
+    setSearchParams(newParams);
   };
 
   const handleResetButtonClick = () => {
-    setSearchParams({});
+    const newParams = new URLSearchParams();
+    const rowPerPage =
+      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+    const currentPage = Number(
+      searchParams.get('currentPage') ||
+        paginationInfoValue.currentPage?.toString()
+    );
+    if (rowPerPage !== '5') newParams.set('rowPerPage', rowPerPage);
+    if (currentPage > 2) newParams.set('currentPage', currentPage.toString());
+    setSearchParams(newParams);
     setSearchValues(initialSearchValues);
   };
 
@@ -291,6 +283,55 @@ const TaskView = () => {
     ],
     []
   );
+
+  const defaultData = [
+    {
+      id: 1,
+      title: 'Task 1',
+      assigned_to: 'John Doe',
+      associated_to: 'Project X',
+      priority: 'High',
+      status: 'In Progress',
+      due_date: '2024-04-10',
+    },
+    {
+      id: 2,
+      title: 'Task 2',
+      assigned_to: 'Jane Smith',
+      associated_to: 'Project Y',
+      priority: 'Medium',
+      status: 'Pending',
+      due_date: '2024-04-15',
+    },
+    {
+      id: 3,
+      title: 'Task 3',
+      assigned_to: 'Alice Johnson',
+      associated_to: 'Project Z',
+      priority: 'Low',
+      status: 'Completed',
+      due_date: '2024-04-20',
+    },
+    {
+      id: 4,
+      title: 'Task 4',
+      assigned_to: 'Bob Brown',
+      associated_to: 'Project X',
+      priority: 'High',
+      status: 'In Progress',
+      due_date: '2024-04-25',
+    },
+    {
+      id: 5,
+      title: 'Task 5',
+      assigned_to: 'Bob Brown',
+      associated_to: 'Project X',
+      priority: 'High',
+      status: 'In Progress',
+      due_date: '2024-04-25',
+    },
+  ];
+
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
       <GenericHeader
@@ -300,96 +341,128 @@ const TaskView = () => {
         buttonContent="Add Task"
         onButtonClick={() => navigate('add')}
       />
+
       <Paper
         shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >
-        <SearchComponent
-          searchValue={searchValues.searchValue}
-          setValuesById={setValuesById}
-          handleSearchButtonClick={handleSearchButtonClick}
-          handleResetButtonClick={handleResetButtonClick}
-          isSmallScreen={isSmallScreen}
-        />
-        <Grid className="mt-2">
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Assigned To"
-              data={['Me', 'Farm user 1', 'Farm user 2', 'Farm user 3']}
-              value={searchValues.assignedTo ?? ''}
-              clearable
-              onChange={value => setValuesById({ assignedTo: value })}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Associated To"
-              data={[]}
-              value={searchValues.associatedTo ?? ''}
-              clearable
-              onChange={value => setValuesById({ associatedTo: value })}
-            />
-          </Grid.Col>
+        <Tabs
+          tabs={[
+            {
+              value: 'Table',
+              label: 'Table',
+              icon: <CiViewTable size={24} />,
+              component: (
+                <div className="mt-4">
+                  <SearchComponent
+                    searchValue={searchValues.searchValue}
+                    setValuesById={setValuesById}
+                    handleSearchButtonClick={handleSearchButtonClick}
+                    handleResetButtonClick={handleResetButtonClick}
+                    isSmallScreen={isSmallScreen}
+                  />
+                  <Grid className="mt-2">
+                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                      <Select
+                        placeholder="Assigned To"
+                        data={[
+                          'Me',
+                          'Farm user 1',
+                          'Farm user 2',
+                          'Farm user 3',
+                        ]}
+                        value={searchValues.assignedTo ?? ''}
+                        clearable
+                        onChange={value => setValuesById({ assignedTo: value })}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                      <Select
+                        placeholder="Associated To"
+                        data={[]}
+                        value={searchValues.associatedTo ?? ''}
+                        clearable
+                        onChange={value =>
+                          setValuesById({ associatedTo: value })
+                        }
+                      />
+                    </Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Progress"
-              data={['In Progress', 'Pending', 'Completed']}
-              clearable
-              value={searchValues.progress ?? ''}
-              onChange={value => setValuesById({ progress: value })}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Upcoming Task"
-              data={[
-                'All',
-                'Today',
-                'Tomorrow',
-                'This Week',
-                'Next Week',
-                'Next Month',
-                'Custom Range',
-              ]}
-              value={searchValues?.upcomingTask ?? ''}
-              clearable
-              onChange={value => setValuesById({ upcomingTask: value })}
-            />
-          </Grid.Col>
-          {searchValues?.upcomingTask === 'Custom Range' && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-              <DatePicker
-                type="range"
-                placeholder="Select a date range"
-                value={searchValues.dateRange ?? ''}
-                onChange={value =>
-                  setValuesById({
-                    dateRange: value as [Date | null, Date | null],
-                  })
-                }
-              />
-            </Grid.Col>
-          )}
+                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                      <Select
+                        placeholder="Progress"
+                        data={['In Progress', 'Pending', 'Completed']}
+                        clearable
+                        value={searchValues.progress ?? ''}
+                        onChange={value => setValuesById({ progress: value })}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                      <Select
+                        placeholder="Upcoming Task"
+                        data={[
+                          'All',
+                          'Today',
+                          'Tomorrow',
+                          'This Week',
+                          'Next Week',
+                          'Next Month',
+                          'Custom Range',
+                        ]}
+                        value={searchValues?.upcomingTask ?? ''}
+                        clearable
+                        onChange={value =>
+                          setValuesById({ upcomingTask: value })
+                        }
+                      />
+                    </Grid.Col>
+                    {searchValues?.upcomingTask === 'Custom Range' && (
+                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                        <DatePicker
+                          type="range"
+                          placeholder="Select a date range"
+                          value={searchValues.dateRange ?? ''}
+                          onChange={value =>
+                            setValuesById({
+                              dateRange: value as [Date | null, Date | null],
+                            })
+                          }
+                        />
+                      </Grid.Col>
+                    )}
 
-          {isSmallScreen && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-              <div className="flex flex-row justify-between">
-                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
-                <ResetButton onResetButtonClick={handleResetButtonClick} />
-              </div>
-            </Grid.Col>
-          )}
-        </Grid>
-
-        <Table
-          isLoading={isLoading}
-          data={defaultData}
-          columns={columns}
-          paginationInfo={paginationInfo}
-          handlePagination={handlePagination}
-        />
+                    {isSmallScreen && (
+                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                        <div className="flex flex-row justify-between">
+                          <SearchButton
+                            onSearchButtonClick={handleSearchButtonClick}
+                          />
+                          <ResetButton
+                            onResetButtonClick={handleResetButtonClick}
+                          />
+                        </div>
+                      </Grid.Col>
+                    )}
+                  </Grid>
+                  <Table
+                    isLoading={isLoading}
+                    data={defaultData}
+                    columns={columns}
+                    paginationInfo={paginationInfo}
+                    handlePagination={handlePagination}
+                  />
+                </div>
+              ),
+            },
+            {
+              value: 'Calendar',
+              label: 'Calendar',
+              icon: <CiCalendarDate size={24} />,
+              component: <div>Calendar</div>,
+            },
+          ]}
+        ></Tabs>
       </Paper>
       <div className="h-4" />
     </main>
