@@ -20,6 +20,7 @@ import { SearchValuesType } from '../../types/view-task.type';
 import { paginationInfoValue } from '../../utils/common/constant.function';
 import { initialSearchValues } from './initial.values';
 import { Demo } from './task';
+import MyCalendar from '../calendar/calendar';
 
 const TaskView = () => {
   /* /////////////////////////////////////////////////
@@ -468,7 +469,12 @@ const TaskView = () => {
               value: 'Calendar',
               label: 'Calendar',
               icon: <CiCalendarDate size={24} />,
-              component: <div>Calendar</div>,
+              component: (
+                <div>
+                  {' '}
+                  <MyCalendar />
+                </div>
+              ),
             },
           ]}
         ></Tabs>

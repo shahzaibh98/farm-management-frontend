@@ -3,8 +3,6 @@ import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import TaskPage from '../../pages/task/view-task.page';
 import PrivateRoute from '../private/private.routes';
-import { Demo } from '../../pages/task/task';
-import MyCalendar from '../../pages/calendar/calendar';
 
 export const taskRoutes = [
   {
@@ -27,7 +25,6 @@ export const taskRoutes = [
           <PrivateRoute>
             <DocumentTitle title="Task - Add" />
             <div>Task Add</div>
-            <MyCalendar />
           </PrivateRoute>
         ),
       },

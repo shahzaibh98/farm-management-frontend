@@ -99,11 +99,11 @@ export function Demo() {
   };
 
   return (
-    <Box
-      component="form"
-      mx="auto"
-      onSubmit={form.onSubmit(() => {})}
-      className="p-8 rounded-lg border border-gray-200 shadow-md TST"
+    <div
+    // component="form"
+    // mx="auto"
+    // onSubmit={form.onSubmit(() => {})}
+    // className="p-8 rounded-lg border border-gray-200 shadow-md TST"
     >
       {/* Add Task Container */}
       <Grid>
@@ -460,6 +460,7 @@ export function Demo() {
         >
           Add Checklist
         </Button>
+
         <Button type="button" onClick={handleAddAttachmentClick}>
           Add Attachment
         </Button>
@@ -469,6 +470,6 @@ export function Demo() {
         <Button type="submit">Close</Button>
         <Button type="submit">Create</Button>
       </Group> */}
-    </Box>
+    </div>
   );
 }
