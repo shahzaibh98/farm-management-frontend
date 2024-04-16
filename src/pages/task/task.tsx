@@ -124,7 +124,7 @@ export function Demo() {
        </Grid.Col>
        <Grid.Col>
        <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
-            <Grid.Col span={4}>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Button
                 type="button"
                 onClick={handleAddChecklistItem}
@@ -134,12 +134,12 @@ export function Demo() {
                 Add Checklist
               </Button>
                  </Grid.Col>
-            <Grid.Col span={4}>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Button type="button" className="mt-4" onClick={handleAddLocation}>
                 Add Location
               </Button>
               </Grid.Col>
-            <Grid.Col span={4}>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Button type="button" className="mt-4" onClick={handleAddAttachmentClick}>
                 Add Attachment
               </Button>
@@ -156,7 +156,7 @@ export function Demo() {
                    </Grid.Col>
 <Grid.Col>
   <h2 className='mb-2'>Task Color</h2>
-    <SimpleGrid cols={16}>
+    <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs" > 
       <div><a style={{color:'#bdbdbd'}}><FaCircle size={25}/></a></div>
       <div><a style={{color:'#ef5350'}}><FaCircle size={25} /></a></div>
       <div><a style={{color:'#ec407a'}}><FaCircle size={25}/></a></div>
@@ -245,9 +245,21 @@ export function Demo() {
         {...form.getInputProps('hoursSpent')}
       />
                     </Grid.Col>
+                  
          </Grid.Col>
 {/* End of Add Task Container 30% */}
       </Grid>
+      <Flex
+      mih={50}
+      gap="xs"
+      justify="flex-end"
+      align="flex-start"
+      direction="row"
+      wrap="wrap"
+    >
+      <Button type="submit">Close</Button>
+      <Button type="submit">Create</Button>
+    </Flex>
 {/* End of Add Task Container */}
 
 
@@ -342,63 +354,41 @@ export function Demo() {
         style={{ display: 'none' }}
         onChange={handleAttachmentChange}
       /> */}
+   {form.values.checklist.map((item: any, index: number) => (
+    <div key={index} className="flex items-center mt-4">
+      {/* Checkbox */}
+      
+      {/* Text field */}
+      {/* <TextInput
+        value={item.text}
+        onChange={e => handleChecklistTextChange(e)}
+        placeholder="Checklist item"
+        className="mr-2"
+      /> */}
+      {/* Dropdown */}
+      {/* <Select
+        value={item.dropdownValue}
+        onChange={value => handleChecklistDropdownChange(value)}
+        placeholder="Select option"
+        className="mr-2"
+        data={['Option 1', 'Option 2', 'Option 3'].map(option => ({
+          value: option,
+          label: option,
+        }))}
+      /> */}
+      {/* Delete button */}
+      {/* <Button
+        onClick={() => handleDeleteChecklistItem(index)}
+        variant="outline"
+        color="red"
+      >
+        Delete
+      </Button> */}
+    </div>
+  ))}
 
-      {form.values.checklist.map((item: any, index: number) => (
-        <div key={index} className="flex items-center mt-4">
-          {/* Checkbox */}
-          
-          {/* Text field */}
-          {/* <TextInput
-            value={item.text}
-            onChange={e => handleChecklistTextChange(e)}
-            placeholder="Checklist item"
-            className="mr-2"
-          /> */}
-          {/* Dropdown */}
-          {/* <Select
-            value={item.dropdownValue}
-            onChange={value => handleChecklistDropdownChange(value)}
-            placeholder="Select option"
-            className="mr-2"
-            data={['Option 1', 'Option 2', 'Option 3'].map(option => ({
-              value: option,
-              label: option,
-            }))}
-          /> */}
-          {/* Delete button */}
-          {/* <Button
-            onClick={() => handleDeleteChecklistItem(index)}
-            variant="outline"
-            color="red"
-          >
-            Delete
-          </Button> */}
-        </div>
-      ))}
-
-      {/* <Text>Description</Text>
-      <TextEditor /> */}
-
-      {/* <Group justify="space-between" mt="md">
-        <Button
-          type="button"
-          onClick={handleAddChecklistItem}
-          variant="outline"
-          className="mt-4"
-        >
-          Add Checklist
-        </Button>
-        
-        <Button type="button" onClick={handleAddAttachmentClick}>
-          Add Attachment
-        </Button>
-        <Button type="button" onClick={handleAddLocation}>
-          Add Location
-        </Button>
-        <Button type="submit">Close</Button>
-        <Button type="submit">Create</Button>
-      </Group> */}
-    </Box>
-   
+  {/* <Text>Description</Text>
+  <TextEditor /> */}
+  </Box>
   );
 }
