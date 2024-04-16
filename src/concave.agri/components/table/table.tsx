@@ -41,7 +41,7 @@ const Table = ({
           <Loader />
         </div>
       ) : (
-        <div className="p-2 max-w-full overflow-x-scroll overflow-y-hidden flex flex-col justify-between">
+        <div className="mt-4 max-w-full overflow-x-scroll overflow-y-hidden flex flex-col justify-between">
           <table
             className="w-full"
             style={{

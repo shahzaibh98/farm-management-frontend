@@ -1,3 +1,5 @@
+import { GrPowerReset } from 'react-icons/gr';
+
 const SearchButton = ({
   onSearchButtonClick,
 }: {
