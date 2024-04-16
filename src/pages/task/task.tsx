@@ -1,17 +1,7 @@
 import React, { ChangeEvent, useState } from 'react'; // Import ChangeEvent type
 import { useForm, isNotEmpty, hasLength } from '@mantine/form';
-import {
-  Button,
-  Group,
-  TextInput,
-  Box,
-  Select,
-  Textarea,
-  Input,
-  Text,
-} from '@mantine/core';
+import { Button, Group, TextInput, Box, Select, Text } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
-import { RichTextEditor } from '@mantine/tiptap';
 import { TextEditor } from '../../concave.agri/components/richtext';
 
 interface ChecklistItem {
