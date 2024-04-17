@@ -1,21 +1,33 @@
-import { Code, Group, useMantineTheme } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
+// Mantine library imports
+import { Code, Group, Tooltip, useMantineTheme } from '@mantine/core';
+
+// Tabler icons imports
 import {
   IconBuildingWarehouse,
   IconCarrot,
   IconDashboard,
   IconListDetails,
-  IconLogout,
   IconReceipt2,
-  IconSwitchHorizontal,
 } from '@tabler/icons-react';
+
+// React icon imports
+import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
+
+// React library imports
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+
+// Component imports
 import { Text } from '../concave.agri/components';
+
+// Redux action imports
 import { clearUserInfo } from '../redux/actions/user';
+
+// Utility function imports
 import { extractFirstWord } from '../utils/common/function';
 
+// Navigation data with links and icons
 const data = [
   { link: '/', label: 'Dashboard', icon: IconDashboard },
   { link: '/task', label: 'Task', icon: IconListDetails },
@@ -25,15 +37,22 @@ const data = [
   { link: '/financial', label: 'Financial', icon: IconReceipt2 },
 ];
 
-function Navbar() {
-  const theme = useMantineTheme();
+function Navbar({ onClick }: { onClick: () => void }) {
+  // Initialize the Redux dispatch hook
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
+  // Get the current theme for styling purposes
+  const theme = useMantineTheme();
+
+  // Determine the current URL and extract the first word for comparison
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
 
+  // Create links for navigation using the data array
   const links = data.map(item => (
     <Link
+      // Apply Tailwind CSS classes for styling
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
         item.link === `/${currentUrl}`
           ? 'bg-secondaryColors-100 text-darkColors-100'
@@ -41,19 +60,25 @@ function Navbar() {
       }`}
       to={item.link}
       key={item.label}
+      onClick={() => onClick()}
     >
+      {/* Render the icon */}
       <item.icon className="w-6 h-6 mr-2" stroke={'1.5'} />
+      {/* Display the label */}
       <span>{item.label}</span>
     </Link>
   ));
+
   return (
     <div
       className={`flex flex-col h-full`}
+      // Set the text and background colors based on the theme
       style={{
         color: theme.colors.lightColors[6],
         backgroundColor: theme.colors.darkColors[0],
       }}
     >
+      {/* Header section with application version */}
       <div className="h-[11%] overflow-hidden mt-8 ml-4">
         <Group>
           <Code
@@ -66,24 +91,62 @@ function Navbar() {
           </Code>
         </Group>
       </div>
+
+      {/* Main navigation links */}
       <div className="h-[82%] overflow-y-auto">
         <div className="flex flex-col p-2">{links}</div>
       </div>
-      <div className="h-[30%] lg:h-[7%] items-center border-t-2 border-t-skin-light flex justify-around gap-5 py-1 flex-wrap">
-        <a
-          href=""
-          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
+
+      {/* Footer section with user profile and logout button */}
+      <div className="h-[30%] lg:h-[7%] border-t-2 border-t-skin-light flex justify-between items-center gap-5 py-1 px-3">
+        {/* User profile and avatar */}
+        <div
+          className="flex items-center rounded-sm cursor-pointer"
           onClick={event => event.preventDefault()}
         >
-          <IconSwitchHorizontal className="w-6 h-6" stroke={1.5} />
-        </a>
-        <a
-          className="flex items-center text-sm font-medium rounded-sm hover:bg-gray-100 hover:text-secondaryColors-100"
-          onClick={() => dispatch(clearUserInfo())}
-          href=""
+          <div className="w-6 rounded-md ring ring-secondaryColors-100 ring-offset-2 hover:ring-offset-4 transition-all duration-300 delay-300">
+            {/* Avatar image */}
+            <img
+              src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+              className="rounded-md"
+            />
+          </div>
+          {/* User information */}
+          <div className="ml-4">
+            {/* User name */}
+            <div className="hover:text-secondaryColors-100 capitalize">
+              {'user name'}
+            </div>
+            {/* View profile link */}
+            <Text
+              size="sm"
+              className="hover:text-secondaryColors-100"
+              onClick={() => {
+                navigate('/view-profile');
+                onClick();
+              }} // Use navigate to redirect}
+            >
+              View Profile
+            </Text>
+          </div>
+        </div>
+        {/* Logout button with tooltip */}
+        <Tooltip
+          label="Logout ?"
+          withArrow
+          position="left"
+          transitionProps={{ transition: 'skew-up', duration: 300 }}
+          color={theme.colors.lightColors[3]}
         >
-          <IconLogout className="w-6 h-6" stroke={1.5} />
-        </a>
+          {/* Logout button */}
+          <div
+            className="flex items-center text-sm font-medium rounded-sm hover:text-secondaryColors-100 cursor-pointer"
+            onClick={() => dispatch(clearUserInfo())}
+          >
+            {/* Right arrow icon */}
+            <MdOutlineKeyboardArrowRight size={32} />
+          </div>
+        </Tooltip>
       </div>
     </div>
   );
