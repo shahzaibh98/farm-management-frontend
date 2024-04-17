@@ -1,20 +1,13 @@
-import React, { ChangeEvent, useState } from 'react'; // Import ChangeEvent type
-import { useForm, isNotEmpty, hasLength } from '@mantine/form';
+import { ChangeEvent, useState } from 'react'; // Import ChangeEvent type
+import { useForm } from '@mantine/form';
 import { FaCircle } from 'react-icons/fa';
 import {
-  Container,
   SimpleGrid,
   Grid,
   Flex,
   Button,
-  Group,
   TextInput,
-  Box,
   Select,
-  Textarea,
-  Input,
-  Text,
-  GridCol,
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { TextEditor } from '../../concave.agri/components/richtext';
@@ -22,6 +15,7 @@ import { TextEditor } from '../../concave.agri/components/richtext';
 interface ChecklistItem {
   text: string;
   dropdownValue: string;
+  checked: boolean;
 }
 export function Demo() {
   const form = useForm({
@@ -69,16 +63,46 @@ export function Demo() {
     fileInput?.click();
   };
 
-  const [checklistItem, setChecklistItem] = useState<ChecklistItem>({
-    text: '',
-    dropdownValue: '',
-  });
+  // const [checklistItem, setChecklistItem] = useState<ChecklistItem>({
+  //   text: '',
+  //   dropdownValue: '',
+  // });
 
   const handleAddChecklistItem = () => {
-    // Add new checklist item to form state
-    form.setFieldValue('checklist', [...form.values.checklist, checklistItem]);
-    // Reset checklist item fields
-    setChecklistItem({ text: '', dropdownValue: '' });
+    const newChecklistItem: ChecklistItem = {
+      text: '',
+      dropdownValue: '',
+      checked: false,
+    };
+    form.setFieldValue('checklist', [
+      ...form.values.checklist,
+      newChecklistItem,
+    ]);
+  };
+
+  const handleChecklistTextChange = (index: number, value: string) => {
+    const updatedChecklist = [...form.values.checklist];
+    updatedChecklist[index].text = value;
+    form.setFieldValue('checklist', updatedChecklist);
+  };
+
+  const handleChecklistDropdownChange = (
+    index: number,
+    value: string | null
+  ) => {
+    const updatedChecklist = [...form.values.checklist];
+    updatedChecklist[index].dropdownValue = value || '';
+    form.setFieldValue('checklist', updatedChecklist);
+  };
+  const handleRemoveChecklistItem = (index: number) => {
+    const updatedChecklist = [...form.values.checklist];
+    updatedChecklist.splice(index, 1);
+    form.setFieldValue('checklist', updatedChecklist);
+  };
+  const handleChecklistCheckboxChange = (index: number, checked: boolean) => {
+    const updatedChecklist = [...form.values.checklist];
+    updatedChecklist[index].checked = checked;
+    form.setFieldValue('checklist', updatedChecklist);
   };
 
   const handleDeleteChecklistItem = (index: number) => {
@@ -88,23 +112,8 @@ export function Demo() {
     form.setFieldValue('checklist', updatedChecklist);
   };
 
-  const handleChecklistTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setChecklistItem({ ...checklistItem, text: e.target.value });
-  };
-
-  const handleChecklistDropdownChange = (value: string | null) => {
-    // Provide a default value if value is null
-    const dropdownValue = value || '';
-    setChecklistItem({ ...checklistItem, dropdownValue });
-  };
-
   return (
-    <div
-    // component="form"
-    // mx="auto"
-    // onSubmit={form.onSubmit(() => {})}
-    // className="p-8 rounded-lg border border-gray-200 shadow-md TST"
-    >
+    <div>
       {/* Add Task Container */}
       <Grid>
         {/* Add Task Container 70% */}
@@ -123,17 +132,57 @@ export function Demo() {
           </Grid.Col>
           <Grid.Col>
             <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
-              <Grid.Col span={4}>
+              <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
                   type="button"
-                  onClick={handleAddChecklistItem}
-                  variant="outline"
                   className="mt-4"
+                  onClick={handleAddChecklistItem}
                 >
                   Add Checklist
                 </Button>
+                {form.values.checklist.map(
+                  (item: ChecklistItem, index: number) => (
+                    <div key={index} className="flex items-center mt-4">
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={e =>
+                          handleChecklistCheckboxChange(index, e.target.checked)
+                        }
+                      />
+                      <TextInput
+                        placeholder="Enter text"
+                        value={item.text}
+                        onChange={e =>
+                          handleChecklistTextChange(index, e.target.value)
+                        }
+                        className="ml-2"
+                      />
+                      <Select
+                        placeholder="Select value"
+                        value={item.dropdownValue}
+                        onChange={value =>
+                          handleChecklistDropdownChange(index, value)
+                        }
+                        data={['Option 1', 'Option 2', 'Option 3'].map(
+                          option => ({
+                            value: option,
+                            label: option,
+                          })
+                        )}
+                        className="ml-2"
+                      />
+                      <Button
+                        onClick={() => handleRemoveChecklistItem(index)}
+                        className="ml-2"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )
+                )}
               </Grid.Col>
-              <Grid.Col span={4}>
+              <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
                   type="button"
                   className="mt-4"
@@ -142,7 +191,7 @@ export function Demo() {
                   Add Location
                 </Button>
               </Grid.Col>
-              <Grid.Col span={4}>
+              <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
                   type="button"
                   className="mt-4"
@@ -159,7 +208,7 @@ export function Demo() {
           </Grid.Col>
           <Grid.Col>
             <h2 className="mb-2">Task Color</h2>
-            <SimpleGrid cols={16}>
+            <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs">
               <div>
                 <a style={{ color: '#bdbdbd' }}>
                   <FaCircle size={25} />
@@ -324,152 +373,28 @@ export function Demo() {
         </Grid.Col>
         {/* End of Add Task Container 30% */}
       </Grid>
-      {/* End of Add Task Container */}
-      {/* <Grid>
-      <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
-        <TextInput
-        label="Title"
-        placeholder="Enter title"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('title')}
-      />
-      </Grid.Col>
-      <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
-      <Select
-        label="Status"
-        placeholder="Select status"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('status')}
-        data={['inProgress', 'done', 'toDo'].map(status => ({
-          value: status,
-          label: status,
-        }))}
-      /></Grid.Col>
-      </Grid> */}
-
-      {/* <Select
-        label="Assigned to"
-        placeholder="Select person"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('assignedTo')}
-        data={['Person A', 'Person B', 'Person C'].map(person => ({
-          value: person,
-          label: person,
-        }))}
-      />
-
-      <Select
-        label="Priority"
-        placeholder="Select priority"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('priority')}
-        data={['high', 'medium', 'low'].map(priority => ({
-          value: priority,
-          label: priority,
-        }))}
-      />
-
-      <DateTimePicker
-        label="Due Date and Time"
-        placeholder="Select due date and time"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('dueDate')}
-      />
-
-      <Select
-        label="Repeat"
-        placeholder="Select repeat option"
-        withAsterisk
-        mt="md"
-        {...form.getInputProps('repeat')}
-        data={['daily', 'weekly', 'monthly', 'yearly'].map(option => ({
-          value: option,
-          label: option,
-        }))}
-      />
-
-      <TextInput
-        label="Hours Spent"
-        placeholder="Enter hours spent"
-        withAsterisk
-        mt="md"
-        type="number"
-        {...form.getInputProps('hoursSpent')}
-      />
-      <TextInput
-        label="Associated To"
-        placeholder="Enter value"
-        radius="xl"
-        mt="md"
-      />
+      <Flex
+        mih={50}
+        gap="xs"
+        justify="flex-end"
+        align="flex-start"
+        direction="row"
+        wrap="wrap"
+      >
+        <Button type="submit">Close</Button>
+        <Button type="submit">Create</Button>
+      </Flex>
       <input
         id="attachment-input"
         type="file"
-        name="attachment"
+        accept="image/*, .pdf, .doc, .docx"
         style={{ display: 'none' }}
         onChange={handleAttachmentChange}
-      /> */}
+      />
 
       {form.values.checklist.map((item: any, index: number) => (
-        <div key={index} className="flex items-center mt-4">
-          {/* Checkbox */}
-
-          {/* Text field */}
-          {/* <TextInput
-            value={item.text}
-            onChange={e => handleChecklistTextChange(e)}
-            placeholder="Checklist item"
-            className="mr-2"
-          /> */}
-          {/* Dropdown */}
-          {/* <Select
-            value={item.dropdownValue}
-            onChange={value => handleChecklistDropdownChange(value)}
-            placeholder="Select option"
-            className="mr-2"
-            data={['Option 1', 'Option 2', 'Option 3'].map(option => ({
-              value: option,
-              label: option,
-            }))}
-          /> */}
-          {/* Delete button */}
-          {/* <Button
-            onClick={() => handleDeleteChecklistItem(index)}
-            variant="outline"
-            color="red"
-          >
-            Delete
-          </Button> */}
-        </div>
+        <div key={index} className="flex items-center mt-4"></div>
       ))}
-
-      {/* <Text>Description</Text>
-      <TextEditor /> */}
-
-      {/* <Group justify="space-between" mt="md">
-        <Button
-          type="button"
-          onClick={handleAddChecklistItem}
-          variant="outline"
-          className="mt-4"
-        >
-          Add Checklist
-        </Button>
-
-        <Button type="button" onClick={handleAddAttachmentClick}>
-          Add Attachment
-        </Button>
-        <Button type="button" onClick={handleAddLocation}>
-          Add Location
-        </Button>
-        <Button type="submit">Close</Button>
-        <Button type="submit">Create</Button>
-      </Group> */}
     </div>
   );
 }

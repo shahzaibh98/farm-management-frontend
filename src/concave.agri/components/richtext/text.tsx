@@ -21,7 +21,7 @@ export function TextEditor() {
       Highlight,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ],
-    content,
+    content: '',
   });
 
   return (
