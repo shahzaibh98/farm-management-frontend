@@ -1,24 +1,38 @@
-import { ChangeEvent, useState } from 'react'; // Import ChangeEvent type
-import { useForm } from '@mantine/form';
+import { Flex, Grid, SimpleGrid, useMantineTheme } from '@mantine/core';
+import { DateTimePicker } from '@mantine/dates';
+import { useFormik } from 'formik';
+import { ChangeEvent } from 'react'; // Import ChangeEvent type
 import { FaCircle } from 'react-icons/fa';
 import {
-  SimpleGrid,
-  Grid,
-  Flex,
   Button,
-  TextInput,
+  Checkbox,
   Select,
-} from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
+  TextInput,
+} from '../../concave.agri/components';
 import { TextEditor } from '../../concave.agri/components/richtext';
-
+import { colorArray } from '../../utils/common/constant.objects';
+import { Text } from '@mantine/core';
+import { HiOutlineLocationMarker } from 'react-icons/hi';
+import { MdAttachFile } from 'react-icons/md';
+import { MdChecklistRtl } from 'react-icons/md';
+import { AiOutlineDelete } from 'react-icons/ai';
 interface ChecklistItem {
   text: string;
   dropdownValue: string;
   checked: boolean;
 }
-export function Demo() {
-  const form = useForm({
+
+export function TaskForm({
+  onCloseButton,
+  mode = 'Add',
+}: {
+  onCloseButton: () => void;
+  mode?: string;
+}) {
+  // Initialize the useMantineTheme hook for accessing theme variables
+  const theme = useMantineTheme();
+  const form = useFormik({
+    enableReinitialize: true,
     initialValues: {
       title: '',
       status: 'inProgress',
@@ -31,7 +45,11 @@ export function Demo() {
       latitude: '',
       longitude: '',
       attachment: null,
-      checklist: [] as ChecklistItem[],
+      checklist: [],
+    },
+    onSubmit: values => {
+      // Handle form submission logic here
+      console.log('Form submitted with values:', values);
     },
   });
 
@@ -54,7 +72,6 @@ export function Demo() {
   };
   const handleAttachmentChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null; // Ensure file is of type File | null
-    // form.setFieldValue('attachment', file);
   };
 
   const handleAddAttachmentClick = () => {
@@ -62,11 +79,6 @@ export function Demo() {
     const fileInput = document.getElementById('attachment-input');
     fileInput?.click();
   };
-
-  // const [checklistItem, setChecklistItem] = useState<ChecklistItem>({
-  //   text: '',
-  //   dropdownValue: '',
-  // });
 
   const handleAddChecklistItem = () => {
     const newChecklistItem: ChecklistItem = {
@@ -81,7 +93,7 @@ export function Demo() {
   };
 
   const handleChecklistTextChange = (index: number, value: string) => {
-    const updatedChecklist = [...form.values.checklist];
+    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
     updatedChecklist[index].text = value;
     form.setFieldValue('checklist', updatedChecklist);
   };
@@ -90,7 +102,7 @@ export function Demo() {
     index: number,
     value: string | null
   ) => {
-    const updatedChecklist = [...form.values.checklist];
+    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
     updatedChecklist[index].dropdownValue = value || '';
     form.setFieldValue('checklist', updatedChecklist);
   };
@@ -100,7 +112,7 @@ export function Demo() {
     form.setFieldValue('checklist', updatedChecklist);
   };
   const handleChecklistCheckboxChange = (index: number, checked: boolean) => {
-    const updatedChecklist = [...form.values.checklist];
+    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
     updatedChecklist[index].checked = checked;
     form.setFieldValue('checklist', updatedChecklist);
   };
@@ -110,6 +122,10 @@ export function Demo() {
     const updatedChecklist = [...form.values.checklist];
     updatedChecklist.splice(index, 1);
     form.setFieldValue('checklist', updatedChecklist);
+  };
+
+  const handleClick = (color: string) => {
+    console.log('Clicked color:', color);
   };
 
   return (
@@ -123,7 +139,9 @@ export function Demo() {
             <TextInput
               placeholder="Enter title"
               withAsterisk
-              {...form.getInputProps('title')}
+              {...form.getFieldProps('title')}
+              onChange={() => {}}
+              value={''}
             />
           </Grid.Col>
           <Grid.Col>
@@ -134,173 +152,111 @@ export function Demo() {
             <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
               <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
-                  type="button"
-                  className="mt-4"
+                  variant="outline"
+                  autoContrast
+                  color={theme.colors.primaryColors[0]}
+                  size="sm"
+                  style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
                   onClick={handleAddChecklistItem}
+                  leftSection={<MdChecklistRtl size={16} />}
                 >
                   Add Checklist
                 </Button>
-                {form.values.checklist.map(
-                  (item: ChecklistItem, index: number) => (
-                    <div key={index} className="flex items-center mt-4">
-                      <input
-                        type="checkbox"
-                        checked={item.checked}
-                        onChange={e =>
-                          handleChecklistCheckboxChange(index, e.target.checked)
-                        }
-                      />
-                      <div className="flex-grow flex">
-                        <TextInput
-                          placeholder="Enter text"
-                          value={item.text}
-                          onChange={e =>
-                            handleChecklistTextChange(index, e.target.value)
-                          }
-                          className="flex-grow ml-2"
-                        />
-                        <Select
-                          placeholder="Select value"
-                          value={item.dropdownValue}
-                          onChange={value =>
-                            handleChecklistDropdownChange(index, value)
-                          }
-                          data={['Option 1', 'Option 2', 'Option 3'].map(
-                            option => ({
-                              value: option,
-                              label: option,
-                            })
-                          )}
-                          className="ml-2"
-                        />
-                      </div>
-                      <Button
-                        onClick={() => handleRemoveChecklistItem(index)}
-                        className="ml-2"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  )
-                )}
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
                   type="button"
-                  className="mt-4"
+                  variant="outline"
+                  autoContrast
+                  color={theme.colors.primaryColors[0]}
+                  size="sm"
+                  style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
                   onClick={handleAddLocation}
+                  leftSection={<HiOutlineLocationMarker size={16} />}
                 >
                   Add Location
                 </Button>
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Button
-                  type="button"
-                  className="mt-4"
+                  variant="outline"
+                  autoContrast
+                  color={theme.colors.primaryColors[0]}
+                  size="sm"
+                  style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
                   onClick={handleAddAttachmentClick}
+                  leftSection={<MdAttachFile size={16} />}
                 >
                   Add Attachment
                 </Button>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
+                {form.values.checklist.map(
+                  (item: ChecklistItem, index: number) => (
+                    <div key={index} className="flex items-center mt-1">
+                      <Checkbox
+                        checked={item.checked}
+                        size="md"
+                        onChange={e => handleChecklistCheckboxChange(index, e)}
+                      />
+
+                      <TextInput
+                        placeholder="Enter text"
+                        value={item.text}
+                        onChange={e => handleChecklistTextChange(index, e)}
+                        className="ml-2"
+                      />
+                      <Select
+                        placeholder="Select value"
+                        value={item.dropdownValue}
+                        onChange={(value: string | null) =>
+                          handleChecklistDropdownChange(index, value)
+                        }
+                        data={['Option 1', 'Option 2', 'Option 3'].map(
+                          option => ({
+                            value: option,
+                            label: option,
+                          })
+                        )}
+                        className="ml-2"
+                      />
+
+                      <AiOutlineDelete
+                        color={'#FF6666'}
+                        onClick={() => handleRemoveChecklistItem(index)}
+                        size={24}
+                        className="cursor-pointer ml-2"
+                      />
+                    </div>
+                  )
+                )}
               </Grid.Col>
             </Grid>
           </Grid.Col>
           <Grid.Col>
             <label>Associated To</label>
-            <TextInput placeholder="Enter value" radius="xl" mt="md" />
+            <TextInput
+              placeholder="Enter value"
+              radius="xl"
+              mt="md"
+              onChange={() => {}}
+              value={''}
+            />
           </Grid.Col>
           <Grid.Col>
             <h2 className="mb-2">Task Color</h2>
             <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs">
-              <div>
-                <a style={{ color: '#bdbdbd' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ef5350' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ec407a' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#7e57c2' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#5c6bc0' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#42a5f5' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#29b6f6' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#26c6da' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#26a69a' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#66bb6a' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#9ccc65' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#d4e157' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ffee58' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ffca28' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ffa726' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#ff7043' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#8d6e63' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
-              <div>
-                <a style={{ color: '#78909c' }}>
-                  <FaCircle size={25} />
-                </a>
-              </div>
+              {colorArray.map((color, index) => (
+                <div key={index}>
+                  <a
+                    onClick={() => handleClick(color)}
+                    style={{ color }}
+                    className="cursor-pointer"
+                  >
+                    <FaCircle size={25} />
+                  </a>
+                </div>
+              ))}
             </SimpleGrid>
           </Grid.Col>
         </Grid.Col>
@@ -312,7 +268,7 @@ export function Demo() {
             <Select
               placeholder="Select status"
               withAsterisk
-              {...form.getInputProps('status')}
+              {...form.getFieldProps('status')}
               data={['inProgress', 'done', 'toDo'].map(status => ({
                 value: status,
                 label: status,
@@ -324,7 +280,7 @@ export function Demo() {
             <Select
               placeholder="Select person"
               withAsterisk
-              {...form.getInputProps('assignedTo')}
+              {...form.getFieldProps('assignedTo')}
               data={['Person A', 'Person B', 'Person C'].map(person => ({
                 value: person,
                 label: person,
@@ -336,7 +292,7 @@ export function Demo() {
             <Select
               placeholder="Select priority"
               withAsterisk
-              {...form.getInputProps('priority')}
+              {...form.getFieldProps('priority')}
               data={['high', 'medium', 'low'].map(priority => ({
                 value: priority,
                 label: priority,
@@ -348,7 +304,7 @@ export function Demo() {
             <DateTimePicker
               placeholder="Select due date and time"
               withAsterisk
-              {...form.getInputProps('dueDate')}
+              {...form.getFieldProps('dueDate')}
             />
           </Grid.Col>
           <Grid.Col>
@@ -356,7 +312,7 @@ export function Demo() {
             <Select
               placeholder="Select repeat option"
               withAsterisk
-              {...form.getInputProps('repeat')}
+              {...form.getFieldProps('repeat')}
               data={['daily', 'weekly', 'monthly', 'yearly'].map(option => ({
                 value: option,
                 label: option,
@@ -369,7 +325,7 @@ export function Demo() {
               placeholder="Enter hours spent"
               withAsterisk
               type="number"
-              {...form.getInputProps('hoursSpent')}
+              {...form.getFieldProps('hoursSpent')}
             />
           </Grid.Col>
         </Grid.Col>
@@ -382,9 +338,32 @@ export function Demo() {
         align="flex-start"
         direction="row"
         wrap="wrap"
+        className="mb-5"
       >
-        <Button type="submit">Close</Button>
-        <Button type="submit">Create</Button>
+        <Button
+          variant="outline"
+          autoContrast
+          color={theme.colors.secondaryColors[3]}
+          size="md"
+          onClick={onCloseButton}
+          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+        >
+          <Text tt="capitalize" fs="italic">
+            {'Cancel'}
+          </Text>
+        </Button>
+        <Button
+          variant="outline"
+          autoContrast
+          color={theme.colors.primaryColors[0]}
+          size="md"
+          type="submit"
+          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+        >
+          <Text tt="capitalize" fs="italic">
+            {mode === 'Add' ? 'Create' : 'Update'}
+          </Text>
+        </Button>
       </Flex>
       <input
         id="attachment-input"

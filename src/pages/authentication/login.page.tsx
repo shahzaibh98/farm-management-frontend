@@ -121,7 +121,7 @@ export function LoginPage() {
       <Title className="font-bold text-2xl text-center text-secondaryColors-100">
         Welcome back!
       </Title>
-      {/* Instructions and account creation link */}
+      {/* Instructions and account creation link
       <Text className="text-gray-500 text-sm text-center mt-5">
         Do not have an account yet?{' '}
         <Anchor
@@ -132,7 +132,7 @@ export function LoginPage() {
           Create account
         </Anchor>
         <br />
-      </Text>
+      </Text> */}
       {/* Form submission handler */}
       <form onSubmit={formik.handleSubmit}>
         {/* Paper wrapper for form elements */}

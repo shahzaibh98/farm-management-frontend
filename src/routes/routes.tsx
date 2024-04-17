@@ -1,27 +1,39 @@
-import { createBrowserRouter } from 'react-router-dom';
+import React from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import {
   cropRoutes,
   dashboardRoutes,
+  farmAdminRoutes,
   financialRoutes,
   inventoryRoutes,
   livestockRoutes,
+  profileRoutes,
   publicRoutes,
   taskRoutes,
-  profileRoutes,
 } from './route';
 
-const authRouter = createBrowserRouter(
-  [
-    ...taskRoutes,
-    ...cropRoutes,
-    ...livestockRoutes,
-    ...publicRoutes,
-    ...dashboardRoutes,
-    ...financialRoutes,
-    ...inventoryRoutes,
-    ...profileRoutes,
-  ],
-  { basename: '/' }
-);
+const AppRouter: React.FC = () => {
+  // const superAdmin = useSelector((state: any) => state?.userInfo?.userInfo);
 
-export default authRouter;
+  const isSuperAdmin = false;
+
+  const authRouter = createBrowserRouter(
+    isSuperAdmin
+      ? [...farmAdminRoutes, ...dashboardRoutes, ...profileRoutes]
+      : [
+          ...taskRoutes,
+          ...cropRoutes,
+          ...livestockRoutes,
+          ...publicRoutes,
+          ...dashboardRoutes,
+          ...financialRoutes,
+          ...inventoryRoutes,
+          ...profileRoutes,
+        ],
+    { basename: '/' }
+  );
+
+  return <RouterProvider router={authRouter} />;
+};
+
+export default AppRouter;

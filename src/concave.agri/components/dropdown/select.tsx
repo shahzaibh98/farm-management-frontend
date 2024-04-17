@@ -4,8 +4,8 @@ interface SelectProps {
   label?: string;
   description?: string;
   placeholder?: string;
-  data: string[];
-  value: string;
+  data: any[];
+  value?: string;
   onChange: (value: string | null) => void;
   nothingFoundMessage?: string;
   searchable?: boolean;

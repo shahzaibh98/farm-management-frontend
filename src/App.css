@@ -43,3 +43,8 @@
   width: 80% !important;
   margin: 0 auto;
 }
+
+.addtaskModal .mantine-Modal-title {
+  font-size: '24px';
+  font-weight: 'bold';
+}

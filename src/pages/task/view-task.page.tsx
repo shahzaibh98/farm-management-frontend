@@ -1,4 +1,4 @@
-import { Center, Grid, Modal } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
@@ -26,15 +26,16 @@ import SearchComponent from '../../layout/searchBar.layout';
 // Importing types and constants
 import { SearchValuesType } from '../../types/view-task.type';
 import { paginationInfoValue } from '../../utils/common/constant.objects';
-import { initialSearchValues } from './initial.values';
-import { Demo } from './task';
 import MyCalendar from '../calendar/calendar';
+import { initialSearchValues } from './initial.values';
+import { TaskForm } from './task';
 
 const TaskView = () => {
   /* /////////////////////////////////////////////////
                        Variable
   /////////////////////////////////////////////////// */
-
+  // Initialize the useMantineTheme hook for accessing theme variables
+  const theme = useMantineTheme();
   const navigate = useNavigate();
   const { isSmallScreen } = useScreenSize();
 
@@ -475,7 +476,6 @@ const TaskView = () => {
               icon: <CiCalendarDate size={24} />,
               component: (
                 <div className="mt-5">
-                  {' '}
                   <MyCalendar />
                 </div>
               ),
@@ -488,11 +488,16 @@ const TaskView = () => {
         onClose={toggleModal}
         title="Add Task"
         size="lg"
+        styles={{
+          title: {
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: theme.colors.primaryColors[0],
+          },
+        }}
         className="addtaskModal"
       >
-        <Center className="addtaskModalCenter">
-          <Demo /> {/* Render the Demo component inside the modal */}
-        </Center>
+        <TaskForm onCloseButton={toggleModal} />
       </Modal>
       <div className="h-4" />
     </main>

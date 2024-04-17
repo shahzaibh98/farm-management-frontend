@@ -6,6 +6,7 @@ import { financialRoutes } from './finanical.routes';
 import { dashboardRoutes } from './dashboard.routes';
 import { inventoryRoutes } from './inventory.routes';
 import { profileRoutes } from './profile.routes';
+import { farmAdminRoutes } from './farmAdmin.routes';
 
 export {
   publicRoutes,
@@ -16,4 +17,5 @@ export {
   financialRoutes,
   inventoryRoutes,
   profileRoutes,
+  farmAdminRoutes,
 };

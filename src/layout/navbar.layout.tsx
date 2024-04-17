@@ -11,12 +11,15 @@ import {
 } from '@tabler/icons-react';
 
 // React icon imports
-import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
+import {
+  MdOutlineAdminPanelSettings,
+  MdOutlineKeyboardArrowRight,
+} from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
 
 // React library imports
 import { useDispatch } from 'react-redux';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Component imports
 import { Text } from '../concave.agri/components';
@@ -28,14 +31,25 @@ import { clearUserInfo } from '../redux/actions/user';
 import { extractFirstWord } from '../utils/common/function';
 
 // Navigation data with links and icons
-const data = [
-  { link: '/', label: 'Dashboard', icon: IconDashboard },
-  { link: '/task', label: 'Task', icon: IconListDetails },
-  { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
-  { link: '/crop', label: 'Crop', icon: IconCarrot },
-  { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
-  { link: '/financial', label: 'Financial', icon: IconReceipt2 },
-];
+const isSuperAdmin = false;
+
+const data = isSuperAdmin
+  ? [
+      { link: '/', label: 'Dashboard', icon: IconDashboard },
+      {
+        link: '/manage-farm-admin',
+        label: 'Manage Farm Admin',
+        icon: MdOutlineAdminPanelSettings,
+      },
+    ]
+  : [
+      { link: '/', label: 'Dashboard', icon: IconDashboard },
+      { link: '/task', label: 'Task', icon: IconListDetails },
+      { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
+      { link: '/crop', label: 'Crop', icon: IconCarrot },
+      { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
+      { link: '/financial', label: 'Financial', icon: IconReceipt2 },
+    ];
 
 function Navbar({ onClick }: { onClick: () => void }) {
   // Initialize the Redux dispatch hook
