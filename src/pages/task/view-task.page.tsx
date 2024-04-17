@@ -1,7 +1,9 @@
-import { Center, Grid, Modal } from '@mantine/core';
-import { useEffect, useMemo, useState } from 'react';
-import { CiCalendarDate, CiViewTable } from 'react-icons/ci';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Center, Grid, Modal } from '@mantine/core'; // Importing Mantine UI components
+import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
+import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+
+// Importing custom components from the 'concave.agri' project
 import {
   DatePicker,
   Paper,
@@ -12,12 +14,18 @@ import {
 } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+
+// Importing a custom hook to get the screen size
 import useScreenSize from '../../hooks/useScreenSize';
+
+// Importing custom components and layouts
 import { TableMenu } from '../../layout';
 import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
+
+// Importing types and constants
 import { SearchValuesType } from '../../types/view-task.type';
-import { paginationInfoValue } from '../../utils/common/constant.function';
+import { paginationInfoValue } from '../../utils/common/constant.objects';
 import { initialSearchValues } from './initial.values';
 import { Demo } from './task';
 import MyCalendar from '../calendar/calendar';
@@ -370,7 +378,6 @@ const TaskView = () => {
                     setValuesById={setValuesById}
                     handleSearchButtonClick={handleSearchButtonClick}
                     handleResetButtonClick={handleResetButtonClick}
-                    isSmallScreen={isSmallScreen}
                   />
                   <Grid className="mt-2">
                     <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
@@ -383,7 +390,6 @@ const TaskView = () => {
                           'Farm user 3',
                         ]}
                         value={searchValues.assignedTo ?? ''}
-                        clearable
                         onChange={value => setValuesById({ assignedTo: value })}
                       />
                     </Grid.Col>
@@ -403,7 +409,6 @@ const TaskView = () => {
                       <Select
                         placeholder="Progress"
                         data={['In Progress', 'Pending', 'Completed']}
-                        clearable
                         value={searchValues.progress ?? ''}
                         onChange={value => setValuesById({ progress: value })}
                       />
@@ -421,7 +426,6 @@ const TaskView = () => {
                           'Custom Range',
                         ]}
                         value={searchValues?.upcomingTask ?? ''}
-                        clearable
                         onChange={value =>
                           setValuesById({ upcomingTask: value })
                         }

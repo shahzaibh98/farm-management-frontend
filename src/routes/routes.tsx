@@ -7,6 +7,7 @@ import {
   livestockRoutes,
   publicRoutes,
   taskRoutes,
+  profileRoutes,
 } from './route';
 
 const authRouter = createBrowserRouter(
@@ -18,6 +19,7 @@ const authRouter = createBrowserRouter(
     ...dashboardRoutes,
     ...financialRoutes,
     ...inventoryRoutes,
+    ...profileRoutes,
   ],
   { basename: '/' }
 );

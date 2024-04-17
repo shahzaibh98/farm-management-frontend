@@ -1,9 +1,10 @@
+// Import necessary components and hooks from Mantine and other libraries
+import { useMantineTheme } from '@mantine/core';
 import { IoChevronBackOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { Button, Text } from '../concave.agri/components';
-import { theme } from 'highcharts';
-import { Title, useMantineTheme } from '@mantine/core';
 
+// Define the Props interface for the component
 interface Props {
   isBackendButton?: boolean;
   headerText: string;
@@ -13,6 +14,7 @@ interface Props {
   onButtonClick?: () => void;
 }
 
+// Define the GenericHeader functional component
 const GenericHeader: React.FC<Props> = ({
   isBackendButton = true,
   headerText,
@@ -21,13 +23,19 @@ const GenericHeader: React.FC<Props> = ({
   buttonContent = 'Add',
   onButtonClick = () => {},
 }) => {
+  // Initialize the useNavigate hook for navigation
   const navigate = useNavigate();
+  // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
+
+  // Render the component's layout
   return (
     <section
       className={'flex justify-between items-center lg:px-8 lg:py-4 px-2 py-1'}
     >
+      {/* Left section with back button and header text */}
       <div className="flex items-center">
+        {/* Back button */}
         {isBackendButton && (
           <IoChevronBackOutline
             size={24}
@@ -36,6 +44,7 @@ const GenericHeader: React.FC<Props> = ({
             className="cursor-pointer"
           />
         )}
+        {/* Header text and breadcrumbs */}
         <div className="ml-4">
           <p className="font-mono text-2xl font-semibold">{headerText}</p>
           <Text
@@ -55,6 +64,7 @@ const GenericHeader: React.FC<Props> = ({
           </Text>
         </div>
       </div>
+      {/* Right section with add or update button */}
       {isAddOrUpdateButton && (
         <Button
           variant="outline"

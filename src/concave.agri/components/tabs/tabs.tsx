@@ -33,7 +33,7 @@ const Tabs = ({
             leftSection={tab.icon}
             {...tabProps}
           >
-            <div className="text-lg"> {tab.label}</div>
+            <div className="text-sm">{tab.label}</div>
           </MantineTabs.Tab>
         ))}
       </MantineTabs.List>

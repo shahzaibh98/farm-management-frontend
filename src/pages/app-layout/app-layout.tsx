@@ -26,7 +26,7 @@ export function AppShell() {
         </Group>
       </MantineAppShell.Header>
       <MantineAppShell.Navbar>
-        <Navbar />
+        <Navbar onClick={toggle} />
       </MantineAppShell.Navbar>
       <MantineAppShell.Main>
         <Outlet />
