@@ -150,28 +150,30 @@ export function Demo() {
                           handleChecklistCheckboxChange(index, e.target.checked)
                         }
                       />
-                      <TextInput
-                        placeholder="Enter text"
-                        value={item.text}
-                        onChange={e =>
-                          handleChecklistTextChange(index, e.target.value)
-                        }
-                        className="ml-2"
-                      />
-                      <Select
-                        placeholder="Select value"
-                        value={item.dropdownValue}
-                        onChange={value =>
-                          handleChecklistDropdownChange(index, value)
-                        }
-                        data={['Option 1', 'Option 2', 'Option 3'].map(
-                          option => ({
-                            value: option,
-                            label: option,
-                          })
-                        )}
-                        className="ml-2"
-                      />
+                      <div className="flex-grow flex">
+                        <TextInput
+                          placeholder="Enter text"
+                          value={item.text}
+                          onChange={e =>
+                            handleChecklistTextChange(index, e.target.value)
+                          }
+                          className="flex-grow ml-2"
+                        />
+                        <Select
+                          placeholder="Select value"
+                          value={item.dropdownValue}
+                          onChange={value =>
+                            handleChecklistDropdownChange(index, value)
+                          }
+                          data={['Option 1', 'Option 2', 'Option 3'].map(
+                            option => ({
+                              value: option,
+                              label: option,
+                            })
+                          )}
+                          className="ml-2"
+                        />
+                      </div>
                       <Button
                         onClick={() => handleRemoveChecklistItem(index)}
                         className="ml-2"

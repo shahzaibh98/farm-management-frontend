@@ -470,7 +470,7 @@ const TaskView = () => {
               label: 'Calendar',
               icon: <CiCalendarDate size={24} />,
               component: (
-                <div>
+                <div className="mt-5">
                   {' '}
                   <MyCalendar />
                 </div>
