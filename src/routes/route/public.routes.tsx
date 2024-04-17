@@ -17,16 +17,16 @@ export const publicRoutes = [
     ),
     errorElement: <ErrorPage />,
   },
-  {
-    path: '/sign-up',
-    element: (
-      <PublicRoute>
-        <DocumentTitle title="Sign Up" />
-        <SignUpPage />
-      </PublicRoute>
-    ),
-    errorElement: <ErrorPage />,
-  },
+  // {
+  //   path: '/sign-up',
+  //   element: (
+  //     <PublicRoute>
+  //       <DocumentTitle title="Sign Up" />
+  //       <SignUpPage />
+  //     </PublicRoute>
+  //   ),
+  //   errorElement: <ErrorPage />,
+  // },
   {
     path: '/forgot-password',
     element: (

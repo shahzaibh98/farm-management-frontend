@@ -13,6 +13,7 @@ import { NumberInput, TextInput } from './inputField';
 import { AutoComplete, MultiSelect, Select } from './dropdown';
 import { Checkbox } from './checkbox';
 import { Table } from './table';
+import { SearchForm } from './searchbar';
 
 export {
   BreadCrumbs,
@@ -36,4 +37,5 @@ export {
   Select,
   Checkbox,
   Table,
+  SearchForm,
 };

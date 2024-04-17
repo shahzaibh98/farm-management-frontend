@@ -1,4 +1,5 @@
-import Navbar from './navbar';
-import { EventCalendar } from './calendar';
+import Navbar from './navbar.layout';
+import { EventCalendar } from './calendar.layout';
+import TableMenu from './table-menu.layout';
 
-export { Navbar, EventCalendar };
+export { Navbar, EventCalendar, TableMenu };

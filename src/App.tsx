@@ -1,10 +1,8 @@
-import { RouterProvider } from 'react-router-dom';
-import { authRouter } from './routes';
-
 // Style and Css
 import './App.css';
+import AppRouter from './routes/routes';
 function App() {
-  return <RouterProvider router={authRouter} />;
+  return <AppRouter />;
 }
 
 export default App;
