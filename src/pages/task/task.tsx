@@ -238,7 +238,6 @@ export function TaskForm({
             <TextInput
               placeholder="Enter value"
               radius="xl"
-              mt="md"
               onChange={() => {}}
               value={''}
             />

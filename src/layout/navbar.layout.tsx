@@ -118,7 +118,13 @@ function Navbar({ onClick }: { onClick: () => void }) {
           className="flex items-center rounded-sm cursor-pointer"
           onClick={event => event.preventDefault()}
         >
-          <div className="w-6 rounded-md ring ring-secondaryColors-100 ring-offset-2 hover:ring-offset-4 transition-all duration-300 delay-300">
+          <div
+            onClick={() => {
+              navigate('/view-profile');
+              onClick();
+            }}
+            className="w-6 rounded-md ring ring-secondaryColors-100 ring-offset-2 hover:ring-offset-4 transition-all duration-300 delay-300"
+          >
             {/* Avatar image */}
             <img
               src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
@@ -128,7 +134,13 @@ function Navbar({ onClick }: { onClick: () => void }) {
           {/* User information */}
           <div className="ml-4">
             {/* User name */}
-            <div className="hover:text-secondaryColors-100 capitalize">
+            <div
+              className="hover:text-secondaryColors-100 capitalize"
+              onClick={() => {
+                navigate('/view-profile');
+                onClick();
+              }}
+            >
               {'user name'}
             </div>
             {/* View profile link */}

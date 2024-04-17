@@ -496,6 +496,7 @@ const TaskView = () => {
           },
         }}
         className="addtaskModal"
+        transitionProps={{ transition: 'fade-up', duration: 300 }}
       >
         <TaskForm onCloseButton={toggleModal} />
       </Modal>
