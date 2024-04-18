@@ -19,7 +19,12 @@ const AppRouter: React.FC = () => {
 
   const authRouter = createBrowserRouter(
     isSuperAdmin
-      ? [...farmAdminRoutes, ...dashboardRoutes, ...profileRoutes]
+      ? [
+          ...farmAdminRoutes,
+          ...dashboardRoutes,
+          ...profileRoutes,
+          ...publicRoutes,
+        ]
       : [
           ...taskRoutes,
           ...cropRoutes,
