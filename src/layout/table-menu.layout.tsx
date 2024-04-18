@@ -1,17 +1,32 @@
 import { Menu, rem } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import {
+  JSXElementConstructor,
+  Key,
   MouseEventHandler,
   ReactElement,
-  JSXElementConstructor,
   ReactNode,
   ReactPortal,
-  Key,
 } from 'react';
 import { CgOptions } from 'react-icons/cg';
 import { CiEdit } from 'react-icons/ci';
 import { VscOpenPreview } from 'react-icons/vsc';
-import { JSX } from 'react/jsx-runtime';
+
+type MenuItem = {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+};
+
+interface TableMenuProps {
+  isView?: boolean;
+  isEdit?: boolean;
+  isDelete?: boolean;
+  additionalMenuItems?: MenuItem[];
+  onViewClick?: () => void;
+  onEditClick?: () => void;
+  onDeleteClick?: () => void;
+}
 
 const TableMenu = ({
   isView = true,
@@ -21,7 +36,7 @@ const TableMenu = ({
   onViewClick = () => {},
   onEditClick = () => {},
   onDeleteClick = () => {},
-}) => {
+}: TableMenuProps) => {
   return (
     <div className="relative">
       <Menu
@@ -61,24 +76,7 @@ const TableMenu = ({
           )}
 
           {additionalMenuItems?.map(
-            (
-              item: {
-                icon: ReactNode;
-                onClick: MouseEventHandler<HTMLButtonElement> | undefined;
-                color: any;
-                disabled: any;
-                label:
-                  | string
-                  | number
-                  | boolean
-                  | ReactElement<any, string | JSXElementConstructor<any>>
-                  | Iterable<ReactNode>
-                  | ReactPortal
-                  | null
-                  | undefined;
-              },
-              index: Key | null | undefined
-            ) => (
+            (item: MenuItem, index: Key | null | undefined) => (
               <Menu.Item
                 key={index}
                 leftSection={item.icon ?? null}

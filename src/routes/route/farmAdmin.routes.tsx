@@ -1,6 +1,7 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
+import ManageFarmAdmin from '../../pages/manage-farm-admin/view-farm-admin.page';
 import PrivateRoute from '../private/private.routes';
 
 export const farmAdminRoutes = [
@@ -13,8 +14,8 @@ export const farmAdminRoutes = [
         index: true,
         element: (
           <PrivateRoute>
-            <DocumentTitle title="manage-farm-admin" />
-            <div>View Farm Admin</div>
+            <DocumentTitle title="Farm Admin" />
+            <ManageFarmAdmin />
           </PrivateRoute>
         ),
       },

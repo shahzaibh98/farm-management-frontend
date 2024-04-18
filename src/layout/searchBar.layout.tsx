@@ -11,12 +11,14 @@ import useScreenSize from '../hooks/useScreenSize'; // Hook to determine the scr
 
 // Interface defining the props for the SearchComponent
 interface SearchComponentProps {
+  placeholder: string;
   searchValue: string; // The current search value
   setValuesById: (values: { searchValue: string }) => void; // Function to update search values
   handleSearchButtonClick: () => void; // Function to handle search button click
   handleResetButtonClick: () => void; // Function to handle reset button click
 }
 const SearchComponent = ({
+  placeholder,
   searchValue,
   setValuesById,
   handleSearchButtonClick,
@@ -31,7 +33,7 @@ const SearchComponent = ({
       <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
         <SearchForm
           id="simple-search"
-          placeholder="Search by title..."
+          placeholder={placeholder}
           value={searchValue}
           // Update the search value when the input changes
           onChange={(event: { target: { value: any } }) =>

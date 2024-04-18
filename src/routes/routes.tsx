@@ -15,7 +15,7 @@ import {
 const AppRouter: React.FC = () => {
   // const superAdmin = useSelector((state: any) => state?.userInfo?.userInfo);
 
-  const isSuperAdmin = false;
+  const isSuperAdmin = true;
 
   const authRouter = createBrowserRouter(
     isSuperAdmin

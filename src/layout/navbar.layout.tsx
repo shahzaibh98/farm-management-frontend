@@ -31,7 +31,7 @@ import { clearUserInfo } from '../redux/actions/user';
 import { extractFirstWord } from '../utils/common/function';
 
 // Navigation data with links and icons
-const isSuperAdmin = false;
+const isSuperAdmin = true;
 
 const data = isSuperAdmin
   ? [

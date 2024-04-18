@@ -28,9 +28,10 @@ import { SearchValuesType } from '../../types/view-task.type';
 import { paginationInfoValue } from '../../utils/common/constant.objects';
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
-import { TaskForm } from './task';
+import { MdDisabledVisible } from 'react-icons/md';
+import { MdOutlineBlock } from 'react-icons/md';
 
-const TaskView = () => {
+const ManageFarmAdmin = () => {
   /* /////////////////////////////////////////////////
                        Variable
   /////////////////////////////////////////////////// */
@@ -50,15 +51,14 @@ const TaskView = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleAddTask = () => {
+  const handleAddFarmAdmin = () => {
     toggleModal(); // Open the modal when "Add Task" button is clicked
   };
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
 
   const [paginationInfo, setPaginationInfo] = useState(paginationInfoValue);
-  const [searchValues, setSearchValues] =
-    useState<SearchValuesType>(initialSearchValues);
+  const [searchValues, setSearchValues] = useState(initialSearchValues);
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -68,33 +68,12 @@ const TaskView = () => {
     // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') || searchValues.searchValue;
-    const assignedTo =
-      searchParams.get('assignedTo') || searchValues.assignedTo;
-    const associatedTo =
-      searchParams.get('associatedTo') || searchValues.associatedTo;
-    const progress = searchParams.get('progress') || searchValues.progress;
-    const upcomingTask =
-      searchParams.get('upcomingTask') || searchValues.upcomingTask;
-    const dateRangeStart = searchParams.get('dateRangeStart');
-    const dateRangeEnd = searchParams.get('dateRangeEnd');
-
-    // Convert dateRangeStart and dateRangeEnd to date objects
-    let dateRange: [Date | null, Date | null] = [null, null];
-    if (dateRangeStart && dateRangeEnd) {
-      dateRange = [
-        new Date(dateRangeStart) ?? null,
-        new Date(dateRangeEnd) ?? null,
-      ];
-    }
+    const status = searchParams.get('status') || searchValues.status;
 
     // Update state with extracted values
     setSearchValues({
       searchValue,
-      assignedTo,
-      associatedTo,
-      progress,
-      upcomingTask,
-      dateRange,
+      status,
     });
   };
 
@@ -115,7 +94,7 @@ const TaskView = () => {
   }, [searchParams]);
 
   // Function to set values based on identifiers
-  const setValuesById = (valuesById: Partial<SearchValuesType>) => {
+  const setValuesById = (valuesById: any) => {
     setSearchValues(prevFormValues => ({
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
@@ -127,10 +106,10 @@ const TaskView = () => {
     Object.entries(searchValues).forEach(([key, value]) => {
       if (key === 'dateRange') {
         if (value[0]) {
-          newParams.set('dateRangeStart', value[0].toISOString());
+          newParams.set('dateRangeStart', value[0]?.toString());
         }
         if (value[1]) {
-          newParams.set('dateRangeEnd', value[1].toISOString());
+          newParams.set('dateRangeEnd', value[1]?.toString());
         }
       } else if (value) {
         newParams.set(key, value);
@@ -205,8 +184,8 @@ const TaskView = () => {
   const columns = useMemo(
     () => [
       {
-        header: 'TITLE',
-        accessorKey: 'title',
+        header: 'FARM TITLE',
+        accessorKey: 'farmTitle',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -219,8 +198,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'ASSIGNED TO',
-        accessorKey: 'assigned_to',
+        header: 'NAME',
+        accessorKey: 'name',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -233,8 +212,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'ASSOCIATED TO',
-        accessorKey: 'associated_to',
+        header: 'EMAIL ADDRESS',
+        accessorKey: 'email',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -247,57 +226,59 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'PRIORITY',
-        accessorKey: 'priority',
+        header: 'PHONE NUMBER',
+        accessorKey: 'phoneNo',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 500, //enforced during column resizing
+        cell: (info: { getValue: () => any }) => (
+          <div className="flex items-center justify-center">
+            <p className="text-sm lg:text-base text-center">
+              {info.getValue()}
+            </p>
+          </div>
+        ),
+      },
+      {
+        header: 'STATUS',
+        accessorKey: 'isActive',
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
           return (
             <Center>
               <div className="flex flex-wrap">
                 <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
+                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority ? 'bg-green-light' : 'bg-red-light'}`}
                 />
-                <Text>{priority}</Text>
+                <Text>{priority ? 'Active' : 'Blocked'}</Text>
               </div>
             </Center>
           );
         },
       },
       {
-        header: 'STATUS',
-        accessorKey: 'status',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
-      },
-      {
-        header: 'DUE DATE',
-        accessorKey: 'due_date',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
-      },
-      {
         header: '',
-        accessorKey: 'status',
+        accessorKey: 'id',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
-        cell: () => <TableMenu />,
+        cell: (info: any) => {
+          const isActive = info?.row?.original?.isActive;
+
+          return (
+            <TableMenu
+              additionalMenuItems={[
+                {
+                  label: isActive ? 'Block' : 'Active',
+                  icon: isActive ? <MdDisabledVisible /> : <MdOutlineBlock />,
+                  onClick: () => {
+                    console.log('blocked');
+                  },
+                },
+              ]}
+            />
+          );
+        },
       },
     ],
     []
@@ -306,59 +287,64 @@ const TaskView = () => {
   const defaultData = [
     {
       id: 1,
-      title: 'Task 1',
-      assigned_to: 'John Doe',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-10',
+      name: 'Shahzaib',
+      farmTitle: 'Multan Farm',
+      email: 'hassanshahzaib81@gmail.com',
+      profilePic:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      phoneNo: '0300-1234567',
+      isActive: true,
     },
     {
       id: 2,
-      title: 'Task 2',
-      assigned_to: 'Jane Smith',
-      associated_to: 'Project Y',
-      priority: 'Medium',
-      status: 'Pending',
-      due_date: '2024-04-15',
+      name: 'Hassan',
+      farmTitle: 'Lahore Farm',
+      email: 'lahorefarm@gmail.com',
+      profilePic:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      phoneNo: '0300-7654321',
+      isActive: false,
     },
     {
       id: 3,
-      title: 'Task 3',
-      assigned_to: 'Alice Johnson',
-      associated_to: 'Project Z',
-      priority: 'Low',
-      status: 'Completed',
-      due_date: '2024-04-20',
+      name: 'Hammad Khan',
+      farmTitle: 'Karachi Farm',
+      email: 'karachifarm@gmail.com',
+      profilePic:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      phoneNo: '0300-9876543',
+      isActive: true,
     },
     {
       id: 4,
-      title: 'Task 4',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
+      name: 'Basit Ali',
+      farmTitle: 'Islamabad Farm',
+      email: 'islamabadfarm@gmail.com',
+      profilePic:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      phoneNo: '0300-5678912',
+      isActive: false,
     },
     {
       id: 5,
-      title: 'Task 5',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
+      name: 'Hammad Ali',
+      farmTitle: 'Peshawar Farm',
+      email: 'peshawarfarm@gmail.com',
+      profilePic:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      phoneNo: '0300-2468101',
+      isActive: true,
     },
   ];
 
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
       <GenericHeader
-        headerText="Task"
-        breadcrumbsText="Manage Task"
+        headerText="Farm Admin"
+        breadcrumbsText="Manage Farm Admin"
         isAddOrUpdateButton
-        buttonContent="Add Task"
-        onButtonClick={handleAddTask} // Call handleAddTask function when button is clicked
+        buttonContent="Add Farm Admin"
+        onButtonClick={handleAddFarmAdmin} // Call handleAddFarmAdmin function when button is clicked
       />
 
       <Paper
@@ -366,123 +352,41 @@ const TaskView = () => {
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >
-        <Tabs
-          tabs={[
-            {
-              value: 'Table',
-              label: 'Table',
-              icon: <CiViewTable size={24} />,
-              component: (
-                <div className="mt-4">
-                  <SearchComponent
-                    placeholder="Search by title..."
-                    searchValue={searchValues.searchValue}
-                    setValuesById={setValuesById}
-                    handleSearchButtonClick={handleSearchButtonClick}
-                    handleResetButtonClick={handleResetButtonClick}
-                  />
-                  <Grid className="mt-2">
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Assigned To"
-                        data={[
-                          'Me',
-                          'Farm user 1',
-                          'Farm user 2',
-                          'Farm user 3',
-                        ]}
-                        value={searchValues.assignedTo ?? ''}
-                        onChange={value => setValuesById({ assignedTo: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Associated To"
-                        data={[]}
-                        value={searchValues.associatedTo ?? ''}
-                        clearable
-                        onChange={value =>
-                          setValuesById({ associatedTo: value })
-                        }
-                      />
-                    </Grid.Col>
+        <div className="mt-4">
+          <SearchComponent
+            placeholder="Search by name..."
+            searchValue={searchValues.searchValue}
+            setValuesById={setValuesById}
+            handleSearchButtonClick={handleSearchButtonClick}
+            handleResetButtonClick={handleResetButtonClick}
+          />
+          <Grid className="mt-2">
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <Select
+                placeholder="Status"
+                data={['Active', 'Blocked']}
+                value={searchValues.status ?? ''}
+                onChange={value => setValuesById({ status: value })}
+              />
+            </Grid.Col>
 
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Progress"
-                        data={['In Progress', 'Pending', 'Completed']}
-                        value={searchValues.progress ?? ''}
-                        onChange={value => setValuesById({ progress: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Upcoming Task"
-                        data={[
-                          'All',
-                          'Today',
-                          'Tomorrow',
-                          'This Week',
-                          'Next Week',
-                          'Next Month',
-                          'Custom Range',
-                        ]}
-                        value={searchValues?.upcomingTask ?? ''}
-                        onChange={value =>
-                          setValuesById({ upcomingTask: value })
-                        }
-                      />
-                    </Grid.Col>
-                    {searchValues?.upcomingTask === 'Custom Range' && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <DatePicker
-                          type="range"
-                          placeholder="Select a date range"
-                          value={searchValues.dateRange ?? ''}
-                          onChange={value =>
-                            setValuesById({
-                              dateRange: value as [Date | null, Date | null],
-                            })
-                          }
-                        />
-                      </Grid.Col>
-                    )}
-
-                    {isSmallScreen && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <div className="flex flex-row justify-between">
-                          <SearchButton
-                            onSearchButtonClick={handleSearchButtonClick}
-                          />
-                          <ResetButton
-                            onResetButtonClick={handleResetButtonClick}
-                          />
-                        </div>
-                      </Grid.Col>
-                    )}
-                  </Grid>
-                  <Table
-                    isLoading={isLoading}
-                    data={defaultData}
-                    columns={columns}
-                    paginationInfo={paginationInfo}
-                    handlePagination={handlePagination}
-                  />
+            {isSmallScreen && (
+              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                <div className="flex flex-row justify-between">
+                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <ResetButton onResetButtonClick={handleResetButtonClick} />
                 </div>
-              ),
-            },
-            {
-              value: 'Calendar',
-              label: 'Calendar',
-              icon: <CiCalendarDate size={24} />,
-              component: (
-                <div className="mt-5">
-                  <MyCalendar />
-                </div>
-              ),
-            },
-          ]}
-        ></Tabs>
+              </Grid.Col>
+            )}
+          </Grid>
+          <Table
+            isLoading={isLoading}
+            data={defaultData}
+            columns={columns}
+            paginationInfo={paginationInfo}
+            handlePagination={handlePagination}
+          />
+        </div>
       </Paper>
       <Modal
         opened={isModalOpen}
@@ -498,11 +402,9 @@ const TaskView = () => {
         }}
         className="addtaskModal"
         transitionProps={{ transition: 'fade-up', duration: 300 }}
-      >
-        <TaskForm onCloseButton={toggleModal} />
-      </Modal>
+      ></Modal>
       <div className="h-4" />
     </main>
   );
 };
-export default TaskView;
+export default ManageFarmAdmin;
