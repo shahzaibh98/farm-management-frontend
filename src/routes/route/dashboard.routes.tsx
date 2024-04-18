@@ -5,12 +5,11 @@ import PrivateRoute from '../private/private.routes';
 
 export const dashboardRoutes = [
   {
-    path: '/',
+    path: '/dashboard',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: '/',
         index: true,
         element: (
           <PrivateRoute>

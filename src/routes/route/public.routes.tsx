@@ -7,8 +7,8 @@ import { PublicRoute } from '../private';
 
 export const publicRoutes = [
   {
-    path: '/login',
-    basename: '/login',
+    path: '/',
+    basename: '/',
     element: (
       <PublicRoute>
         <DocumentTitle title="Login" />

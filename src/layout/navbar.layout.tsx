@@ -35,7 +35,7 @@ const isSuperAdmin = false;
 
 const data = isSuperAdmin
   ? [
-      { link: '/', label: 'Dashboard', icon: IconDashboard },
+      { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
       {
         link: '/manage-farm-admin',
         label: 'Manage Farm Admin',
@@ -43,7 +43,7 @@ const data = isSuperAdmin
       },
     ]
   : [
-      { link: '/', label: 'Dashboard', icon: IconDashboard },
+      { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
       { link: '/task', label: 'Task', icon: IconListDetails },
       { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
       { link: '/crop', label: 'Crop', icon: IconCarrot },
