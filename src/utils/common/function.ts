@@ -1,5 +1,11 @@
-export function extractFirstWord(url: string) {
-  const parts = url.split('/');
+export function extractFirstWord(url: string): string | null {
+  // Split the URL at the '?' character to separate the base URL and query parameters
+  const [baseUrl] = url.split('?');
+
+  // Split the base URL into parts by '/'
+  const parts = baseUrl.split('/');
+
+  // Return the first word from the URL if it exists, otherwise return null
   return parts.length > 1 ? parts[3] : null;
 }
 

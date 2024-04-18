@@ -5,7 +5,7 @@ const PublicRoute = ({ children }: any) => {
   const isAuthenticated = useSelector(
     (state: any) => state?.userInfo?.isAuthenticated
   );
-  return !isAuthenticated ? children : <Navigate to="/" />;
+  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
 };
 
 export default PublicRoute;
