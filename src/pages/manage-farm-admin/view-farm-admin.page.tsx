@@ -1,4 +1,12 @@
-import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import {
+  Button,
+  Center,
+  Flex,
+  Grid,
+  Modal,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
@@ -30,6 +38,7 @@ import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
 import { MdDisabledVisible } from 'react-icons/md';
 import { MdOutlineBlock } from 'react-icons/md';
+import { useFormik } from 'formik';
 
 const ManageFarmAdmin = () => {
   /* /////////////////////////////////////////////////
@@ -37,6 +46,20 @@ const ManageFarmAdmin = () => {
   /////////////////////////////////////////////////// */
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
+  const form = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      title: '',
+      name: '',
+      email: '',
+      role: 'Farmer',
+    },
+    onSubmit: values => {
+      // Handle form submission logic here
+      console.log('Form submitted with values:', values);
+    },
+  });
+
   const navigate = useNavigate();
   const { isSmallScreen } = useScreenSize();
 
@@ -391,8 +414,8 @@ const ManageFarmAdmin = () => {
       <Modal
         opened={isModalOpen}
         onClose={toggleModal}
-        title="Add Task"
-        size="lg"
+        title="Add User"
+        size="xs"
         styles={{
           title: {
             fontSize: '24px',
@@ -402,7 +425,82 @@ const ManageFarmAdmin = () => {
         }}
         className="addtaskModal"
         transitionProps={{ transition: 'fade-up', duration: 300 }}
-      ></Modal>
+      >
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+            <label>Farm Title *</label>
+            <TextInput
+              placeholder="Enter title"
+              withAsterisk
+              {...form.getFieldProps('title')}
+              onChange={() => {}}
+              value={''}
+            />
+          </Grid.Col>
+        </Grid>
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+            <label>Name *</label>
+            <TextInput
+              placeholder="Enter name"
+              withAsterisk
+              {...form.getFieldProps('name')}
+              onChange={() => {}}
+              value={''}
+            />
+          </Grid.Col>
+        </Grid>
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+            <label>Email *</label>
+            <TextInput
+              placeholder="Enter email"
+              withAsterisk
+              {...form.getFieldProps('email')}
+              onChange={() => {}}
+              value={''}
+            />
+          </Grid.Col>
+        </Grid>
+        <Grid>
+          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+            <label>Role *</label>
+            <Select
+              placeholder="Select role"
+              {...form.getFieldProps('role')}
+              onChange={value => form.setFieldValue('role', value)} // Ensure correct state update
+              data={['Farmer', 'Kissan', 'Employee'].map(role => ({
+                value: role,
+                label: role,
+              }))}
+            />
+          </Grid.Col>
+        </Grid>
+        <Flex
+          mih={50}
+          gap="xs"
+          justify="flex-start"
+          align="flex-start"
+          direction="row"
+          wrap="wrap"
+          className="mb-5"
+        >
+          <Button
+            variant="outline"
+            autoContrast
+            color={theme.colors.primaryColors[0]}
+            mt={8}
+            size="md"
+            type="submit"
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic">
+              {'Add User'}
+            </Text>
+          </Button>
+        </Flex>
+      </Modal>
+
       <div className="h-4" />
     </main>
   );
