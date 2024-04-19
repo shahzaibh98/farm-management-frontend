@@ -5,13 +5,13 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: 'AIzaSyAUEyv61olP5jiwflEi74LvmTKRsz5d6SQ',
-  authDomain: 'concave-agri.firebaseapp.com',
-  projectId: 'concave-agri',
-  storageBucket: 'concave-agri.appspot.com',
-  messagingSenderId: '69749560271',
-  appId: '1:69749560271:web:977dd82560e4d08af0b8ba',
-  measurementId: 'G-D395MPY777',
+  apiKey: 'AIzaSyCeOVKoyHjpoHYJHtpv8KGKCzaMNI6bCOk',
+  authDomain: 'farm-management-1d50a.firebaseapp.com',
+  projectId: 'farm-management-1d50a',
+  storageBucket: 'farm-management-1d50a.appspot.com',
+  messagingSenderId: '983954423336',
+  appId: '1:983954423336:web:027ec0a5277440efaa3f1d',
+  measurementId: 'G-6C7Y0YDEWV',
 };
 
 // Initialize Firebase

@@ -33,3 +33,16 @@ export const colorArray = [
   '#8d6e63',
   '#78909c',
 ];
+
+export const systemRoles = [
+  {
+    id: '0',
+    name: 'Super Admin',
+    shortCutName: 'SA',
+  },
+  {
+    id: '1',
+    name: 'Farm Admin',
+    shortCutName: 'FA',
+  },
+];

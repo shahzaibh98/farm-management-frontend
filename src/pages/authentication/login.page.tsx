@@ -57,15 +57,10 @@ export function LoginPage() {
 
   // Initialize notification state
   const [notification, setNotification] = useState(initialNotification);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fcmToken = async () => {
-      const token = await requestForToken();
-      console.log('FCM Token: ' + token);
-    };
-
-    fcmToken();
-  });
+  // Initialize user state
+  const [isFarmAdmin, setIsFarmAdmin] = useState(false);
 
   // Initialize formik for form handling
   const formik = useFormik({
@@ -79,10 +74,15 @@ export function LoginPage() {
       password: Yup.string().required('Required'),
     }),
     // Define form submission handler
-    onSubmit: (values: LoginPageProps) => {
+    onSubmit: async (values: LoginPageProps) => {
+      setIsLoading(true);
       // Post login data to the server
-      postData('/users/login', { ...values, fcmToken: 'Fcm Token' })
-        .then(res => {
+      postData(isFarmAdmin ? '/farm/login/' : '/users/login', {
+        ...values,
+        fcmWebToken: await requestForToken(),
+        fcmMobileToken: null,
+      })
+        .then((res: any) => {
           // Dispatch user info to the store
           dispatch(setUserInfo(res));
         })
@@ -90,11 +90,12 @@ export function LoginPage() {
           // Set notification for errors
           setNotification({
             isSuccess: false,
-            message: error.message,
+            message: error?.response?.data?.message ?? error?.message,
             title: 'Something went wrong',
             isEnable: true,
           });
-        });
+        })
+        .finally(() => setIsLoading(false));
     },
   });
 
@@ -119,7 +120,7 @@ export function LoginPage() {
       )}
       {/* Page title */}
       <Title className="font-bold text-2xl text-center text-secondaryColors-100">
-        Welcome back!
+        Welcome back to Concave Farm!
       </Title>
       {/* Instructions and account creation link
       <Text className="text-gray-500 text-sm text-center mt-5">
@@ -167,7 +168,15 @@ export function LoginPage() {
           {/* Group for checkboxes and links */}
           <Group className="mt-6" justify="between">
             {/* Remember me checkbox */}
-            <Checkbox label="Remember me" checked={false} onChange={() => {}} />
+            <Checkbox
+              styles={{
+                input: { cursor: 'pointer' },
+                label: { fontWeight: 'bold', color: 'rgb(75 85 99)' },
+              }}
+              label="Is Admin Account?"
+              checked={isFarmAdmin}
+              onChange={() => setIsFarmAdmin(!isFarmAdmin)}
+            />
             {/* Forgot password link */}
             <Text className="text-gray-500 text-sm text-center mt-5">
               Have already account{' '}
@@ -188,6 +197,7 @@ export function LoginPage() {
             fullWidth
             className="mt-10"
             style={{ backgroundColor: theme.colors.secondaryColors[3] }}
+            loading={isLoading}
           >
             SIGN IN
           </Button>

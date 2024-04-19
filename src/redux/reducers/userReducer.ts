@@ -5,9 +5,12 @@ import {
   SET_USER_INFO,
 } from '../constants/user';
 
+const userInfoString = sessionStorage.getItem('userInfo');
+const userInfo = userInfoString ? JSON.parse(userInfoString) : null;
+
 const initialState = {
-  userInfo: sessionStorage.getItem('userInfo') || null,
-  isAuthenticated: sessionStorage.getItem('userInfo') ? true : false,
+  userInfo: userInfo,
+  isAuthenticated: userInfo ? true : false,
   token: sessionStorage.getItem('token') || null,
   refreshToken: sessionStorage.getItem('refreshToken') || null,
 };
@@ -25,7 +28,10 @@ const userInfoReducer = (
         // If payload exists, set user info and tokens
         sessionStorage.setItem('token', action.payload.token);
         sessionStorage.setItem('refreshToken', action.payload.refreshToken);
-        sessionStorage.setItem('userInfo', action.payload.user);
+        sessionStorage.setItem(
+          'userInfo',
+          JSON.stringify(action.payload.userInfo)
+        );
         return {
           ...state,
           userInfo: action.payload.userInfo,

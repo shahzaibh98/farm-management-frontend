@@ -7,14 +7,20 @@ import { ChangeEvent, useState } from 'react';
 import * as Yup from 'yup';
 import { postData } from '../../api/api';
 import { setUserInfo } from '../../redux/actions/user';
-import { initialNotification } from '../../utils/common/constant.objects';
+import {
+  initialNotification,
+  systemRoles,
+} from '../../utils/common/constant.objects';
 import { Notification, Text } from '../../concave.agri/components';
 import useScreenSize from '../../hooks/useScreenSize';
 import { inputStyle } from '../../theme/common.style';
 
 const UserProfile = () => {
-  const userInformation = useSelector(
-    (state: any) => state?.userInfo?.userInfo
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+
+  console.log(
+    `UserProfile: ${JSON.stringify(userInfo)}`,
+    useSelector((state: any) => state?.userInfo)
   );
 
   // State to hold the source URL of the selected image
@@ -52,14 +58,19 @@ const UserProfile = () => {
 
   // Initialize formik for form handling and validation
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      email: '', // Initial value for email input
+      email: userInfo?.email ?? '', // Initial value for email input
       password: '', // Initial value for password input
-      name: '', // Initial value for name input
-      phoneNumber: '', // Initial value for phone number
+      name: userInfo?.name, // Initial value for name input
+      phoneNo: userInfo?.phoneNo ?? '', // Initial value for phone number
+      profilePic:
+        userInfo?.profilePic ??
+        'https://e7.pngegg.com/pngimages/442/477/png-clipart-computer-icons-user-profile-avatar-profile-heroes-profile.png', // Initial value for profile
     },
     // Define validation schema using Yup
     validationSchema: Yup.object({
+      phoneNo: Yup.string().required('Required'),
       email: Yup.string().email('Invalid email').required('Required'),
       password: Yup.string().required('Required'),
       confirmPassword: Yup.string().required('Required'),
@@ -132,7 +143,7 @@ const UserProfile = () => {
 
                 {/* Image element acting as the avatar */}
                 <img
-                  src={imageSrc}
+                  src={userInfo?.profilePic ?? imageSrc}
                   alt="Avatar"
                   className="w-32 group-hover:w-36 group-hover:h-36 h-32 object-center object-cover rounded-full transition-all duration-500 delay-500 transform cursor-pointer"
                   onClick={handleImageClick}
@@ -140,11 +151,13 @@ const UserProfile = () => {
               </div>
               <div className="w-fit transition-all transform duration-500">
                 <h1 className="text-gray-600 dark:text-gray-200 font-bold text-3xl">
-                  User Name
+                  {userInfo?.name}
                 </h1>
-                <p className="text-gray-400">Farm Owner</p>
+                <p className="text-gray-400">
+                  {systemRoles[Number(userInfo?.roleId)]?.name}
+                </p>
                 <a className="text-xs text-gray-500 dark:text-gray-200 group-hover:opacity-100 opacity-0 transform transition-all delay-300 duration-500">
-                  myuser@gmail.com
+                  {userInfo?.email}
                 </a>
               </div>
             </div>
@@ -186,15 +199,15 @@ const UserProfile = () => {
               <TextInput
                 label="Phone Number"
                 placeholder="Enter your phone number"
-                value={formik.values.email}
+                value={formik.values.phoneNo}
                 onChange={(value: string) =>
-                  formik.setFieldValue('phoneNumber', value)
+                  formik.setFieldValue('phoneNo', value)
                 }
                 styles={inputStyle}
                 error={
-                  formik.touched.phoneNumber &&
-                  formik.errors.phoneNumber &&
-                  formik.errors.phoneNumber
+                  formik.touched.phoneNo &&
+                  formik.errors.phoneNo &&
+                  formik.errors.phoneNo
                 }
               />
             </Grid.Col>
@@ -206,9 +219,9 @@ const UserProfile = () => {
               <PasswordInput
                 label="Password"
                 placeholder="Enter your current password"
-                value={formik.values.email}
+                value={formik.values.password}
                 styles={inputStyle}
-                description="for profile upgrading..."
+                description="For profile upgrading..."
                 onChange={event =>
                   formik.setFieldValue('password', event.target.value)
                 }
