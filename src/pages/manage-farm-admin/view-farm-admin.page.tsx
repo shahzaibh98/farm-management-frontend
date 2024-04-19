@@ -384,7 +384,7 @@ const ManageFarmAdmin = () => {
             handleResetButtonClick={handleResetButtonClick}
           />
           <Grid className="mt-2">
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
               <Select
                 placeholder="Status"
                 data={['Active', 'Blocked']}
@@ -394,7 +394,7 @@ const ManageFarmAdmin = () => {
             </Grid.Col>
 
             {isSmallScreen && (
-              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
                 <div className="flex flex-row justify-between">
                   <SearchButton onSearchButtonClick={handleSearchButtonClick} />
                   <ResetButton onResetButtonClick={handleResetButtonClick} />
@@ -423,11 +423,11 @@ const ManageFarmAdmin = () => {
             color: theme.colors.primaryColors[0],
           },
         }}
-        className="addtaskModal"
+        className="addtaskModalforUser"
         transitionProps={{ transition: 'fade-up', duration: 300 }}
       >
         <Grid>
-          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
             <label>Farm Title *</label>
             <TextInput
               placeholder="Enter title"
@@ -439,7 +439,7 @@ const ManageFarmAdmin = () => {
           </Grid.Col>
         </Grid>
         <Grid>
-          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
             <label>Name *</label>
             <TextInput
               placeholder="Enter name"
@@ -451,7 +451,7 @@ const ManageFarmAdmin = () => {
           </Grid.Col>
         </Grid>
         <Grid>
-          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
             <label>Email *</label>
             <TextInput
               placeholder="Enter email"
@@ -463,7 +463,7 @@ const ManageFarmAdmin = () => {
           </Grid.Col>
         </Grid>
         <Grid>
-          <Grid.Col span={{ base: 12, md: 4, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
             <label>Role *</label>
             <Select
               placeholder="Select role"
