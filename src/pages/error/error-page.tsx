@@ -5,11 +5,13 @@ import {
   SimpleGrid,
   useMantineTheme,
 } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 import { Error404Image, Error500Image } from '../../assets/images';
 import { Text } from '../../concave.agri/components';
 
 const ErrorPage = ({ errorNumber = 404 }: { errorNumber?: number }) => {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   return (
     <Container className="py-20 md:py-32">
       <SimpleGrid spacing={{ base: 10, sm: 20 }} cols={{ base: 1, sm: 2 }}>
@@ -34,6 +36,7 @@ const ErrorPage = ({ errorNumber = 404 }: { errorNumber?: number }) => {
             mt="6"
             className="mt-6 w-full md:w-auto"
             color={theme.colors.secondaryColors[0]}
+            onClick={() => navigate('/')}
           >
             <Text size="md" c={theme.colors.secondaryColors[0]} tt="capitalize">
               Get back to home page

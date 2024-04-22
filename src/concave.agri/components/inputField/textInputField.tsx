@@ -14,7 +14,7 @@ interface InputProps {
 const TextInput = ({
   label,
   placeholder,
-  value = 'Enter a text value',
+  value,
   onChange,
   ...rest
 }: InputProps) => {

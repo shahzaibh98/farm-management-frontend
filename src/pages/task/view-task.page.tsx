@@ -297,7 +297,10 @@ const TaskView = () => {
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
-        cell: () => <TableMenu />,
+        cell: (info: any) => {
+          const id = info?.row?.original?.id;
+          return <TableMenu id={id} />;
+        },
       },
     ],
     []

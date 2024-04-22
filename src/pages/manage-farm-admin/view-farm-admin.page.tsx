@@ -1,25 +1,9 @@
-import {
-  Button,
-  Center,
-  Flex,
-  Grid,
-  Modal,
-  TextInput,
-  useMantineTheme,
-} from '@mantine/core'; // Importing Mantine UI components
-import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
-import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
+import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
-import {
-  DatePicker,
-  Paper,
-  Select,
-  Table,
-  Tabs,
-  Text,
-} from '../../concave.agri/components';
+import { Paper, Select, Table, Text } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
 
@@ -32,13 +16,17 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { SearchValuesType } from '../../types/view-task.type';
-import { paginationInfoValue } from '../../utils/common/constant.objects';
-import MyCalendar from '../calendar/calendar';
+import { MdDisabledVisible, MdOutlineBlock } from 'react-icons/md';
+import { deleteData, fetchData } from '../../api/api';
+import { Notification } from '../../concave.agri/components';
+import { User } from '../../types/view-farm-admin.type';
+import {
+  initialNotification,
+  paginationInfoValue,
+} from '../../utils/common/constant.objects';
 import { initialSearchValues } from './initial.values';
-import { MdDisabledVisible } from 'react-icons/md';
-import { MdOutlineBlock } from 'react-icons/md';
-import { useFormik } from 'formik';
+import UserForm from './user.form';
+import { VscVmActive } from 'react-icons/vsc';
 
 const ManageFarmAdmin = () => {
   /* /////////////////////////////////////////////////
@@ -46,29 +34,40 @@ const ManageFarmAdmin = () => {
   /////////////////////////////////////////////////// */
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
-  const form = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      title: '',
-      name: '',
-      email: '',
-      role: 'Farmer',
-    },
-    onSubmit: values => {
-      // Handle form submission logic here
-      console.log('Form submitted with values:', values);
-    },
-  });
 
-  const navigate = useNavigate();
   const { isSmallScreen } = useScreenSize();
 
   /* /////////////////////////////////////////////////
                       State
   /////////////////////////////////////////////////// */
 
+  // State for search parameters
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // State for modal open/close
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
+
+  // State for resetting table
+  const [resetTable, setResetTable] = useState(false);
+
+  // State for pagination information
+  const [paginationInfo, setPaginationInfo] = useState(paginationInfoValue);
+
+  // State for search values
+  const [searchValues, setSearchValues] = useState(initialSearchValues);
+
+  // State for notification
+  const [notification, setNotification] = useState(initialNotification);
+
+  // State for table data
+  const [tableData, setTableData] = useState<User[]>([]);
+
+  /* /////////////////////////////////////////////////
+                      functions
+  /////////////////////////////////////////////////// */
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -77,15 +76,6 @@ const ManageFarmAdmin = () => {
   const handleAddFarmAdmin = () => {
     toggleModal(); // Open the modal when "Add Task" button is clicked
   };
-  // Loading state
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [paginationInfo, setPaginationInfo] = useState(paginationInfoValue);
-  const [searchValues, setSearchValues] = useState(initialSearchValues);
-
-  /* /////////////////////////////////////////////////
-                      useEffect
-  /////////////////////////////////////////////////// */
 
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
@@ -111,12 +101,6 @@ const ManageFarmAdmin = () => {
     setPaginationInfo({ ...paginationInfoValue, rowPerPage, currentPage });
   };
 
-  useEffect(() => {
-    initializeStateFromQueryParams();
-    initialPaginationFromQueryParams();
-  }, [searchParams]);
-
-  // Function to set values based on identifiers
   const setValuesById = (valuesById: any) => {
     setSearchValues(prevFormValues => ({
       ...prevFormValues,
@@ -141,7 +125,18 @@ const ManageFarmAdmin = () => {
     setSearchParams(newParams);
   };
 
-  const handleFetchDataByFilter = () => {};
+  const handleFetchDataByFilter = () => {
+    setIsLoading(true);
+    fetchData('farm')
+      .then((response: any) => setTableData(response))
+      .catch(error => console.log(error))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+  const handleNotificationClose = () => {
+    setNotification(initialNotification);
+  };
 
   const handleSearchButtonClick = () => {
     handleSetParams();
@@ -203,6 +198,29 @@ const ManageFarmAdmin = () => {
     setSearchParams(newParams);
     setSearchValues(initialSearchValues);
   };
+
+  const handleDeleteById = (id: string) => {
+    setIsLoading(true);
+    deleteData(`farm/${id}`)
+      .then(response => console.log(response))
+      .catch(error => console.log(error))
+      .finally(() => setIsLoading(false));
+  };
+
+  /* /////////////////////////////////////////////////
+                      useEffect
+  /////////////////////////////////////////////////// */
+
+  useEffect(() => {
+    handleSearchButtonClick();
+  }, [paginationInfo]);
+
+  useEffect(() => {
+    initializeStateFromQueryParams();
+    initialPaginationFromQueryParams();
+  }, [searchParams]);
+
+  // Function to set values based on identifiers
 
   const columns = useMemo(
     () => [
@@ -267,13 +285,14 @@ const ManageFarmAdmin = () => {
         accessorKey: 'isActive',
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
+          console.log(`${info.getValue()} ${priority}`);
           return (
             <Center>
               <div className="flex flex-wrap">
                 <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority ? 'bg-green-light' : 'bg-red-light'}`}
+                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === '1' ? 'bg-green-light' : 'bg-red-light'}`}
                 />
-                <Text>{priority ? 'Active' : 'Blocked'}</Text>
+                <Text>{priority === '1' ? 'Active' : 'Blocked'}</Text>
               </div>
             </Center>
           );
@@ -281,19 +300,21 @@ const ManageFarmAdmin = () => {
       },
       {
         header: '',
-        accessorKey: 'id',
+        accessorKey: 'userId',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const isActive = info?.row?.original?.isActive;
-
+          const id = info?.row?.original?.userId;
           return (
             <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
               additionalMenuItems={[
                 {
                   label: isActive ? 'Block' : 'Active',
-                  icon: isActive ? <MdDisabledVisible /> : <MdOutlineBlock />,
+                  icon: isActive ? <MdDisabledVisible /> : <VscVmActive />,
                   onClick: () => {
                     console.log('blocked');
                   },
@@ -307,61 +328,18 @@ const ManageFarmAdmin = () => {
     []
   );
 
-  const defaultData = [
-    {
-      id: 1,
-      name: 'Shahzaib',
-      farmTitle: 'Multan Farm',
-      email: 'hassanshahzaib81@gmail.com',
-      profilePic:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-      phoneNo: '0300-1234567',
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: 'Hassan',
-      farmTitle: 'Lahore Farm',
-      email: 'lahorefarm@gmail.com',
-      profilePic:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-      phoneNo: '0300-7654321',
-      isActive: false,
-    },
-    {
-      id: 3,
-      name: 'Hammad Khan',
-      farmTitle: 'Karachi Farm',
-      email: 'karachifarm@gmail.com',
-      profilePic:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-      phoneNo: '0300-9876543',
-      isActive: true,
-    },
-    {
-      id: 4,
-      name: 'Basit Ali',
-      farmTitle: 'Islamabad Farm',
-      email: 'islamabadfarm@gmail.com',
-      profilePic:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-      phoneNo: '0300-5678912',
-      isActive: false,
-    },
-    {
-      id: 5,
-      name: 'Hammad Ali',
-      farmTitle: 'Peshawar Farm',
-      email: 'peshawarfarm@gmail.com',
-      profilePic:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-      phoneNo: '0300-2468101',
-      isActive: true,
-    },
-  ];
-
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
+      {notification.isEnable && (
+        <Notification
+          title={notification.title}
+          withClose
+          color={notification.isSuccess ? theme.colors.primaryColors[0] : 'red'}
+          handleCloseNotification={handleNotificationClose}
+        >
+          <Text fw={500}>{notification.message}</Text>
+        </Notification>
+      )}
       <GenericHeader
         headerText="Farm Admin"
         breadcrumbsText="Manage Farm Admin"
@@ -374,6 +352,7 @@ const ManageFarmAdmin = () => {
         shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
+        mih={'70%'}
       >
         <div className="mt-4">
           <SearchComponent
@@ -384,7 +363,7 @@ const ManageFarmAdmin = () => {
             handleResetButtonClick={handleResetButtonClick}
           />
           <Grid className="mt-2">
-            <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
+            <Grid.Col span={{ base: 12, md: 2, lg: 2 }}>
               <Select
                 placeholder="Status"
                 data={['Active', 'Blocked']}
@@ -404,18 +383,19 @@ const ManageFarmAdmin = () => {
           </Grid>
           <Table
             isLoading={isLoading}
-            data={defaultData}
+            data={tableData}
             columns={columns}
             paginationInfo={paginationInfo}
             handlePagination={handlePagination}
           />
         </div>
       </Paper>
+
       <Modal
         opened={isModalOpen}
         onClose={toggleModal}
-        title="Add User"
-        size="xs"
+        title="Add Farm Admin"
+        size="md"
         styles={{
           title: {
             fontSize: '24px',
@@ -423,82 +403,22 @@ const ManageFarmAdmin = () => {
             color: theme.colors.primaryColors[0],
           },
         }}
-        className="addtaskModalforUser"
         transitionProps={{ transition: 'fade-up', duration: 300 }}
       >
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-            <label>Farm Title *</label>
-            <TextInput
-              placeholder="Enter title"
-              withAsterisk
-              {...form.getFieldProps('title')}
-              onChange={() => {}}
-              value={''}
-            />
-          </Grid.Col>
-        </Grid>
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-            <label>Name *</label>
-            <TextInput
-              placeholder="Enter name"
-              withAsterisk
-              {...form.getFieldProps('name')}
-              onChange={() => {}}
-              value={''}
-            />
-          </Grid.Col>
-        </Grid>
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-            <label>Email *</label>
-            <TextInput
-              placeholder="Enter email"
-              withAsterisk
-              {...form.getFieldProps('email')}
-              onChange={() => {}}
-              value={''}
-            />
-          </Grid.Col>
-        </Grid>
-        <Grid>
-          <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-            <label>Role *</label>
-            <Select
-              placeholder="Select role"
-              {...form.getFieldProps('role')}
-              onChange={value => form.setFieldValue('role', value)} // Ensure correct state update
-              data={['Farmer', 'Kissan', 'Employee'].map(role => ({
-                value: role,
-                label: role,
-              }))}
-            />
-          </Grid.Col>
-        </Grid>
-        <Flex
-          mih={50}
-          gap="xs"
-          justify="flex-start"
-          align="flex-start"
-          direction="row"
-          wrap="wrap"
-          className="mb-5"
-        >
-          <Button
-            variant="outline"
-            autoContrast
-            color={theme.colors.primaryColors[0]}
-            mt={8}
-            size="md"
-            type="submit"
-            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-          >
-            <Text tt="capitalize" fs="italic">
-              {'Add User'}
-            </Text>
-          </Button>
-        </Flex>
+        <UserForm
+          onCloseButton={toggleModal}
+          handleNotification={(
+            notification: SetStateAction<{
+              isSuccess: boolean;
+              isEnable: boolean;
+              title: string;
+              message: string;
+            }>
+          ) => {
+            toggleModal();
+            setNotification(notification);
+          }}
+        />
       </Modal>
 
       <div className="h-4" />

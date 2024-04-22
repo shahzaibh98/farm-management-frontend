@@ -15,27 +15,29 @@ import { VscOpenPreview } from 'react-icons/vsc';
 type MenuItem = {
   label: string;
   icon: React.ReactNode;
-  onClick: () => void;
+  onClick: (id: string) => void;
 };
 
 interface TableMenuProps {
+  id: string;
   isView?: boolean;
   isEdit?: boolean;
   isDelete?: boolean;
   additionalMenuItems?: MenuItem[];
-  onViewClick?: () => void;
-  onEditClick?: () => void;
-  onDeleteClick?: () => void;
+  onViewClick?: (id: string) => void;
+  onEditClick?: (id: string) => void;
+  onDeleteClick?: (id: string) => void;
 }
 
 const TableMenu = ({
+  id,
   isView = true,
   isEdit = true,
   isDelete = true,
   additionalMenuItems = [],
-  onViewClick = () => {},
-  onEditClick = () => {},
-  onDeleteClick = () => {},
+  onViewClick = id => {},
+  onEditClick = id => {},
+  onDeleteClick = id => {},
 }: TableMenuProps) => {
   return (
     <div className="relative">
@@ -59,7 +61,7 @@ const TableMenu = ({
               leftSection={
                 <CiEdit style={{ width: rem(14), height: rem(14) }} />
               }
-              onChange={() => onEditClick()}
+              onChange={() => onEditClick(id)}
             >
               Edit
             </Menu.Item>
@@ -69,7 +71,7 @@ const TableMenu = ({
               leftSection={
                 <VscOpenPreview style={{ width: rem(14), height: rem(14) }} />
               }
-              onClick={() => onViewClick()}
+              onClick={() => onViewClick(id)}
             >
               View
             </Menu.Item>
@@ -80,7 +82,7 @@ const TableMenu = ({
               <Menu.Item
                 key={index}
                 leftSection={item.icon ?? null}
-                onClick={item.onClick}
+                onClick={() => item.onClick(id)}
               >
                 {item.label}
               </Menu.Item>
@@ -95,7 +97,7 @@ const TableMenu = ({
               leftSection={
                 <IconTrash style={{ width: rem(14), height: rem(14) }} />
               }
-              onClick={() => onDeleteClick()}
+              onClick={() => onDeleteClick(id)}
             >
               Delete
             </Menu.Item>

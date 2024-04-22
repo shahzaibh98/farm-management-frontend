@@ -1,17 +1,26 @@
-import { Grid, useMantineTheme } from '@mantine/core';
+// React imports
+import { useState } from 'react';
+
+// React icon imports
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+import { RiArrowDropDownLine } from 'react-icons/ri';
+
+// Mantine core theme hook
+import { useMantineTheme } from '@mantine/core';
+
+// Table-related imports
+import { TableProps } from '../../../types/table.type';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
-import { RiArrowDropDownLine } from 'react-icons/ri';
-import { TableProps } from '../../../types/table.type';
+
+// Component imports
 import { Select } from '../dropdown';
 import { TextInput } from '../inputField';
 import { Loader } from '../loader';
 import { Text } from '../text';
-import { useState } from 'react';
 
 const Table = ({
   data,
@@ -38,10 +47,10 @@ const Table = ({
     <>
       {isLoading ? (
         <div className="flex items-center justify-center min-h-[80%]">
-          <Loader />
+          <Loader isLoading={isLoading} />
         </div>
       ) : (
-        <div className="mt-4 max-w-full overflow-x-scroll overflow-y-hidden flex flex-col justify-between">
+        <section className="min-h-[370px] flex justify-between flex-col mt-4">
           <table
             className="w-full"
             style={{
@@ -143,9 +152,7 @@ const Table = ({
           </table>
           <div className="h-4" />
           {data?.length !== 0 && (
-            <div
-              className={`w-full flex justify-between px-2 py-2 mr-4 ${table?.getRowModel()?.rows?.length === 0 ? 'absolute bottom-0 h-[65%]' : ''}`}
-            >
+            <div className="w-full flex justify-between ml-5 py-2 pb-2">
               <div className="flex items-center gap-1">
                 <Text size="lg" c={theme.colors.darkColors[0]}>
                   Total Records:{' '}
@@ -296,7 +303,7 @@ const Table = ({
               </div>
             </div>
           )}
-        </div>
+        </section>
       )}
     </>
   );
