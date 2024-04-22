@@ -11,12 +11,17 @@ const CustomLoader = ({
   type = 'oval',
   color,
   size = 30,
+  isLoading = false,
   ...rest
 }: LoaderProps) => {
   const theme = useMantineTheme();
   const colorDefault = color || theme.colors.secondaryColors[3];
 
-  return <Loader type={type} color={colorDefault} size={size} {...rest} />;
+  return (
+    { isLoading } && (
+      <Loader type={type} color={colorDefault} size={size} {...rest} />
+    )
+  );
 };
 
 export default CustomLoader;

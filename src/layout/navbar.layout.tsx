@@ -18,7 +18,7 @@ import {
 import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
 
 // React library imports
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 
 // Component imports
@@ -29,27 +29,7 @@ import { clearUserInfo } from '../redux/actions/user';
 
 // Utility function imports
 import { extractFirstWord } from '../utils/common/function';
-
-// Navigation data with links and icons
-const isSuperAdmin = false;
-
-const data = isSuperAdmin
-  ? [
-      { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-      {
-        link: '/manage-farm-admin',
-        label: 'Manage Farm Admin',
-        icon: MdOutlineAdminPanelSettings,
-      },
-    ]
-  : [
-      { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-      { link: '/task', label: 'Task', icon: IconListDetails },
-      { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
-      { link: '/crop', label: 'Crop', icon: IconCarrot },
-      { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
-      { link: '/financial', label: 'Financial', icon: IconReceipt2 },
-    ];
+import { systemRoles } from '../utils/common/constant.objects';
 
 function Navbar({ onClick }: { onClick: () => void }) {
   // Initialize the Redux dispatch hook
@@ -62,6 +42,31 @@ function Navbar({ onClick }: { onClick: () => void }) {
   // Determine the current URL and extract the first word for comparison
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
+
+  // Navigation data with links and icons
+  const isSuperAdmin =
+    useSelector((state: any) => state?.userInfo?.userInfo)?.roleId ===
+    systemRoles[0].id;
+
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+
+  const data = isSuperAdmin
+    ? [
+        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+        {
+          link: '/manage-farm-admin',
+          label: 'Manage Farm Admin',
+          icon: MdOutlineAdminPanelSettings,
+        },
+      ]
+    : [
+        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+        { link: '/task', label: 'Task', icon: IconListDetails },
+        { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
+        { link: '/crop', label: 'Crop', icon: IconCarrot },
+        { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
+        { link: '/financial', label: 'Financial', icon: IconReceipt2 },
+      ];
 
   // Create links for navigation using the data array
   const links = data.map(item => (
@@ -127,7 +132,10 @@ function Navbar({ onClick }: { onClick: () => void }) {
           >
             {/* Avatar image */}
             <img
-              src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+              src={
+                userInfo?.profilePic ??
+                'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
+              }
               className="rounded-md"
             />
           </div>
@@ -141,7 +149,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
                 onClick();
               }}
             >
-              {'user name'}
+              {userInfo?.name}
             </div>
             {/* View profile link */}
             <Text

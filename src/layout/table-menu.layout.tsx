@@ -1,27 +1,44 @@
 import { Menu, rem } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import {
+  JSXElementConstructor,
+  Key,
   MouseEventHandler,
   ReactElement,
-  JSXElementConstructor,
   ReactNode,
   ReactPortal,
-  Key,
 } from 'react';
 import { CgOptions } from 'react-icons/cg';
 import { CiEdit } from 'react-icons/ci';
 import { VscOpenPreview } from 'react-icons/vsc';
-import { JSX } from 'react/jsx-runtime';
+
+type MenuItem = {
+  label: string;
+  icon: React.ReactNode;
+  onClick: (id: string) => void;
+};
+
+interface TableMenuProps {
+  id: string;
+  isView?: boolean;
+  isEdit?: boolean;
+  isDelete?: boolean;
+  additionalMenuItems?: MenuItem[];
+  onViewClick?: (id: string) => void;
+  onEditClick?: (id: string) => void;
+  onDeleteClick?: (id: string) => void;
+}
 
 const TableMenu = ({
+  id,
   isView = true,
   isEdit = true,
   isDelete = true,
   additionalMenuItems = [],
-  onViewClick = () => {},
-  onEditClick = () => {},
-  onDeleteClick = () => {},
-}) => {
+  onViewClick = id => {},
+  onEditClick = id => {},
+  onDeleteClick = id => {},
+}: TableMenuProps) => {
   return (
     <div className="relative">
       <Menu
@@ -44,7 +61,7 @@ const TableMenu = ({
               leftSection={
                 <CiEdit style={{ width: rem(14), height: rem(14) }} />
               }
-              onChange={() => onEditClick()}
+              onChange={() => onEditClick(id)}
             >
               Edit
             </Menu.Item>
@@ -54,35 +71,18 @@ const TableMenu = ({
               leftSection={
                 <VscOpenPreview style={{ width: rem(14), height: rem(14) }} />
               }
-              onClick={() => onViewClick()}
+              onClick={() => onViewClick(id)}
             >
               View
             </Menu.Item>
           )}
 
           {additionalMenuItems?.map(
-            (
-              item: {
-                icon: ReactNode;
-                onClick: MouseEventHandler<HTMLButtonElement> | undefined;
-                color: any;
-                disabled: any;
-                label:
-                  | string
-                  | number
-                  | boolean
-                  | ReactElement<any, string | JSXElementConstructor<any>>
-                  | Iterable<ReactNode>
-                  | ReactPortal
-                  | null
-                  | undefined;
-              },
-              index: Key | null | undefined
-            ) => (
+            (item: MenuItem, index: Key | null | undefined) => (
               <Menu.Item
                 key={index}
                 leftSection={item.icon ?? null}
-                onClick={item.onClick}
+                onClick={() => item.onClick(id)}
               >
                 {item.label}
               </Menu.Item>
@@ -97,7 +97,7 @@ const TableMenu = ({
               leftSection={
                 <IconTrash style={{ width: rem(14), height: rem(14) }} />
               }
-              onClick={() => onDeleteClick()}
+              onClick={() => onDeleteClick(id)}
             >
               Delete
             </Menu.Item>

@@ -297,7 +297,10 @@ const TaskView = () => {
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
-        cell: () => <TableMenu />,
+        cell: (info: any) => {
+          const id = info?.row?.original?.id;
+          return <TableMenu id={id} />;
+        },
       },
     ],
     []
@@ -375,6 +378,7 @@ const TaskView = () => {
               component: (
                 <div className="mt-4">
                   <SearchComponent
+                    placeholder="Search by title..."
                     searchValue={searchValues.searchValue}
                     setValuesById={setValuesById}
                     handleSearchButtonClick={handleSearchButtonClick}

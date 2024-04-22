@@ -1,5 +1,11 @@
 import React from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+} from 'react-router-dom';
+import { systemRoles } from '../utils/common/constant.objects';
 import {
   cropRoutes,
   dashboardRoutes,
@@ -13,13 +19,18 @@ import {
 } from './route';
 
 const AppRouter: React.FC = () => {
-  // const superAdmin = useSelector((state: any) => state?.userInfo?.userInfo);
-
-  const isSuperAdmin = false;
+  const isSuperAdmin =
+    useSelector((state: any) => state?.userInfo?.userInfo)?.roleId ===
+    systemRoles[0].id;
 
   const authRouter = createBrowserRouter(
     isSuperAdmin
-      ? [...farmAdminRoutes, ...dashboardRoutes, ...profileRoutes]
+      ? [
+          ...farmAdminRoutes,
+          ...dashboardRoutes,
+          ...profileRoutes,
+          ...publicRoutes,
+        ]
       : [
           ...taskRoutes,
           ...cropRoutes,
@@ -29,6 +40,10 @@ const AppRouter: React.FC = () => {
           ...financialRoutes,
           ...inventoryRoutes,
           ...profileRoutes,
+          {
+            path: '*',
+            element: <Navigate to="/" />,
+          },
         ],
     { basename: '/' }
   );

@@ -1,7 +1,9 @@
 import axios from 'axios';
+import store from '../redux';
 
 // API base URL
 const API_BASE_URL = `${process.env.REACT_APP_BASE_URL}`;
+const userDetails = store.getState()?.userInfo?.userInfo;
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -28,12 +30,19 @@ export const fetchData = async <T>(url: string) => {
 
 // POST request
 export const postData = async <T>(url: string, postData: any) => {
-  return await requestData<T>('post', url, postData);
+  return await requestData<T>('post', url, {
+    ...postData,
+    createdBy: userDetails.userId,
+    updatedBy: userDetails.userId,
+  });
 };
 
 // PUT request
 export const putData = async <T>(url: string, putData: any) => {
-  return await requestData<T>('put', url, putData);
+  return await requestData<T>('put', url, {
+    ...putData,
+    updatedBy: userDetails.userId,
+  });
 };
 
 // DELETE request
