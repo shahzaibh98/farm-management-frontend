@@ -18,11 +18,6 @@ import { inputStyle } from '../../theme/common.style';
 const UserProfile = () => {
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
-  console.log(
-    `UserProfile: ${JSON.stringify(userInfo)}`,
-    useSelector((state: any) => state?.userInfo)
-  );
-
   // State to hold the source URL of the selected image
   const [imageSrc, setImageSrc] = useState<string>(
     'https://res.cloudinary.com/demo/image/twitter/1330457336.jpg'

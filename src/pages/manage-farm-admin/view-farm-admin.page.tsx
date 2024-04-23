@@ -16,19 +16,48 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { MdDisabledVisible, MdOutlineBlock } from 'react-icons/md';
-import { deleteData, fetchData } from '../../api/api';
+import { MdDisabledVisible } from 'react-icons/md';
+import { VscVmActive } from 'react-icons/vsc';
+import { deleteData, fetchData, putData } from '../../api/api';
 import { Notification } from '../../concave.agri/components';
 import { User } from '../../types/view-farm-admin.type';
 import {
+  initialModalInfo,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
+import {
+  extractPageInfo,
+  removeEmptyValues,
+} from '../../utils/common/function';
 import { initialSearchValues } from './initial.values';
 import UserForm from './user.form';
-import { VscVmActive } from 'react-icons/vsc';
 
 const ManageFarmAdmin = () => {
+  const initializeStateFromQueryParams = () => {
+    // Extract values from searchParams
+    const searchValue =
+      searchParams.get('searchValue') || initialSearchValues.searchValue;
+    const status = searchParams.get('status') || initialSearchValues.status;
+
+    // Update state with extracted values
+    return {
+      searchValue,
+      status,
+    };
+  };
+
+  const initialPaginationFromQueryParams = () => {
+    const rowPerPage =
+      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+
+    const currentPage = Number(
+      searchParams.get('currentPage') ||
+        paginationInfoValue.currentPage?.toString()
+    );
+    return { ...paginationInfoValue, rowPerPage, currentPage };
+  };
+
   /* /////////////////////////////////////////////////
                        Variable
   /////////////////////////////////////////////////// */
@@ -44,20 +73,18 @@ const ManageFarmAdmin = () => {
   // State for search parameters
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // State for modal open/close
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
 
-  // State for resetting table
-  const [resetTable, setResetTable] = useState(false);
-
   // State for pagination information
-  const [paginationInfo, setPaginationInfo] = useState(paginationInfoValue);
+  const [paginationInfo, setPaginationInfo] = useState(
+    initialPaginationFromQueryParams()
+  );
 
   // State for search values
-  const [searchValues, setSearchValues] = useState(initialSearchValues);
+  const [searchValues, setSearchValues] = useState(
+    initializeStateFromQueryParams()
+  );
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
@@ -65,48 +92,22 @@ const ManageFarmAdmin = () => {
   // State for table data
   const [tableData, setTableData] = useState<User[]>([]);
 
+  // State for reset button
+  const [resetTable, setResetTable] = useState(false);
+
+  const [modalInfo, setModalInfo] = useState(initialModalInfo);
+
   /* /////////////////////////////////////////////////
                       functions
   /////////////////////////////////////////////////// */
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
+  const handleAddFarmAdmin = () => setModalInfo({ ...modalInfo, isOpen: true });
 
-  const handleAddFarmAdmin = () => {
-    toggleModal(); // Open the modal when "Add Task" button is clicked
-  };
-
-  const initializeStateFromQueryParams = () => {
-    // Extract values from searchParams
-    const searchValue =
-      searchParams.get('searchValue') || searchValues.searchValue;
-    const status = searchParams.get('status') || searchValues.status;
-
-    // Update state with extracted values
-    setSearchValues({
-      searchValue,
-      status,
-    });
-  };
-
-  const initialPaginationFromQueryParams = () => {
-    const rowPerPage =
-      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
-
-    const currentPage = Number(
-      searchParams.get('currentPage') ||
-        paginationInfoValue.currentPage?.toString()
-    );
-    setPaginationInfo({ ...paginationInfoValue, rowPerPage, currentPage });
-  };
-
-  const setValuesById = (valuesById: any) => {
+  const setValuesById = (valuesById: any) =>
     setSearchValues(prevFormValues => ({
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
     }));
-  };
 
   const handleSetParams = () => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -122,21 +123,43 @@ const ManageFarmAdmin = () => {
         newParams.set(key, value);
       }
     });
-    setSearchParams(newParams);
+    newParams ? setSearchParams(newParams) : initialSearchValues;
   };
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
-    fetchData('farm')
-      .then((response: any) => setTableData(response))
+
+    const filterObject = JSON.stringify(
+      removeEmptyValues({
+        email: searchValues.searchValue,
+        isActive:
+          searchValues?.status === 'Active'
+            ? 'true'
+            : searchValues?.status === 'Blocked'
+              ? 'false'
+              : '',
+        roleId: '1',
+      })
+    );
+
+    fetchData(
+      `farm?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+    )
+      .then((response: any) => {
+        setTableData(response.data);
+        const getPages = extractPageInfo(response.pages);
+        setPaginationInfo({
+          ...paginationInfo,
+          totalRecords: response.total,
+          ...getPages,
+        });
+      })
       .catch(error => console.log(error))
       .finally(() => {
         setIsLoading(false);
       });
   };
-  const handleNotificationClose = () => {
-    setNotification(initialNotification);
-  };
+  const handleNotificationClose = () => setNotification(initialNotification);
 
   const handleSearchButtonClick = () => {
     handleSetParams();
@@ -152,7 +175,7 @@ const ManageFarmAdmin = () => {
         ...prevState,
         currentPage: prevState.currentPage + 1,
       }));
-      currentPage > 2
+      currentPage < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', (currentPage + 1).toString());
     } else if (actionType === 'previous') {
@@ -160,15 +183,15 @@ const ManageFarmAdmin = () => {
         ...prevState,
         currentPage: prevState.currentPage - 1,
       }));
-      currentPage > 2
+      currentPage < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto') {
+    } else if (actionType === 'goto' && value !== currentPage) {
       setPaginationInfo(prevState => ({
         ...prevState,
         currentPage: value,
       }));
-      value > 2
+      value < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', value);
     } else if (actionType === 'rowPerPage') {
@@ -197,12 +220,46 @@ const ManageFarmAdmin = () => {
     if (currentPage > 2) newParams.set('currentPage', currentPage.toString());
     setSearchParams(newParams);
     setSearchValues(initialSearchValues);
+    setResetTable(!resetTable);
   };
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
     deleteData(`farm/${id}`)
-      .then(response => console.log(response))
+      .then(() => {
+        setNotification({
+          isSuccess: true,
+          message: 'Farm Admin deleted successfully',
+          title: 'Successfully',
+          isEnable: true,
+        });
+        setTimeout(() => {
+          setResetTable(!resetTable);
+        });
+      })
+      .catch(error => console.log(error))
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleChangeStatus = (id: string | number) => {
+    setIsLoading(true);
+    const findUserStatus = tableData?.find(
+      user => user?.userId === id
+    )?.isActive;
+    putData(`farm/${id}`, {
+      isActive: findUserStatus === 'true' ? 'false' : 'true',
+    })
+      .then(() => {
+        setNotification({
+          isSuccess: true,
+          message: 'Status has been changed successfully',
+          title: 'Successfully',
+          isEnable: true,
+        });
+        setTimeout(() => {
+          setResetTable(!resetTable);
+        });
+      })
       .catch(error => console.log(error))
       .finally(() => setIsLoading(false));
   };
@@ -211,14 +268,10 @@ const ManageFarmAdmin = () => {
                       useEffect
   /////////////////////////////////////////////////// */
 
+  // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [paginationInfo]);
-
-  useEffect(() => {
-    initializeStateFromQueryParams();
-    initialPaginationFromQueryParams();
-  }, [searchParams]);
+  }, [resetTable]);
 
   // Function to set values based on identifiers
 
@@ -284,15 +337,14 @@ const ManageFarmAdmin = () => {
         header: 'STATUS',
         accessorKey: 'isActive',
         cell: (info: { getValue: () => any }) => {
-          const priority = info.getValue();
-          console.log(`${info.getValue()} ${priority}`);
+          const isActive = info.getValue();
           return (
             <Center>
               <div className="flex flex-wrap">
                 <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === '1' ? 'bg-green-light' : 'bg-red-light'}`}
+                  className={`w-3 h-3 rounded-full m-1 mr-2 ${isActive === 'true' ? 'bg-green-light' : 'bg-red-light'}`}
                 />
-                <Text>{priority === '1' ? 'Active' : 'Blocked'}</Text>
+                <Text>{isActive === 'true' ? 'Active' : 'Blocked'}</Text>
               </div>
             </Center>
           );
@@ -311,13 +363,32 @@ const ManageFarmAdmin = () => {
             <TableMenu
               id={id}
               onDeleteClick={handleDeleteById}
+              onEditClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'Edit',
+                  objectData: info?.row?.original,
+                  isReadOnly: false,
+                })
+              }
+              onViewClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'View',
+                  objectData: info?.row?.original,
+                  isReadOnly: true,
+                })
+              }
               additionalMenuItems={[
                 {
-                  label: isActive ? 'Block' : 'Active',
-                  icon: isActive ? <MdDisabledVisible /> : <VscVmActive />,
-                  onClick: () => {
-                    console.log('blocked');
-                  },
+                  label: isActive === 'true' ? 'Block' : 'Active',
+                  icon:
+                    isActive === 'true' ? (
+                      <MdDisabledVisible />
+                    ) : (
+                      <VscVmActive />
+                    ),
+                  onClick: () => handleChangeStatus(id),
                 },
               ]}
             />
@@ -325,7 +396,7 @@ const ManageFarmAdmin = () => {
         },
       },
     ],
-    []
+    [tableData]
   );
 
   return (
@@ -356,7 +427,7 @@ const ManageFarmAdmin = () => {
       >
         <div className="mt-4">
           <SearchComponent
-            placeholder="Search by name..."
+            placeholder="Search by email address..."
             searchValue={searchValues.searchValue}
             setValuesById={setValuesById}
             handleSearchButtonClick={handleSearchButtonClick}
@@ -392,8 +463,8 @@ const ManageFarmAdmin = () => {
       </Paper>
 
       <Modal
-        opened={isModalOpen}
-        onClose={toggleModal}
+        opened={modalInfo.isOpen}
+        onClose={() => setModalInfo(initialModalInfo)}
         title="Add Farm Admin"
         size="md"
         styles={{
@@ -406,7 +477,8 @@ const ManageFarmAdmin = () => {
         transitionProps={{ transition: 'fade-up', duration: 300 }}
       >
         <UserForm
-          onCloseButton={toggleModal}
+          viewOrUpdate={modalInfo}
+          onCloseButton={() => setModalInfo(initialModalInfo)}
           handleNotification={(
             notification: SetStateAction<{
               isSuccess: boolean;
@@ -415,8 +487,9 @@ const ManageFarmAdmin = () => {
               message: string;
             }>
           ) => {
-            toggleModal();
+            setModalInfo(initialModalInfo);
             setNotification(notification);
+            setResetTable(!resetTable);
           }}
         />
       </Modal>

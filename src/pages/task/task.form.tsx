@@ -23,30 +23,38 @@ interface ChecklistItem {
 }
 
 export function TaskForm({
-  onCloseButton,
-  mode = 'Add',
+  onCloseButton, // Function to handle close button click
+  mode = 'Add', // Form mode: 'Add' or 'Update'
+  handleNotification, // Function to handle notifications
+  viewOrUpdate,
 }: {
   onCloseButton: () => void;
   mode?: string;
+  handleNotification: any;
+  viewOrUpdate: any;
 }) {
   // Initialize the useMantineTheme hook for accessing theme variables
+
   const theme = useMantineTheme();
   const form = useFormik({
     enableReinitialize: true,
-    initialValues: {
-      title: '',
-      status: 'inProgress',
-      description: '',
-      assignedTo: '',
-      priority: 'medium',
-      dueDate: null,
-      repeat: 'daily',
-      hoursSpent: '',
-      latitude: '',
-      longitude: '',
-      attachment: null,
-      checklist: [],
-    },
+    initialValues:
+      viewOrUpdate?.type === 'Add'
+        ? {
+            taskTitle: '',
+            status: 'inProgress',
+            description: '',
+            assignedTo: '',
+            priority: 'medium',
+            dueDate: null,
+            repeat: 'daily',
+            hoursSpent: '',
+            latitude: '',
+            longitude: '',
+            attachment: null,
+            checklist: [],
+          }
+        : viewOrUpdate.objectData,
     onSubmit: values => {
       // Handle form submission logic here
       console.log('Form submitted with values:', values);
@@ -139,9 +147,10 @@ export function TaskForm({
             <TextInput
               placeholder="Enter title"
               withAsterisk
-              {...form.getFieldProps('title')}
-              onChange={() => {}}
-              value={''}
+              onChange={e =>
+                !viewOrUpdate?.isReadOnly && form.setFieldValue('taskTitle', e)
+              }
+              value={form.values.taskTitle}
             />
           </Grid.Col>
           <Grid.Col>
@@ -191,7 +200,7 @@ export function TaskForm({
                 </Button>
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-                {form.values.checklist.map(
+                {form.values.checklist?.map(
                   (item: ChecklistItem, index: number) => (
                     <div key={index} className="flex items-center mt-1">
                       <Checkbox
@@ -212,7 +221,7 @@ export function TaskForm({
                         onChange={(value: string | null) =>
                           handleChecklistDropdownChange(index, value)
                         }
-                        data={['Option 1', 'Option 2', 'Option 3'].map(
+                        data={['Option 1', 'Option 2', 'Option 3']?.map(
                           option => ({
                             value: option,
                             label: option,
@@ -245,7 +254,7 @@ export function TaskForm({
           <Grid.Col>
             <h2 className="mb-2">Task Color</h2>
             <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs">
-              {colorArray.map((color, index) => (
+              {colorArray?.map((color, index) => (
                 <div key={index}>
                   <a
                     onClick={() => handleClick(color)}
@@ -268,7 +277,7 @@ export function TaskForm({
               placeholder="Select status"
               withAsterisk
               {...form.getFieldProps('status')}
-              data={['inProgress', 'done', 'toDo'].map(status => ({
+              data={['inProgress', 'done', 'toDo']?.map(status => ({
                 value: status,
                 label: status,
               }))}
@@ -280,7 +289,7 @@ export function TaskForm({
               placeholder="Select person"
               withAsterisk
               {...form.getFieldProps('assignedTo')}
-              data={['Person A', 'Person B', 'Person C'].map(person => ({
+              data={['Person A', 'Person B', 'Person C']?.map(person => ({
                 value: person,
                 label: person,
               }))}
@@ -292,7 +301,7 @@ export function TaskForm({
               placeholder="Select priority"
               withAsterisk
               {...form.getFieldProps('priority')}
-              data={['high', 'medium', 'low'].map(priority => ({
+              data={['high', 'medium', 'low']?.map(priority => ({
                 value: priority,
                 label: priority,
               }))}
@@ -312,7 +321,7 @@ export function TaskForm({
               placeholder="Select repeat option"
               withAsterisk
               {...form.getFieldProps('repeat')}
-              data={['daily', 'weekly', 'monthly', 'yearly'].map(option => ({
+              data={['daily', 'weekly', 'monthly', 'yearly']?.map(option => ({
                 value: option,
                 label: option,
               }))}
@@ -330,40 +339,42 @@ export function TaskForm({
         </Grid.Col>
         {/* End of Add Task Container 30% */}
       </Grid>
-      <Flex
-        mih={50}
-        gap="xs"
-        justify="flex-end"
-        align="flex-start"
-        direction="row"
-        wrap="wrap"
-        className="mb-5"
-      >
-        <Button
-          variant="outline"
-          autoContrast
-          color={theme.colors.secondaryColors[3]}
-          size="md"
-          onClick={onCloseButton}
-          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+      {!viewOrUpdate?.isReadOnly && (
+        <Flex
+          mih={50}
+          gap="xs"
+          justify="flex-end"
+          align="flex-start"
+          direction="row"
+          wrap="wrap"
+          className="mb-5"
         >
-          <Text tt="capitalize" fs="italic">
-            {'Cancel'}
-          </Text>
-        </Button>
-        <Button
-          variant="outline"
-          autoContrast
-          color={theme.colors.primaryColors[0]}
-          size="md"
-          type="submit"
-          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-        >
-          <Text tt="capitalize" fs="italic">
-            {mode === 'Add' ? 'Create' : 'Update'}
-          </Text>
-        </Button>
-      </Flex>
+          <Button
+            variant="outline"
+            autoContrast
+            color={theme.colors.secondaryColors[3]}
+            size="md"
+            onClick={onCloseButton}
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic">
+              {'Cancel'}
+            </Text>
+          </Button>
+          <Button
+            variant="outline"
+            autoContrast
+            color={theme.colors.primaryColors[0]}
+            size="md"
+            type="submit"
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic">
+              {mode === 'Add' ? 'Create' : 'Update'}
+            </Text>
+          </Button>
+        </Flex>
+      )}
       <input
         id="attachment-input"
         type="file"
@@ -372,7 +383,7 @@ export function TaskForm({
         onChange={handleAttachmentChange}
       />
 
-      {form.values.checklist.map((item: any, index: number) => (
+      {form?.values?.checklist?.map((item: any, index: number) => (
         <div key={index} className="flex items-center mt-4"></div>
       ))}
     </div>

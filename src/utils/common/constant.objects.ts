@@ -2,7 +2,7 @@ export const paginationInfoValue = {
   rowPerPage: '5',
   totalRecords: 0,
   totalPages: 0,
-  currentPage: 0,
+  currentPage: 1,
 };
 
 // Initial state for notification
@@ -11,6 +11,13 @@ export const initialNotification = {
   isEnable: false, // Indicates whether the notification is active
   title: '', // Title of the notification
   message: '', // Message of the notification
+};
+
+export const initialModalInfo = {
+  isOpen: false,
+  type: 'Add',
+  objectData: null,
+  isReadOnly: false,
 };
 
 export const colorArray = [
