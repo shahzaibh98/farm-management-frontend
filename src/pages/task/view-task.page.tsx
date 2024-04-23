@@ -1,11 +1,12 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
-import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
+import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
   DatePicker,
+  Notification,
   Paper,
   Select,
   Table,
@@ -25,56 +26,35 @@ import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
 import { SearchValuesType } from '../../types/view-task.type';
-import { paginationInfoValue } from '../../utils/common/constant.objects';
+import {
+  initialModalInfo,
+  initialNotification,
+  paginationInfoValue,
+} from '../../utils/common/constant.objects';
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
-import { TaskForm } from './task';
+import { TaskForm } from './task.form';
+import {
+  extractPageInfo,
+  formatTimestamp,
+  removeEmptyValues,
+} from '../../utils/common/function';
+import { deleteData, fetchData } from '../../api/api';
+import { useSelector } from 'react-redux';
 
 const TaskView = () => {
-  /* /////////////////////////////////////////////////
-                       Variable
-  /////////////////////////////////////////////////// */
-  // Initialize the useMantineTheme hook for accessing theme variables
-  const theme = useMantineTheme();
-  const navigate = useNavigate();
-  const { isSmallScreen } = useScreenSize();
-
-  /* /////////////////////////////////////////////////
-                      State
-  /////////////////////////////////////////////////// */
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const handleAddTask = () => {
-    toggleModal(); // Open the modal when "Add Task" button is clicked
-  };
-  // Loading state
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [paginationInfo, setPaginationInfo] = useState(paginationInfoValue);
-  const [searchValues, setSearchValues] =
-    useState<SearchValuesType>(initialSearchValues);
-
-  /* /////////////////////////////////////////////////
-                      useEffect
-  /////////////////////////////////////////////////// */
-
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
-      searchParams.get('searchValue') || searchValues.searchValue;
+      searchParams.get('searchValue') || initialSearchValues.searchValue;
     const assignedTo =
-      searchParams.get('assignedTo') || searchValues.assignedTo;
+      searchParams.get('assignedTo') || initialSearchValues.assignedTo;
     const associatedTo =
-      searchParams.get('associatedTo') || searchValues.associatedTo;
-    const progress = searchParams.get('progress') || searchValues.progress;
+      searchParams.get('associatedTo') || initialSearchValues.associatedTo;
+    const progress =
+      searchParams.get('progress') || initialSearchValues.progress;
     const upcomingTask =
-      searchParams.get('upcomingTask') || searchValues.upcomingTask;
+      searchParams.get('upcomingTask') || initialSearchValues.upcomingTask;
     const dateRangeStart = searchParams.get('dateRangeStart');
     const dateRangeEnd = searchParams.get('dateRangeEnd');
 
@@ -88,14 +68,14 @@ const TaskView = () => {
     }
 
     // Update state with extracted values
-    setSearchValues({
+    return {
       searchValue,
       assignedTo,
       associatedTo,
       progress,
       upcomingTask,
       dateRange,
-    });
+    };
   };
 
   const initialPaginationFromQueryParams = () => {
@@ -106,8 +86,51 @@ const TaskView = () => {
       searchParams.get('currentPage') ||
         paginationInfoValue.currentPage?.toString()
     );
-    setPaginationInfo({ ...paginationInfoValue, rowPerPage, currentPage });
+    return { ...paginationInfoValue, rowPerPage, currentPage };
   };
+
+  /* /////////////////////////////////////////////////
+                       Variable
+  /////////////////////////////////////////////////// */
+  // Initialize the useMantineTheme hook for accessing theme variables
+  const theme = useMantineTheme();
+  const { isSmallScreen } = useScreenSize();
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+
+  /* /////////////////////////////////////////////////
+                      State
+  /////////////////////////////////////////////////// */
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // State for pagination information
+  const [paginationInfo, setPaginationInfo] = useState(
+    initialPaginationFromQueryParams()
+  );
+
+  // State for search values
+  const [searchValues, setSearchValues] = useState<SearchValuesType>(
+    initializeStateFromQueryParams()
+  );
+
+  // State for notification
+  const [notification, setNotification] = useState(initialNotification);
+  const [modalInfo, setModalInfo] = useState(initialModalInfo);
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
+
+  // State for reset button
+  const [resetTable, setResetTable] = useState(false);
+
+  // State for table data
+  const [tableData, setTableData] = useState([]);
+
+  /* /////////////////////////////////////////////////
+                      useEffect
+  /////////////////////////////////////////////////// */
+
+  const handleAddTask = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
     initializeStateFromQueryParams();
@@ -139,13 +162,41 @@ const TaskView = () => {
     setSearchParams(newParams);
   };
 
-  const handleFetchDataByFilter = () => {};
+  const handleFetchDataByFilter = () => {
+    setIsLoading(true);
+    const filterObject = JSON.stringify(
+      removeEmptyValues({
+        taskTitle: searchValues?.searchValue,
+        assignedTo: searchValues?.assignedTo === 'Me' ? userInfo?.userId : '', // Default value: 'Me'
+        associatedTo: searchValues?.associatedTo,
+        taskStatus: searchValues?.progress, // Default value: 'In Progress'
+      })
+    );
+
+    fetchData(
+      `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+    )
+      .then((response: any) => {
+        setTableData(response.data);
+        const getPages = extractPageInfo(response.pages);
+        setPaginationInfo({
+          ...paginationInfo,
+          totalRecords: response.total,
+          ...getPages,
+        });
+      })
+      .catch((error: any) => console.log(error))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   const handleSearchButtonClick = () => {
     handleSetParams();
     handleFetchDataByFilter();
   };
 
+  const handleNotificationClose = () => setNotification(initialNotification);
   const handlePagination = (actionType: string, value?: any) => {
     const newParams = new URLSearchParams(searchParams.toString());
     const currentPage = paginationInfo.currentPage;
@@ -155,7 +206,7 @@ const TaskView = () => {
         ...prevState,
         currentPage: prevState.currentPage + 1,
       }));
-      currentPage > 2
+      currentPage < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', (currentPage + 1).toString());
     } else if (actionType === 'previous') {
@@ -163,15 +214,15 @@ const TaskView = () => {
         ...prevState,
         currentPage: prevState.currentPage - 1,
       }));
-      currentPage > 2
+      currentPage < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto') {
+    } else if (actionType === 'goto' && value !== currentPage) {
       setPaginationInfo(prevState => ({
         ...prevState,
         currentPage: value,
       }));
-      value > 2
+      value < 2
         ? newParams.delete('currentPage')
         : newParams.set('currentPage', value);
     } else if (actionType === 'rowPerPage') {
@@ -202,14 +253,37 @@ const TaskView = () => {
     setSearchValues(initialSearchValues);
   };
 
+  const handleDeleteById = (id: string) => {
+    setIsLoading(true);
+    deleteData(`task/${id}`)
+      .then(() => {
+        setNotification({
+          isSuccess: true,
+          message: 'Task is deleted successfully',
+          title: 'Successfully',
+          isEnable: true,
+        });
+        setTimeout(() => {
+          setResetTable(!resetTable);
+        });
+      })
+      .catch(error => console.log(error))
+      .finally(() => setIsLoading(false));
+  };
+
+  // Effect for handling search button click
+  useEffect(() => {
+    handleSearchButtonClick();
+  }, [resetTable]);
+
   const columns = useMemo(
     () => [
       {
         header: 'TITLE',
-        accessorKey: 'title',
+        accessorKey: 'taskTitle',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+        maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
@@ -234,7 +308,7 @@ const TaskView = () => {
       },
       {
         header: 'ASSOCIATED TO',
-        accessorKey: 'associated_to',
+        accessorKey: 'associatedTo',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -249,6 +323,9 @@ const TaskView = () => {
       {
         header: 'PRIORITY',
         accessorKey: 'priority',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
           return (
@@ -265,10 +342,10 @@ const TaskView = () => {
       },
       {
         header: 'STATUS',
-        accessorKey: 'status',
+        accessorKey: 'taskStatus',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+        maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
@@ -279,83 +356,63 @@ const TaskView = () => {
       },
       {
         header: 'DUE DATE',
-        accessorKey: 'due_date',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+        accessorKey: 'endDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
+              {formatTimestamp(info.getValue()) ?? ''}
             </p>
           </div>
         ),
       },
       {
         header: '',
-        accessorKey: 'status',
+        accessorKey: 'taskId',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
-          const id = info?.row?.original?.id;
-          return <TableMenu id={id} />;
+          const id = info?.row?.original?.taskId;
+          return (
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onEditClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'Edit',
+                  objectData: info?.row?.original,
+                  isReadOnly: false,
+                })
+              }
+              onViewClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'View',
+                  objectData: info?.row?.original,
+                  isReadOnly: true,
+                })
+              }
+            />
+          );
         },
       },
     ],
-    []
+    [tableData]
   );
-
-  const defaultData = [
-    {
-      id: 1,
-      title: 'Task 1',
-      assigned_to: 'John Doe',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-10',
-    },
-    {
-      id: 2,
-      title: 'Task 2',
-      assigned_to: 'Jane Smith',
-      associated_to: 'Project Y',
-      priority: 'Medium',
-      status: 'Pending',
-      due_date: '2024-04-15',
-    },
-    {
-      id: 3,
-      title: 'Task 3',
-      assigned_to: 'Alice Johnson',
-      associated_to: 'Project Z',
-      priority: 'Low',
-      status: 'Completed',
-      due_date: '2024-04-20',
-    },
-    {
-      id: 4,
-      title: 'Task 4',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
-    },
-    {
-      id: 5,
-      title: 'Task 5',
-      assigned_to: 'Bob Brown',
-      associated_to: 'Project X',
-      priority: 'High',
-      status: 'In Progress',
-      due_date: '2024-04-25',
-    },
-  ];
 
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
+      {notification.isEnable && (
+        <Notification
+          title={notification.title}
+          withClose
+          color={notification.isSuccess ? theme.colors.primaryColors[0] : 'red'}
+          handleCloseNotification={handleNotificationClose}
+        >
+          <Text fw={500}>{notification.message}</Text>
+        </Notification>
+      )}
       <GenericHeader
         headerText="Task"
         breadcrumbsText="Manage Task"
@@ -466,7 +523,7 @@ const TaskView = () => {
                   </Grid>
                   <Table
                     isLoading={isLoading}
-                    data={defaultData}
+                    data={tableData}
                     columns={columns}
                     paginationInfo={paginationInfo}
                     handlePagination={handlePagination}
@@ -488,8 +545,8 @@ const TaskView = () => {
         ></Tabs>
       </Paper>
       <Modal
-        opened={isModalOpen}
-        onClose={toggleModal}
+        opened={modalInfo.isOpen}
+        onClose={() => setModalInfo(initialModalInfo)}
         title="Add Task"
         size="lg"
         styles={{
@@ -502,7 +559,22 @@ const TaskView = () => {
         className="addtaskModal"
         transitionProps={{ transition: 'fade-up', duration: 300 }}
       >
-        <TaskForm onCloseButton={toggleModal} />
+        <TaskForm
+          viewOrUpdate={modalInfo}
+          onCloseButton={() => setModalInfo(initialModalInfo)}
+          handleNotification={(
+            notification: SetStateAction<{
+              isSuccess: boolean;
+              isEnable: boolean;
+              title: string;
+              message: string;
+            }>
+          ) => {
+            setModalInfo(initialModalInfo);
+            setNotification(notification);
+            setResetTable(!resetTable);
+          }}
+        />
       </Modal>
       <div className="h-4" />
     </main>

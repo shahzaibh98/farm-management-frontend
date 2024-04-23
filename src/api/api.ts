@@ -30,18 +30,24 @@ export const fetchData = async <T>(url: string) => {
 
 // POST request
 export const postData = async <T>(url: string, postData: any) => {
-  return await requestData<T>('post', url, {
-    ...postData,
-    createdBy: userDetails.userId,
-    updatedBy: userDetails.userId,
-  });
+  return await requestData<T>(
+    'post',
+    url,
+    userDetails
+      ? {
+          ...postData,
+          createdBy: userDetails.userId.toString(),
+          updatedBy: userDetails.userId.toString(), // Update updatedBy value with userDetails.userId,
+        }
+      : postData
+  );
 };
 
 // PUT request
 export const putData = async <T>(url: string, putData: any) => {
   return await requestData<T>('put', url, {
     ...putData,
-    updatedBy: userDetails.userId,
+    updatedBy: userDetails.userId.toString(), // Update updatedBy value with userDetails.userId,
   });
 };
 

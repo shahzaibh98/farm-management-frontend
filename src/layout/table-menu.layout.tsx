@@ -61,7 +61,7 @@ const TableMenu = ({
               leftSection={
                 <CiEdit style={{ width: rem(14), height: rem(14) }} />
               }
-              onChange={() => onEditClick(id)}
+              onClick={() => onEditClick(id)}
             >
               Edit
             </Menu.Item>
