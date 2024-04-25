@@ -31,20 +31,86 @@ export function formatTime(timeText: string) {
 
 export const isEmpty = <T>(item: Array<T> | string) => item.length === 0;
 
-export const removeEmptyValues = (obj: { [key: string]: any }) => {
-  const newObj: { [key: string]: any } = {};
-  for (const key in obj) {
-    if (
-      Object.prototype.hasOwnProperty.call(obj, key) && // Using Object.prototype.hasOwnProperty indirectly
-      obj[key] !== undefined &&
-      obj[key] !== null &&
-      obj[key] !== ''
-    ) {
-      newObj[key] = obj[key];
+export function removeEmptyValueFilters(filters: any[]) {
+  return filters.filter(
+    filter => filter.value !== undefined && filter.value !== ''
+  );
+}
+
+export function getDateRange(option: string): [string, string] {
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const endOfWeek = new Date(today);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+  const formatDate = (date: Date): string => {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+  };
+
+  switch (option) {
+    case 'Today': {
+      const startDate = formatDate(today);
+      const endDate = formatDate(
+        new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      );
+      return [startDate, endDate];
     }
+    case 'Tomorrow': {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const startDate = formatDate(tomorrow);
+      const endDate = formatDate(
+        new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000)
+      );
+      return [startDate, endDate];
+    }
+    case 'This Week': {
+      const startDate = formatDate(startOfWeek);
+      const endDate = formatDate(
+        new Date(endOfWeek.getTime() + 24 * 60 * 60 * 1000)
+      );
+      return [startDate, endDate];
+    }
+    case 'Next Week': {
+      const nextWeekStart = new Date(startOfWeek);
+      nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+      const nextWeekEnd = new Date(endOfWeek);
+      nextWeekEnd.setDate(nextWeekEnd.getDate() + 7);
+      const startDate = formatDate(nextWeekStart);
+      const endDate = formatDate(
+        new Date(nextWeekEnd.getTime() + 24 * 60 * 60 * 1000)
+      );
+      return [startDate, endDate];
+    }
+    case 'Next Month': {
+      const nextMonthStart = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        1
+      );
+      const nextMonthEnd = new Date(
+        today.getFullYear(),
+        today.getMonth() + 2,
+        0
+      );
+      const startDate = formatDate(nextMonthStart);
+      const endDate = formatDate(
+        new Date(nextMonthEnd.getTime() + 24 * 60 * 60 * 1000)
+      );
+      return [startDate, endDate];
+    }
+    default:
+      // For 'All' and 'Custom Range', return an empty range
+      return ['', ''];
   }
-  return newObj;
-};
+}
 
 export function extractPageInfo(
   pageInfo: string

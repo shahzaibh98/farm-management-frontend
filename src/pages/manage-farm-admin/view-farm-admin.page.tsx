@@ -28,7 +28,7 @@ import {
 } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
-  removeEmptyValues,
+  removeEmptyValueFilters,
 } from '../../utils/common/function';
 import { initialSearchValues } from './initial.values';
 import UserForm from './user.form';
@@ -129,18 +129,30 @@ const ManageFarmAdmin = () => {
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
-    const filterObject = JSON.stringify(
-      removeEmptyValues({
-        email: searchValues.searchValue,
-        isActive:
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'email',
+        operator: 'like',
+        value: searchValues.searchValue,
+      },
+      {
+        field: 'isActive',
+        operator: 'eq',
+        value:
           searchValues?.status === 'Active'
             ? 'true'
             : searchValues?.status === 'Blocked'
               ? 'false'
               : '',
-        roleId: '1',
-      })
-    );
+      },
+      {
+        field: 'roleId',
+        operator: 'eq',
+        value: 1,
+      },
+    ]);
+
+    const filterObject = JSON.stringify({ filter: filters });
 
     fetchData(
       `farm?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
@@ -151,7 +163,7 @@ const ManageFarmAdmin = () => {
         setPaginationInfo({
           ...paginationInfo,
           totalRecords: response.total,
-          ...getPages,
+          totalPages: getPages?.totalPages ?? 0,
         });
       })
       .catch(error => console.log(error))
@@ -271,7 +283,7 @@ const ManageFarmAdmin = () => {
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [resetTable]);
+  }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
 
   // Function to set values based on identifiers
 
