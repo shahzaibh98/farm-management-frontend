@@ -1,7 +1,7 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
-import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
@@ -25,22 +25,23 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
+import { useSelector } from 'react-redux';
+import { deleteData, fetchData } from '../../api/api';
 import { SearchValuesType } from '../../types/view-task.type';
 import {
   initialModalInfo,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
-import MyCalendar from '../calendar/calendar';
-import { initialSearchValues } from './initial.values';
-import { TaskForm } from './task.form';
 import {
   extractPageInfo,
   formatTimestamp,
-  removeEmptyValues,
+  getDateRange,
+  removeEmptyValueFilters,
 } from '../../utils/common/function';
-import { deleteData, fetchData } from '../../api/api';
-import { useSelector } from 'react-redux';
+import MyCalendar from '../calendar/calendar';
+import { initialSearchValues } from './initial.values';
+import { TaskForm } from './task.form';
 
 const TaskView = () => {
   const initializeStateFromQueryParams = () => {
@@ -164,17 +165,50 @@ const TaskView = () => {
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
-    const filterObject = JSON.stringify(
-      removeEmptyValues({
-        taskTitle: searchValues?.searchValue,
-        assignedTo: searchValues?.assignedTo === 'Me' ? userInfo?.userId : '', // Default value: 'Me'
-        associatedTo: searchValues?.associatedTo,
-        taskStatus: searchValues?.progress, // Default value: 'In Progress'
-      })
-    );
+
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'taskTitle',
+        operator: 'like',
+        value: searchValues.searchValue,
+      },
+      {
+        field: 'assignedTo',
+        operator: searchValues?.assignedTo === 'Me' ? 'eq' : 'neq',
+        value: searchValues?.assignedTo === 'All' ? '' : userInfo?.userId, // Default value: 'All' or userInfo?.userId, // Default value: 'Me'
+      },
+      {
+        field: 'associatedTo',
+        operator: 'eq',
+        value: searchValues?.associatedTo ?? '',
+      },
+      {
+        field: 'taskStatus',
+        operator: 'eq',
+        value: searchValues?.progress, // Default value: 'In Progress'
+      },
+      {
+        field: 'startDateTime',
+        operator: 'gte',
+        value:
+          searchValues?.upcomingTask === 'Custom Range'
+            ? searchValues?.dateRange[0]?.toISOString()
+            : getDateRange(searchValues?.upcomingTask ?? '')[0],
+      },
+      {
+        field: 'startDateTime',
+        operator: 'lte',
+        value:
+          searchValues?.upcomingTask === 'Custom Range'
+            ? searchValues?.dateRange[1]?.toISOString()
+            : getDateRange(searchValues?.upcomingTask ?? '')[1],
+      },
+    ]);
+
+    const filterObject = JSON.stringify({ filter: filters });
 
     fetchData(
-      `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+      `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&{"task.startDateTime":"ASC"}`
     )
       .then((response: any) => {
         setTableData(response.data);
@@ -182,7 +216,7 @@ const TaskView = () => {
         setPaginationInfo({
           ...paginationInfo,
           totalRecords: response.total,
-          ...getPages,
+          totalPages: getPages?.totalPages ?? 0,
         });
       })
       .catch((error: any) => console.log(error))
@@ -251,6 +285,7 @@ const TaskView = () => {
     if (currentPage > 2) newParams.set('currentPage', currentPage.toString());
     setSearchParams(newParams);
     setSearchValues(initialSearchValues);
+    setResetTable(!resetTable);
   };
 
   const handleDeleteById = (id: string) => {
@@ -274,7 +309,7 @@ const TaskView = () => {
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [resetTable]);
+  }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
 
   const columns = useMemo(
     () => [
@@ -294,14 +329,14 @@ const TaskView = () => {
       },
       {
         header: 'ASSIGNED TO',
-        accessorKey: 'assigned_to',
+        accessorKey: 'assigned',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
+              {info.getValue()?.name ?? ''}
             </p>
           </div>
         ),
@@ -445,12 +480,7 @@ const TaskView = () => {
                     <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
                       <Select
                         placeholder="Assigned To"
-                        data={[
-                          'Me',
-                          'Farm user 1',
-                          'Farm user 2',
-                          'Farm user 3',
-                        ]}
+                        data={['All', 'Me', 'Other']}
                         value={searchValues.assignedTo ?? ''}
                         onChange={value => setValuesById({ assignedTo: value })}
                       />
@@ -460,7 +490,6 @@ const TaskView = () => {
                         placeholder="Associated To"
                         data={[]}
                         value={searchValues.associatedTo ?? ''}
-                        clearable
                         onChange={value =>
                           setValuesById({ associatedTo: value })
                         }
