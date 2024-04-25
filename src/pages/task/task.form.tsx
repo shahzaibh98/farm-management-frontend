@@ -7,7 +7,7 @@ import {
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useFormik } from 'formik';
-import { ChangeEvent } from 'react'; // Import ChangeEvent type
+import { ChangeEvent, useEffect, useState } from 'react'; // Import ChangeEvent type
 import { FaCircle } from 'react-icons/fa';
 import {
   Button,
@@ -15,14 +15,14 @@ import {
   Select,
   TextInput,
 } from '../../concave.agri/components';
-import { TextEditor } from '../../concave.agri/components/richtext';
 import { colorArray } from '../../utils/common/constant.objects';
 import { Text } from '@mantine/core';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
 import { MdAttachFile } from 'react-icons/md';
 import { MdChecklistRtl } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
-import { postData, putData } from '../../api/api';
+import { fetchData, postData, putData } from '../../api/api';
+import { useSelector } from 'react-redux';
 interface ChecklistItem {
   text: string;
   dropdownValue: string;
@@ -41,6 +41,22 @@ export function TaskForm({
   viewOrUpdate: any;
 }) {
   // Initialize the useMantineTheme hook for accessing theme variables
+
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+
+  const [userList, setUserList] = useState([]);
+
+  useEffect(() => {
+    fetchData(
+      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+    )
+      .then((response: any) => {
+        setUserList(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
 
   const theme = useMantineTheme();
   const form = useFormik({
@@ -85,7 +101,11 @@ export function TaskForm({
                 isEnable: true,
               });
             })
-        : postData('/task', values) // Send form data to the server
+        : postData('/task', {
+            ...values,
+            assignedTo: values.assigned,
+            assigned: Number(values.assigned),
+          }) // Send form data to the server
             .then(() => {
               // Handle successful form submission
               handleNotification({
@@ -371,10 +391,9 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.assigned}
                 onChange={value => form.setFieldValue('assigned', value)}
-                data={['Person A', 'Person B', 'Person C'].map(person => ({
-                  value: person,
-                  label: person,
-                }))}
+                data={userList?.map((user: any) => {
+                  return { label: user.name, value: user.userId.toString() };
+                })}
               />
             </Grid.Col>
             <Grid.Col>
