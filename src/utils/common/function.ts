@@ -1,3 +1,13 @@
+import {
+  IconDashboard,
+  IconListDetails,
+  IconCarrot,
+  IconBuildingWarehouse,
+  IconReceipt2,
+} from '@tabler/icons-react';
+import moment from 'moment';
+import { MdOutlineAdminPanelSettings } from 'react-icons/md';
+
 export function extractFirstWord(url: string): string | null {
   // Split the URL at the '?' character to separate the base URL and query parameters
   const [baseUrl] = url.split('?');
@@ -154,4 +164,18 @@ export function formatTimestamp(timestamp: string | number | Date) {
   hours = hours % 12 || 12;
 
   return `${day} ${dateOfMonth} ${month} ${year} ${hours}:${minutes} ${period}`;
+}
+
+export function formatTasks(tasks: any[]) {
+  return tasks.map(
+    (task: { startDateTime: any; endDateTime: any; taskTitle: any }) => {
+      const { startDateTime, endDateTime, taskTitle } = task;
+      return {
+        start: moment(startDateTime).toDate(),
+        end: moment(endDateTime).toDate(),
+        title: taskTitle,
+        ...task,
+      };
+    }
+  );
 }

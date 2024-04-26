@@ -30,6 +30,7 @@ import { clearUserInfo } from '../redux/actions/user';
 // Utility function imports
 import { extractFirstWord } from '../utils/common/function';
 import { systemRoles } from '../utils/common/constant.objects';
+import { getNavBarAgainstRole } from './role-based.navbar';
 
 function Navbar({ onClick }: { onClick: () => void }) {
   // Initialize the Redux dispatch hook
@@ -50,26 +51,10 @@ function Navbar({ onClick }: { onClick: () => void }) {
 
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
-  const data = isSuperAdmin
-    ? [
-        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-        {
-          link: '/manage-farm-admin',
-          label: 'Manage Farm Admin',
-          icon: MdOutlineAdminPanelSettings,
-        },
-      ]
-    : [
-        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-        { link: '/task', label: 'Task', icon: IconListDetails },
-        { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
-        { link: '/crop', label: 'Crop', icon: IconCarrot },
-        { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
-        { link: '/financial', label: 'Financial', icon: IconReceipt2 },
-      ];
+  const data = getNavBarAgainstRole();
 
   // Create links for navigation using the data array
-  const links = data.map(item => (
+  const links = data?.map(item => (
     <Link
       // Apply Tailwind CSS classes for styling
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${

@@ -241,7 +241,7 @@ const ManageFarmAdmin = () => {
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Farm Admin deleted successfully',
+          message: 'Farm  deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -424,10 +424,10 @@ const ManageFarmAdmin = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Farm Admin"
-        breadcrumbsText="Manage Farm Admin"
+        headerText="Farm "
+        breadcrumbsText="Manage Farm "
         isAddOrUpdateButton
-        buttonContent="Add Farm Admin"
+        buttonContent="Add Farm "
         onButtonClick={handleAddFarmAdmin} // Call handleAddFarmAdmin function when button is clicked
       />
 
@@ -477,7 +477,7 @@ const ManageFarmAdmin = () => {
       <Modal
         opened={modalInfo.isOpen}
         onClose={() => setModalInfo(initialModalInfo)}
-        title="Add Farm Admin"
+        title={`${modalInfo.type} Farm`}
         size="md"
         styles={{
           title: {

@@ -126,6 +126,9 @@ const TaskView = () => {
 
   // State for table data
   const [tableData, setTableData] = useState([]);
+  const [userList, setUserList] = useState<any[]>([]);
+
+  const [activeTab, setActiveTab] = useState('Table');
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -138,6 +141,32 @@ const TaskView = () => {
     initialPaginationFromQueryParams();
   }, [searchParams]);
 
+  useEffect(() => {
+    fetchData(
+      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+    )
+      .then((response: any) => {
+        const users = response.data?.map((user: { name: any; userId: any }) => {
+          return { label: user.name, value: user.userId?.toString() };
+        });
+        const newArray = [
+          { label: 'Me', value: userInfo.farmId?.toString() },
+          { label: 'Others', value: 'Others' },
+          { label: 'All', value: 'All' },
+          ...users,
+        ];
+        setUserList(newArray);
+      })
+      .catch(error => {
+        const newArray = [
+          { label: 'Me', value: userInfo.farmId?.toString() },
+          { label: 'Others', value: 'Others' },
+          { label: 'All', value: 'All' },
+        ];
+        setUserList(newArray);
+        console.log(error);
+      });
+  }, []);
   // Function to set values based on identifiers
   const setValuesById = (valuesById: Partial<SearchValuesType>) => {
     setSearchValues(prevFormValues => ({
@@ -174,8 +203,13 @@ const TaskView = () => {
       },
       {
         field: 'assignedTo',
-        operator: searchValues?.assignedTo === 'Me' ? 'eq' : 'neq',
-        value: searchValues?.assignedTo === 'All' ? '' : userInfo?.userId, // Default value: 'All' or userInfo?.userId, // Default value: 'Me'
+        operator: searchValues?.assignedTo === 'Others' ? 'neq' : 'eq',
+        value:
+          searchValues?.assignedTo === 'All'
+            ? ''
+            : (searchValues?.assignedTo === 'Others'
+                ? userInfo?.userId
+                : searchValues?.assignedTo) ?? '', // Default value: 'All' or userInfo?.userId, // Default value: 'Me'
       },
       {
         field: 'associatedTo',
@@ -203,13 +237,19 @@ const TaskView = () => {
             ? searchValues?.dateRange[1]?.toISOString()
             : getDateRange(searchValues?.upcomingTask ?? '')[1],
       },
+      {
+        field: 'farmId',
+        operator: 'eq',
+        value: userInfo?.farmId?.toString(),
+      },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    fetchData(
-      `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&{"task.startDateTime":"ASC"}`
-    )
+    const tableFetchUrl = `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&{"task.startDateTime":"ASC"}`;
+    const calendarFetchUrl = `task?filter=${filterObject}&{"task.startDateTime":"ASC"}`;
+
+    fetchData(activeTab === 'Table' ? tableFetchUrl : calendarFetchUrl)
       .then((response: any) => {
         setTableData(response.data);
         const getPages = extractPageInfo(response.pages);
@@ -309,7 +349,12 @@ const TaskView = () => {
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
+  }, [
+    resetTable,
+    paginationInfo?.currentPage,
+    paginationInfo?.rowPerPage,
+    activeTab,
+  ]);
 
   const columns = useMemo(
     () => [
@@ -436,6 +481,88 @@ const TaskView = () => {
     [tableData]
   );
 
+  const searchAndFilter = () => {
+    return (
+      <>
+        <SearchComponent
+          placeholder="Search by title..."
+          searchValue={searchValues.searchValue}
+          setValuesById={setValuesById}
+          handleSearchButtonClick={handleSearchButtonClick}
+          handleResetButtonClick={handleResetButtonClick}
+        />
+        <Grid className="mt-2">
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Assigned To"
+              data={userList}
+              value={searchValues.assignedTo ?? ''}
+              onChange={value => value && setValuesById({ assignedTo: value })}
+              // allowDeselect={false}
+              // searchable
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Associated To"
+              data={[]}
+              value={searchValues.associatedTo ?? ''}
+              onChange={value => setValuesById({ associatedTo: value })}
+            />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Progress"
+              data={['In Progress', 'Pending', 'Completed']}
+              value={searchValues.progress ?? ''}
+              onChange={value => setValuesById({ progress: value })}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Upcoming Task"
+              data={[
+                'All',
+                'Today',
+                'Tomorrow',
+                'This Week',
+                'Next Week',
+                'Next Month',
+                'Custom Range',
+              ]}
+              value={searchValues?.upcomingTask ?? ''}
+              onChange={value => setValuesById({ upcomingTask: value })}
+            />
+          </Grid.Col>
+          {searchValues?.upcomingTask === 'Custom Range' && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <DatePicker
+                type="range"
+                placeholder="Select a date range"
+                value={searchValues.dateRange ?? ''}
+                onChange={value =>
+                  setValuesById({
+                    dateRange: value as [Date | null, Date | null],
+                  })
+                }
+              />
+            </Grid.Col>
+          )}
+
+          {isSmallScreen && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <div className="flex flex-row justify-between">
+                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                <ResetButton onResetButtonClick={handleResetButtonClick} />
+              </div>
+            </Grid.Col>
+          )}
+        </Grid>
+      </>
+    );
+  };
+
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
       {notification.isEnable && (
@@ -462,6 +589,7 @@ const TaskView = () => {
         radius={12}
       >
         <Tabs
+          onChange={value => setActiveTab(value)}
           tabs={[
             {
               value: 'Table',
@@ -469,87 +597,7 @@ const TaskView = () => {
               icon: <CiViewTable size={24} />,
               component: (
                 <div className="mt-4">
-                  <SearchComponent
-                    placeholder="Search by title..."
-                    searchValue={searchValues.searchValue}
-                    setValuesById={setValuesById}
-                    handleSearchButtonClick={handleSearchButtonClick}
-                    handleResetButtonClick={handleResetButtonClick}
-                  />
-                  <Grid className="mt-2">
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Assigned To"
-                        data={['All', 'Me', 'Other']}
-                        value={searchValues.assignedTo ?? ''}
-                        onChange={value => setValuesById({ assignedTo: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Associated To"
-                        data={[]}
-                        value={searchValues.associatedTo ?? ''}
-                        onChange={value =>
-                          setValuesById({ associatedTo: value })
-                        }
-                      />
-                    </Grid.Col>
-
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Progress"
-                        data={['In Progress', 'Pending', 'Completed']}
-                        value={searchValues.progress ?? ''}
-                        onChange={value => setValuesById({ progress: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Upcoming Task"
-                        data={[
-                          'All',
-                          'Today',
-                          'Tomorrow',
-                          'This Week',
-                          'Next Week',
-                          'Next Month',
-                          'Custom Range',
-                        ]}
-                        value={searchValues?.upcomingTask ?? ''}
-                        onChange={value =>
-                          setValuesById({ upcomingTask: value })
-                        }
-                      />
-                    </Grid.Col>
-                    {searchValues?.upcomingTask === 'Custom Range' && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <DatePicker
-                          type="range"
-                          placeholder="Select a date range"
-                          value={searchValues.dateRange ?? ''}
-                          onChange={value =>
-                            setValuesById({
-                              dateRange: value as [Date | null, Date | null],
-                            })
-                          }
-                        />
-                      </Grid.Col>
-                    )}
-
-                    {isSmallScreen && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <div className="flex flex-row justify-between">
-                          <SearchButton
-                            onSearchButtonClick={handleSearchButtonClick}
-                          />
-                          <ResetButton
-                            onResetButtonClick={handleResetButtonClick}
-                          />
-                        </div>
-                      </Grid.Col>
-                    )}
-                  </Grid>
+                  {searchAndFilter()}
                   <Table
                     isLoading={isLoading}
                     data={tableData}
@@ -566,7 +614,20 @@ const TaskView = () => {
               icon: <CiCalendarDate size={24} />,
               component: (
                 <div className="mt-5">
-                  <MyCalendar />
+                  {searchAndFilter()}
+                  <div className="h-4" />
+                  <MyCalendar
+                    taskList={tableData}
+                    handleClickTask={(object: any) => {
+                      console.log('Object data: ', object);
+                      setModalInfo({
+                        isOpen: true,
+                        type: 'View',
+                        objectData: object,
+                        isReadOnly: true,
+                      });
+                    }}
+                  />
                 </div>
               ),
             },
@@ -576,7 +637,7 @@ const TaskView = () => {
       <Modal
         opened={modalInfo.isOpen}
         onClose={() => setModalInfo(initialModalInfo)}
-        title="Add Task"
+        title={`${modalInfo.type} Task`}
         size="lg"
         styles={{
           title: {

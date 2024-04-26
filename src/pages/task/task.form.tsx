@@ -132,8 +132,8 @@ export function TaskForm({
   const handleAddLocation = () => {
     navigator.geolocation.getCurrentPosition(
       position => {
-        const latitude = position.coords.latitude.toString(); // Convert to string
-        const longitude = position.coords.longitude.toString(); // Convert to string
+        const latitude = position.coords.latitude?.toString(); // Convert to string
+        const longitude = position.coords.longitude?.toString(); // Convert to string
         form.setFieldValue('latitude', latitude);
         form.setFieldValue('longitude', longitude);
         // Open Google Maps with latitude and longitude
@@ -388,7 +388,7 @@ export function TaskForm({
                 value={form.values.assigned}
                 onChange={value => form.setFieldValue('assigned', value)}
                 data={userList?.map((user: any) => {
-                  return { label: user.name, value: user.userId.toString() };
+                  return { label: user.name, value: user.userId?.toString() };
                 })}
                 disabled={viewOrUpdate?.isReadOnly}
               />
@@ -411,7 +411,7 @@ export function TaskForm({
               <DateTimePicker
                 placeholder="Select start date and time"
                 withAsterisk
-                value={new Date(form.values.startDateTime)}
+                value={new Date(form?.values?.startDateTime)}
                 onChange={value => form.setFieldValue('startDateTime', value)}
               />
             </Grid.Col>
@@ -420,7 +420,7 @@ export function TaskForm({
               <DateTimePicker
                 placeholder="Select end date and time"
                 withAsterisk
-                value={new Date(form.values.endDateTime)}
+                value={new Date(form?.values?.endDateTime)}
                 onChange={value => form.setFieldValue('endDateTime', value)}
               />
             </Grid.Col>

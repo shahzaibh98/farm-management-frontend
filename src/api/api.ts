@@ -5,6 +5,8 @@ import store from '../redux';
 const API_BASE_URL = `${process.env.REACT_APP_BASE_URL}`;
 const userDetails = store.getState()?.userInfo?.userInfo;
 
+console.log('User Details:', userDetails);
+
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -38,6 +40,7 @@ export const postData = async <T>(url: string, postData: any) => {
           ...postData,
           createdBy: userDetails.userId.toString(),
           updatedBy: userDetails.userId.toString(), // Update updatedBy value with userDetails.userId,
+          farmId: userDetails?.farmId?.toString() ?? null,
         }
       : postData
   );
