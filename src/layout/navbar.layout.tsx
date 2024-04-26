@@ -51,7 +51,23 @@ function Navbar({ onClick }: { onClick: () => void }) {
 
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
-  const data = getNavBarAgainstRole();
+  const data = isSuperAdmin
+    ? [
+        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+        {
+          link: '/manage-farm-admin',
+          label: 'Manage Farm Admin',
+          icon: MdOutlineAdminPanelSettings,
+        },
+      ]
+    : [
+        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+        { link: '/task', label: 'Task', icon: IconListDetails },
+        { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
+        { link: '/crop', label: 'Crop', icon: IconCarrot },
+        { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
+        { link: '/financial', label: 'Financial', icon: IconReceipt2 },
+      ];
 
   // Create links for navigation using the data array
   const links = data?.map(item => (
