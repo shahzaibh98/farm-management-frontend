@@ -23,9 +23,10 @@ import { MdChecklistRtl } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { fetchData, postData, putData } from '../../api/api';
 import { useSelector } from 'react-redux';
+import { isTemplateExpression } from 'typescript';
 interface ChecklistItem {
-  text: string;
-  dropdownValue: string;
+  itemName: string;
+  itemDescription: string;
   checked: boolean;
 }
 
@@ -69,15 +70,16 @@ export function TaskForm({
             taskDescription: '',
             assigned: '',
             priority: '',
-            endDateTime: null,
             startDateTime: null,
+            endDateTime: null,
             associatedTo: '',
+            associatedId: '1',
             repeatedTask: '',
             hoursSpent: '',
             latitude: '',
             longitude: '',
             attachments: [],
-            checklist: [],
+            checklistItems: [],
           }
         : viewOrUpdate.objectData,
     onSubmit: values => {
@@ -167,57 +169,57 @@ export function TaskForm({
   };
 
   const handleAddChecklistItem = () => {
-    const newChecklistItem: ChecklistItem = {
-      text: '',
-      dropdownValue: '',
-      checked: false,
+    const newChecklistItem = {
+      itemName: '',
+      isDeleted: false,
+      itemDescription: '',
+      isChecked: false,
     };
-    form.setFieldValue('checklist', [
-      ...form.values.checklist,
+    form.setFieldValue('checklistItems', [
+      ...form.values.checklistItems,
       newChecklistItem,
     ]);
   };
 
   const handleChecklistTextChange = (index: number, value: string) => {
-    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
-    updatedChecklist[index].text = value;
-    form.setFieldValue('checklist', updatedChecklist);
+    const updatedChecklist = [...form.values.checklistItems];
+    updatedChecklist[index].itemName = value;
+    form.setFieldValue('checklistItems', updatedChecklist);
   };
-
-  const handleChecklistDropdownChange = (
+  const handleChecklistTextChangeDescription = (
     index: number,
-    value: string | null
+    value: string
   ) => {
-    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
-    updatedChecklist[index].dropdownValue = value || '';
-    form.setFieldValue('checklist', updatedChecklist);
+    const updatedChecklist = [...form.values.checklistItems];
+    updatedChecklist[index].itemDescription = value;
+    form.setFieldValue('checklistItems', updatedChecklist);
   };
 
   const handleRemoveChecklistItem = (index: number) => {
-    const updatedChecklist = [...form.values.checklist];
+    const updatedChecklist = [...form.values.checklistItems];
     updatedChecklist.splice(index, 1);
-    form.setFieldValue('checklist', updatedChecklist);
+    form.setFieldValue('checklistItems', updatedChecklist);
   };
 
   const handleChecklistCheckboxChange = (index: number, checked: boolean) => {
-    const updatedChecklist: ChecklistItem[] = [...form.values.checklist];
-    updatedChecklist[index].checked = checked;
-    form.setFieldValue('checklist', updatedChecklist);
+    const updatedChecklist = [...form.values.checklistItems];
+    updatedChecklist[index].isChecked = checked;
+    form.setFieldValue('checklistItems', updatedChecklist);
   };
 
-  const handleDeleteChecklistItem = (index: number) => {
-    // Remove checklist item from form state
-    const updatedChecklist = [...form.values.checklist];
-    updatedChecklist.splice(index, 1);
-    form.setFieldValue('checklist', updatedChecklist);
-  };
+  // const handleDeleteChecklistItem = (index: number) => {
+  //   // Remove checklist item from form state
+  //   const updatedChecklist = [...form.values.checklistItems];
+  //   updatedChecklist.splice(index, 1);
+  //   form.setFieldValue('checklistItems', updatedChecklist);
+  // };
 
   const handleClick = (color: string) => {
     console.log('Clicked color:', color);
   };
-  const handleTextEditorChange = (content: string) => {
-    form.setFieldValue('taskDescription', content);
-  };
+  // const handleTextEditorChange = (content: string) => {
+  //   form.setFieldValue('taskDescription', content);
+  // };
   return (
     <div>
       {/* Add Task Container */}
@@ -294,7 +296,7 @@ export function TaskForm({
                   </Button>
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, md: 12, lg: 12 }}>
-                  {form.values.checklist?.map(
+                  {form.values.checklistItems?.map(
                     (item: ChecklistItem, index: number) => (
                       <div key={index} className="flex items-center mt-1">
                         <Checkbox
@@ -307,22 +309,16 @@ export function TaskForm({
 
                         <TextInput
                           placeholder="Enter text"
-                          value={item.text}
+                          value={item.itemName}
                           onChange={e => handleChecklistTextChange(index, e)}
                           className="ml-2"
                         />
-                        <Select
-                          placeholder="Select value"
-                          value={item.dropdownValue}
-                          onChange={(value: string | null) =>
-                            handleChecklistDropdownChange(index, value)
+                        <TextInput
+                          placeholder="Enter Description"
+                          value={item.itemDescription}
+                          onChange={e =>
+                            handleChecklistTextChangeDescription(index, e)
                           }
-                          data={['Option 1', 'Option 2', 'Option 3']?.map(
-                            option => ({
-                              value: option,
-                              label: option,
-                            })
-                          )}
                           className="ml-2"
                         />
 
@@ -378,7 +374,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.taskStatus}
                 onChange={value => form.setFieldValue('taskStatus', value)}
-                data={['inProgress', 'done', 'toDo']?.map(status => ({
+                data={['In Progress', 'Pending', 'Completed']?.map(status => ({
                   value: status,
                   label: status,
                 }))}
@@ -394,6 +390,7 @@ export function TaskForm({
                 data={userList?.map((user: any) => {
                   return { label: user.name, value: user.userId?.toString() };
                 })}
+                disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>
             <Grid.Col>
@@ -403,7 +400,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.priority}
                 onChange={value => form.setFieldValue('priority', value)}
-                data={['high', 'medium', 'low'].map(priority => ({
+                data={['High', 'Medium', 'Low'].map(priority => ({
                   value: priority,
                   label: priority,
                 }))}
@@ -434,10 +431,11 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.repeatedTask}
                 onChange={value => form.setFieldValue('repeatedTask', value)}
-                data={['daily', 'weekly', 'monthly', 'yearly'].map(option => ({
+                data={['Daily', 'Weekly', 'Monthly', 'Yearly'].map(option => ({
                   value: option,
                   label: option,
                 }))}
+                disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>
             <Grid.Col>
@@ -501,7 +499,7 @@ export function TaskForm({
           onChange={handleAttachmentChange}
         />
 
-        {form?.values?.checklist?.map((item: any, index: number) => (
+        {form?.values?.checklistItems?.map((item: any, index: number) => (
           <div key={index} className="flex items-center mt-4"></div>
         ))}
       </form>
