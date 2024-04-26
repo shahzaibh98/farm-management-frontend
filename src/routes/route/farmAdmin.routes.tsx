@@ -6,7 +6,7 @@ import PrivateRoute from '../private/private.routes';
 
 export const farmAdminRoutes = [
   {
-    path: '/manage-farm-admin',
+    path: '/manage-farm',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
