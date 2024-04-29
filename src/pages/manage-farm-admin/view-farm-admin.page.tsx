@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'; // Importing routing-related
 import { Paper, Select, Table, Text } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+import { useNavigate } from 'react-router-dom';
 
 // Importing a custom hook to get the screen size
 import useScreenSize from '../../hooks/useScreenSize';
@@ -101,7 +102,12 @@ const ManageFarmAdmin = () => {
                       functions
   /////////////////////////////////////////////////// */
 
-  const handleAddFarmAdmin = () => setModalInfo({ ...modalInfo, isOpen: true });
+  // const handleAddFarmAdmin = () => setModalInfo({ ...modalInfo, isOpen: true });
+  const navigate = useNavigate();
+
+  const handleAddFarmAdmin = () => {
+    navigate('/add/user');
+  };
 
   const setValuesById = (valuesById: any) =>
     setSearchValues(prevFormValues => ({

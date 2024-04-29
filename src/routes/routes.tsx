@@ -17,6 +17,7 @@ import {
   publicRoutes,
   taskRoutes,
 } from './route';
+import { farmAdminUserRoutes } from './route/addUser.routes';
 
 const AppRouter: React.FC = () => {
   const isSuperAdmin =
@@ -27,6 +28,7 @@ const AppRouter: React.FC = () => {
     isSuperAdmin
       ? [
           ...farmAdminRoutes,
+          ...farmAdminUserRoutes,
           ...dashboardRoutes,
           ...profileRoutes,
           ...publicRoutes,

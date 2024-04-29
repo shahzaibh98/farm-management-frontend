@@ -55,8 +55,8 @@ function Navbar({ onClick }: { onClick: () => void }) {
     ? [
         { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
         {
-          link: '/manage-farm-admin',
-          label: 'Manage Farm Admin',
+          link: '/manage-farm',
+          label: 'Manage Farm',
           icon: MdOutlineAdminPanelSettings,
         },
       ]
