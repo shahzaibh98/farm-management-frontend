@@ -5,12 +5,15 @@ import {
   Grid,
   Input,
   Paper,
+  Container,
   Select,
   Text,
   useMantineTheme,
 } from '@mantine/core';
 import { useSearchParams } from 'react-router-dom';
 import { initialSearchValues } from './initial.values';
+
+import GenericHeader from '../../layout/header.layout';
 
 const FarmForm = () => {
   const initializeStateFromQueryParams = () => {
@@ -49,7 +52,14 @@ const FarmForm = () => {
     }));
 
   return (
-    <Paper shadow="xs" radius="md">
+    <main className={`h-screen relative bg-darkColors-700`}>
+      
+      <GenericHeader
+        headerText="Farm "
+        breadcrumbsText="Manage Farm Add Task"// Call handleAddFarmAdmin function when button is clicked
+      />
+      <Container fluid py-4>
+    <Paper shadow="xs" radius="md" style={{padding:'20px'}}>
       <form onSubmit={formik.handleSubmit}>
         <Text component="h3" fw={550} c={theme.colors.darkColors[0]}>
           Farm Detail
@@ -136,6 +146,8 @@ const FarmForm = () => {
         </Button>
       </form>
     </Paper>
+    </Container>
+    </main>
   );
 };
 
