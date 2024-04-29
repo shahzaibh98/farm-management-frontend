@@ -19,7 +19,6 @@ const MyCalendar = ({ taskList, handleClickTask }: any) => {
       <div
         className="flex flex-row"
         onClick={() => {
-          console.log('Event', event);
           const { title, eventStart, eventEnd, ...restTask } =
             event && event.event
               ? event.event

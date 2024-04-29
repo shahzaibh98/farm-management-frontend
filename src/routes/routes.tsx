@@ -5,48 +5,19 @@ import {
   RouterProvider,
   createBrowserRouter,
 } from 'react-router-dom';
-import { systemRoles } from '../utils/common/constant.objects';
-import {
-  cropRoutes,
-  dashboardRoutes,
-  farmAdminRoutes,
-  financialRoutes,
-  inventoryRoutes,
-  livestockRoutes,
-  profileRoutes,
-  publicRoutes,
-  taskRoutes,
-} from './route';
-import { farmAdminUserRoutes } from './route/addUser.routes';
+import { getRoutesAgainstRole } from './role-based.routes';
 
 const AppRouter: React.FC = () => {
-  const isSuperAdmin =
-    useSelector((state: any) => state?.userInfo?.userInfo)?.roleId ===
-    systemRoles[0].id;
-
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const role = userInfo?.roleId?.toString();
   const authRouter = createBrowserRouter(
-    isSuperAdmin
-      ? [
-          ...farmAdminRoutes,
-          ...farmAdminUserRoutes,
-          ...dashboardRoutes,
-          ...profileRoutes,
-          ...publicRoutes,
-        ]
-      : [
-          ...taskRoutes,
-          ...cropRoutes,
-          ...livestockRoutes,
-          ...publicRoutes,
-          ...dashboardRoutes,
-          ...financialRoutes,
-          ...inventoryRoutes,
-          ...profileRoutes,
-          {
-            path: '*',
-            element: <Navigate to="/" />,
-          },
-        ],
+    [
+      ...getRoutesAgainstRole(role),
+      {
+        path: '*',
+        element: <Navigate to="/" />,
+      },
+    ],
     { basename: '/' }
   );
 

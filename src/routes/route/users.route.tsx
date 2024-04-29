@@ -1,12 +1,12 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
-import LandView from '../../pages/land/view.land';
+import ManageFarmAdmin from '../../pages/manage-farm-admin/view-farm-admin.page';
 import PrivateRoute from '../private/private.routes';
 
-export const landRoutes = [
+export const manageUsersRoutes = [
   {
-    path: '/lands',
+    path: '/manage-users',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
@@ -14,8 +14,8 @@ export const landRoutes = [
         index: true,
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Land" />
-            <LandView />
+            <DocumentTitle title="User" />
+            <ManageFarmAdmin />
           </PrivateRoute>
         ),
       },
@@ -23,8 +23,8 @@ export const landRoutes = [
         path: 'add',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Land - Add" />
-            <div>land Add</div>
+            <DocumentTitle title="User - Add" />
+            <div>User Add</div>
           </PrivateRoute>
         ),
       },
@@ -32,8 +32,8 @@ export const landRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Land - View" />
-            <div>land View</div>
+            <DocumentTitle title="User - View" />
+            <div>User View</div>
           </PrivateRoute>
         ),
       },
@@ -41,8 +41,8 @@ export const landRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Land - Edit" />
-            <div>land Edit</div>
+            <DocumentTitle title="User - Edit" />
+            <div>User Edit</div>
           </PrivateRoute>
         ),
       },

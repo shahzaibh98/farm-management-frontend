@@ -10,23 +10,35 @@ import {
   livestockRoutes,
   financialRoutes,
   inventoryRoutes,
+  manageUsersRoutes,
 } from './route';
+import { landRoutes } from './route/land.routes';
 
-const currentRole = store.getState()?.userInfo?.userInfo?.roleId;
-
-export function getRoutesAgainstRole() {
+export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];
 
-  const currentRoutes =
-    currentRole === 0
-      ? [...farmAdminRoutes]
-      : [
-          ...taskRoutes,
-          ...cropRoutes,
-          ...livestockRoutes,
-          ...financialRoutes,
-          ...inventoryRoutes,
-        ];
+  const roleRoutesMapping: any = {
+    0: [...farmAdminRoutes],
+    1: [
+      ...taskRoutes,
+      ...cropRoutes,
+      ...landRoutes,
+      ...livestockRoutes,
+      ...financialRoutes,
+      ...inventoryRoutes,
+      ...manageUsersRoutes,
+    ],
+    2: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    3: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    4: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    5: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    6: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    7: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    8: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+  };
 
-  return [...commonRoutes, ...currentRoutes];
+  const currentRoutes = roleRoutesMapping[currentRole?.toString()] || [];
+
+  const routes = [...commonRoutes, ...currentRoutes];
+  return routes;
 }
