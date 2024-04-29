@@ -41,9 +41,8 @@ import {
 } from '../../utils/common/function';
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
-import { TaskForm } from './task.form';
 
-const TaskView = () => {
+const LandView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
@@ -134,7 +133,7 @@ const TaskView = () => {
                       useEffect
   /////////////////////////////////////////////////// */
 
-  const handleAddTask = () => setModalInfo({ ...modalInfo, isOpen: true });
+  const handleAddLand = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
     initializeStateFromQueryParams();
@@ -153,9 +152,7 @@ const TaskView = () => {
           { label: 'Me', value: userInfo.farmId?.toString() },
           { label: 'Others', value: 'Others' },
           { label: 'All', value: 'All' },
-          ...users.filter(
-            (user: { userId: any }) => user.userId !== userInfo.farmId
-          ),
+          ...users,
         ];
         setUserList(newArray);
       })
@@ -197,54 +194,7 @@ const TaskView = () => {
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
-    const filters = removeEmptyValueFilters([
-      {
-        field: 'taskTitle',
-        operator: 'like',
-        value: searchValues.searchValue,
-      },
-      {
-        field: 'assignedTo',
-        operator: searchValues?.assignedTo === 'Others' ? 'neq' : 'eq',
-        value:
-          searchValues?.assignedTo === 'All'
-            ? ''
-            : (searchValues?.assignedTo === 'Others'
-                ? userInfo?.userId
-                : searchValues?.assignedTo) ?? '', // Default value: 'All' or userInfo?.userId, // Default value: 'Me'
-      },
-      {
-        field: 'associatedTo',
-        operator: 'eq',
-        value: searchValues?.associatedTo ?? '',
-      },
-      {
-        field: 'taskStatus',
-        operator: 'eq',
-        value: searchValues?.progress, // Default value: 'In Progress'
-      },
-      {
-        field: 'startDateTime',
-        operator: 'gte',
-        value:
-          searchValues?.upcomingTask === 'Custom Range'
-            ? searchValues?.dateRange[0]?.toISOString()
-            : getDateRange(searchValues?.upcomingTask ?? '')[0],
-      },
-      {
-        field: 'startDateTime',
-        operator: 'lte',
-        value:
-          searchValues?.upcomingTask === 'Custom Range'
-            ? searchValues?.dateRange[1]?.toISOString()
-            : getDateRange(searchValues?.upcomingTask ?? '')[1],
-      },
-      {
-        field: 'farmId',
-        operator: 'eq',
-        value: userInfo?.farmId?.toString(),
-      },
-    ]);
+    const filters = removeEmptyValueFilters([]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
@@ -494,49 +444,11 @@ const TaskView = () => {
           handleResetButtonClick={handleResetButtonClick}
         />
         <Grid className="mt-2">
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Assigned To"
-              data={userList}
-              value={searchValues.assignedTo ?? ''}
-              onChange={value => value && setValuesById({ assignedTo: value })}
-              // allowDeselect={false}
-              // searchable
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Associated To"
-              data={[]}
-              value={searchValues.associatedTo ?? ''}
-              onChange={value => setValuesById({ associatedTo: value })}
-            />
-          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Progress"
-              data={['In Progress', 'Pending', 'Completed']}
-              value={searchValues.progress ?? ''}
-              onChange={value => setValuesById({ progress: value })}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-            <Select
-              placeholder="Upcoming Task"
-              data={[
-                'All',
-                'Today',
-                'Tomorrow',
-                'This Week',
-                'Next Week',
-                'Next Month',
-                'Custom Range',
-              ]}
-              value={searchValues?.upcomingTask ?? ''}
-              onChange={value => setValuesById({ upcomingTask: value })}
-            />
-          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
           {searchValues?.upcomingTask === 'Custom Range' && (
             <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
               <DatePicker
@@ -578,11 +490,11 @@ const TaskView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Task"
-        breadcrumbsText="Manage Task"
+        headerText="Land"
+        breadcrumbsText="Manage Land"
         isAddOrUpdateButton
-        buttonContent="Add Task"
-        onButtonClick={handleAddTask} // Call handleAddTask function when button is clicked
+        buttonContent="Add Land"
+        onButtonClick={handleAddLand} // Call handleAddTask function when button is clicked
       />
 
       <Paper
@@ -590,86 +502,19 @@ const TaskView = () => {
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >
-        <Tabs
-          onChange={value => setActiveTab(value)}
-          tabs={[
-            {
-              value: 'Table',
-              label: 'Table',
-              icon: <CiViewTable size={24} />,
-              component: (
-                <div className="mt-4">
-                  {searchAndFilter()}
-                  <Table
-                    isLoading={isLoading}
-                    data={tableData}
-                    columns={columns}
-                    paginationInfo={paginationInfo}
-                    handlePagination={handlePagination}
-                  />
-                </div>
-              ),
-            },
-            {
-              value: 'Calendar',
-              label: 'Calendar',
-              icon: <CiCalendarDate size={24} />,
-              component: (
-                <div className="mt-5">
-                  {searchAndFilter()}
-                  <div className="h-4" />
-                  <MyCalendar
-                    taskList={tableData}
-                    handleClickTask={(object: any) => {
-                      console.log('Object data: ', object);
-                      setModalInfo({
-                        isOpen: true,
-                        type: 'View',
-                        objectData: object,
-                        isReadOnly: true,
-                      });
-                    }}
-                  />
-                </div>
-              ),
-            },
-          ]}
-        ></Tabs>
+        <div className="mt-4">
+          {searchAndFilter()}
+          <Table
+            isLoading={isLoading}
+            data={tableData}
+            columns={columns}
+            paginationInfo={paginationInfo}
+            handlePagination={handlePagination}
+          />
+        </div>
       </Paper>
-      <Modal
-        opened={modalInfo.isOpen}
-        onClose={() => setModalInfo(initialModalInfo)}
-        title={`${modalInfo.type} Task`}
-        size="lg"
-        styles={{
-          title: {
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: theme.colors.primaryColors[0],
-          },
-        }}
-        className="addtaskModal"
-        transitionProps={{ transition: 'fade-up', duration: 300 }}
-      >
-        <TaskForm
-          viewOrUpdate={modalInfo}
-          onCloseButton={() => setModalInfo(initialModalInfo)}
-          handleNotification={(
-            notification: SetStateAction<{
-              isSuccess: boolean;
-              isEnable: boolean;
-              title: string;
-              message: string;
-            }>
-          ) => {
-            setModalInfo(initialModalInfo);
-            setNotification(notification);
-            setResetTable(!resetTable);
-          }}
-        />
-      </Modal>
       <div className="h-4" />
     </main>
   );
 };
-export default TaskView;
+export default LandView;

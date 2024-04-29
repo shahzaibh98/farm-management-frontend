@@ -42,14 +42,12 @@ export const colorArray = [
 ];
 
 export const systemRoles = [
-  {
-    id: '0',
-    name: 'Super Admin',
-    shortCutName: 'SA',
-  },
-  {
-    id: '1',
-    name: 'Farm Admin',
-    shortCutName: 'FA',
-  },
+  { id: '0', name: 'Super Admin', abbreviation: 'SA' },
+  { id: '1', name: 'Farm Admin', abbreviation: 'FA' },
+  { id: '2', name: 'Farm Manager', abbreviation: 'FM' },
+  { id: '3', name: 'Accountant', abbreviation: 'AC' },
+  { id: '4', name: 'Service Manager', abbreviation: 'SM' },
+  { id: '5', name: 'Warehouse Manager', abbreviation: 'WM' },
+  { id: '6', name: 'Farm Worker', abbreviation: 'FW' },
+  { id: '7', name: 'Auditor', abbreviation: 'AU' },
 ];

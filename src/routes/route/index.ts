@@ -7,6 +7,7 @@ import { dashboardRoutes } from './dashboard.routes';
 import { inventoryRoutes } from './inventory.routes';
 import { profileRoutes } from './profile.routes';
 import { farmAdminRoutes } from './farmAdmin.routes';
+import { manageUsersRoutes } from './users.route';
 
 export {
   publicRoutes,
@@ -18,4 +19,5 @@ export {
   inventoryRoutes,
   profileRoutes,
   farmAdminRoutes,
+  manageUsersRoutes,
 };

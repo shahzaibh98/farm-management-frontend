@@ -420,7 +420,11 @@ export function TaskForm({
               <DateTimePicker
                 placeholder="Select end date and time"
                 withAsterisk
-                value={new Date(form?.values?.endDateTime)}
+                value={
+                  form?.values?.endDateTime
+                    ? new Date(form?.values?.endDateTime)
+                    : new Date()
+                }
                 onChange={value => form.setFieldValue('endDateTime', value)}
               />
             </Grid.Col>

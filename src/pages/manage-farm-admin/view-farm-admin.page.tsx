@@ -25,13 +25,15 @@ import {
   initialModalInfo,
   initialNotification,
   paginationInfoValue,
+  systemRoles,
 } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
-import { initialSearchValues } from './initial.values';
+import { buildFilters, initialSearchValues } from './initial.values';
 import UserForm from './user.form';
+import { useSelector } from 'react-redux';
 
 const ManageFarmAdmin = () => {
   const initializeStateFromQueryParams = () => {
@@ -57,6 +59,8 @@ const ManageFarmAdmin = () => {
     );
     return { ...paginationInfoValue, rowPerPage, currentPage };
   };
+
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
   /* /////////////////////////////////////////////////
                        Variable
@@ -129,33 +133,12 @@ const ManageFarmAdmin = () => {
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
-    const filters = removeEmptyValueFilters([
-      {
-        field: 'email',
-        operator: 'like',
-        value: searchValues.searchValue,
-      },
-      {
-        field: 'isActive',
-        operator: 'eq',
-        value:
-          searchValues?.status === 'Active'
-            ? 'true'
-            : searchValues?.status === 'Blocked'
-              ? 'false'
-              : '',
-      },
-      {
-        field: 'roleId',
-        operator: 'eq',
-        value: 1,
-      },
-    ]);
+    const filters = removeEmptyValueFilters(buildFilters(searchValues));
 
     const filterObject = JSON.stringify({ filter: filters });
 
     fetchData(
-      `farm?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+      `users?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
     )
       .then((response: any) => {
         setTableData(response.data);
@@ -237,11 +220,11 @@ const ManageFarmAdmin = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`farm/${id}`)
+    deleteData(`users/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Farm  deleted successfully',
+          message: 'Farm deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -258,9 +241,21 @@ const ManageFarmAdmin = () => {
     const findUserStatus = tableData?.find(
       user => user?.userId === id
     )?.isActive;
-    putData(`farm/${id}`, {
-      isActive: findUserStatus === 'true' ? 'false' : 'true',
-    })
+
+    const farm = tableData?.find(user => user?.userId === id)?.farm;
+
+    console.log('Farm', farm);
+
+    putData(
+      userInfo?.roleId === '0' ? `farm/${farm?.farmId}` : `users/${id}`,
+      userInfo?.roleId === '0'
+        ? {
+            isActive: !farm?.isActive,
+          }
+        : {
+            isActive: findUserStatus === 'true' ? 'false' : 'true',
+          }
+    )
       .then(() => {
         setNotification({
           isSuccess: true,
@@ -287,129 +282,154 @@ const ManageFarmAdmin = () => {
 
   // Function to set values based on identifiers
 
-  const columns = useMemo(
-    () => [
-      {
-        header: 'FARM TITLE',
-        accessorKey: 'farmTitle',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
+  const commonColumns = [
+    {
+      header: 'NAME',
+      accessorKey: 'name',
+      size: 50,
+      minSize: 50,
+      maxSize: 500,
+      cell: (info: { getValue: () => any }) => (
+        <div className="flex items-center justify-center">
+          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
+        </div>
+      ),
+    },
+    {
+      header: 'EMAIL ADDRESS',
+      accessorKey: 'email',
+      size: 50,
+      minSize: 50,
+      maxSize: 500,
+      cell: (info: { getValue: () => any }) => (
+        <div className="flex items-center justify-center">
+          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
+        </div>
+      ),
+    },
+    {
+      header: 'PHONE NUMBER',
+      accessorKey: 'phoneNo',
+      size: 50,
+      minSize: 50,
+      maxSize: 500,
+      cell: (info: { getValue: () => any }) => (
+        <div className="flex items-center justify-center">
+          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
+        </div>
+      ),
+    },
+    {
+      header: 'STATUS',
+      accessorKey: 'isActive',
+      cell: (info: any) => {
+        const isActiveUser = info.getValue();
+        const farm = info?.row?.original?.farm;
+        return (
+          <Center>
+            <div className="flex flex-wrap">
+              <div
+                className={`w-3 h-3 rounded-full m-1 mr-2 ${isActiveUser === 'true' && farm?.isActive ? 'bg-green-light' : 'bg-red-light'}`}
+              />
+              <Text>
+                {isActiveUser === 'true' && farm?.isActive
+                  ? 'Active'
+                  : 'Blocked'}
+              </Text>
+            </div>
+          </Center>
+        );
       },
-      {
-        header: 'NAME',
-        accessorKey: 'name',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
+    },
+    {
+      header: '',
+      accessorKey: 'userId',
+      size: 55,
+      minSize: 55,
+      maxSize: 55,
+      cell: (info: any) => {
+        const isActive = info?.row?.original?.isActive;
+        const id = info?.row?.original?.userId;
+        const farm = info?.row?.original?.farm;
+        return (
+          <TableMenu
+            id={id}
+            onDeleteClick={handleDeleteById}
+            onEditClick={() =>
+              setModalInfo({
+                isOpen: true,
+                type: 'Edit',
+                objectData: info?.row?.original,
+                isReadOnly: false,
+              })
+            }
+            onViewClick={() =>
+              setModalInfo({
+                isOpen: true,
+                type: 'View',
+                objectData: info?.row?.original,
+                isReadOnly: true,
+              })
+            }
+            additionalMenuItems={[
+              {
+                label:
+                  isActive === 'true' && farm?.isActive ? 'Block' : 'Active',
+                icon:
+                  isActive === 'true' && farm?.isActive ? (
+                    <MdDisabledVisible />
+                  ) : (
+                    <VscVmActive />
+                  ),
+                onClick: () => handleChangeStatus(id),
+              },
+            ]}
+          />
+        );
       },
-      {
-        header: 'EMAIL ADDRESS',
-        accessorKey: 'email',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
-      },
-      {
-        header: 'PHONE NUMBER',
-        accessorKey: 'phoneNo',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
-      },
-      {
-        header: 'STATUS',
-        accessorKey: 'isActive',
-        cell: (info: { getValue: () => any }) => {
-          const isActive = info.getValue();
-          return (
-            <Center>
-              <div className="flex flex-wrap">
-                <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${isActive === 'true' ? 'bg-green-light' : 'bg-red-light'}`}
-                />
-                <Text>{isActive === 'true' ? 'Active' : 'Blocked'}</Text>
-              </div>
-            </Center>
-          );
+    },
+  ];
+
+  const columns = useMemo(() => {
+    if (userInfo?.roleId === '0') {
+      return [
+        {
+          header: 'FARM TITLE',
+          accessorKey: 'farm',
+          size: 50,
+          minSize: 50,
+          maxSize: 500,
+          cell: (info: { getValue: () => any }) => (
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {info.getValue()?.farmTitle}
+              </p>
+            </div>
+          ),
         },
-      },
-      {
-        header: '',
-        accessorKey: 'userId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
-        cell: (info: any) => {
-          const isActive = info?.row?.original?.isActive;
-          const id = info?.row?.original?.userId;
-          return (
-            <TableMenu
-              id={id}
-              onDeleteClick={handleDeleteById}
-              onEditClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'Edit',
-                  objectData: info?.row?.original,
-                  isReadOnly: false,
-                })
-              }
-              onViewClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'View',
-                  objectData: info?.row?.original,
-                  isReadOnly: true,
-                })
-              }
-              additionalMenuItems={[
-                {
-                  label: isActive === 'true' ? 'Block' : 'Active',
-                  icon:
-                    isActive === 'true' ? (
-                      <MdDisabledVisible />
-                    ) : (
-                      <VscVmActive />
-                    ),
-                  onClick: () => handleChangeStatus(id),
-                },
-              ]}
-            />
-          );
+        ...commonColumns,
+      ];
+    } else {
+      return [
+        ...commonColumns.slice(0, 1), // Add the first common column
+        {
+          header: 'ROLE',
+          accessorKey: 'roleId',
+          size: 50,
+          minSize: 50,
+          maxSize: 500,
+          cell: (info: { getValue: () => any }) => (
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {systemRoles[info.getValue()].name}
+              </p>
+            </div>
+          ),
         },
-      },
-    ],
-    [tableData]
-  );
+        ...commonColumns.slice(1), // Add the remaining common columns
+      ];
+    }
+  }, [userInfo?.roleId, resetTable, tableData]);
 
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>

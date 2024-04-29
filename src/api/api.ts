@@ -3,9 +3,6 @@ import store from '../redux';
 
 // API base URL
 const API_BASE_URL = `${process.env.REACT_APP_BASE_URL}`;
-const userDetails = store.getState()?.userInfo?.userInfo;
-
-console.log('User Details:', userDetails);
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,6 +29,7 @@ export const fetchData = async <T>(url: string) => {
 
 // POST request
 export const postData = async <T>(url: string, postData: any) => {
+  const userDetails = store.getState()?.userInfo?.userInfo;
   return await requestData<T>(
     'post',
     url,
@@ -40,7 +38,6 @@ export const postData = async <T>(url: string, postData: any) => {
           ...postData,
           createdBy: userDetails.userId.toString(),
           updatedBy: userDetails.userId.toString(), // Update updatedBy value with userDetails.userId,
-          farmId: userDetails?.farmId?.toString() ?? null,
         }
       : postData
   );
@@ -48,6 +45,7 @@ export const postData = async <T>(url: string, postData: any) => {
 
 // PUT request
 export const putData = async <T>(url: string, putData: any) => {
+  const userDetails = store.getState()?.userInfo?.userInfo;
   return await requestData<T>('put', url, {
     ...putData,
     updatedBy: userDetails.userId.toString(), // Update updatedBy value with userDetails.userId,
