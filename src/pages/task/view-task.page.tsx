@@ -150,10 +150,13 @@ const TaskView = () => {
           return { label: user.name, value: user.userId?.toString() };
         });
         const newArray = [
-          { label: 'Me', value: userInfo.farmId?.toString() },
+          { label: 'Me', value: userInfo.userId?.toString() },
           { label: 'Others', value: 'Others' },
           { label: 'All', value: 'All' },
-          ...users,
+          ...users.filter(
+            (user: { userId: any }) =>
+              user.userId.toString() !== userInfo.userId.toString()
+          ),
         ];
         setUserList(newArray);
       })

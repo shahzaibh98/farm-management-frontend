@@ -70,8 +70,8 @@ export function TaskForm({
             taskDescription: '',
             assigned: '',
             priority: '',
-            startDateTime: null,
-            endDateTime: null,
+            startDateTime: new Date(),
+            endDateTime: new Date(),
             associatedTo: '',
             associatedId: '1',
             repeatedTask: '',
@@ -84,7 +84,7 @@ export function TaskForm({
         : viewOrUpdate.objectData,
     onSubmit: values => {
       viewOrUpdate?.type === 'Edit'
-        ? putData(`/task/${viewOrUpdate.objectData.userId}`, values)
+        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, values)
             .then(() => {
               // Handle successful form submission
               handleNotification({
@@ -411,7 +411,11 @@ export function TaskForm({
               <DateTimePicker
                 placeholder="Select start date and time"
                 withAsterisk
-                value={new Date(form?.values?.startDateTime)}
+                value={
+                  form?.values?.startDateTime
+                    ? new Date(form?.values?.startDateTime)
+                    : new Date()
+                }
                 onChange={value => form.setFieldValue('startDateTime', value)}
               />
             </Grid.Col>
@@ -420,7 +424,11 @@ export function TaskForm({
               <DateTimePicker
                 placeholder="Select end date and time"
                 withAsterisk
-                value={new Date(form?.values?.endDateTime)}
+                value={
+                  form?.values?.endDateTime
+                    ? new Date(form?.values?.endDateTime)
+                    : new Date()
+                }
                 onChange={value => form.setFieldValue('endDateTime', value)}
               />
             </Grid.Col>
