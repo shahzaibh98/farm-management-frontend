@@ -70,8 +70,8 @@ export function TaskForm({
             taskDescription: '',
             assigned: '',
             priority: '',
-            startDateTime: new Date(),
-            endDateTime: new Date(),
+            startDateTime: null,
+            endDateTime: null,
             associatedTo: '',
             associatedId: '1',
             repeatedTask: '',
@@ -412,9 +412,8 @@ export function TaskForm({
                 placeholder="Select start date and time"
                 withAsterisk
                 value={
-                  form?.values?.startDateTime
-                    ? new Date(form?.values?.startDateTime)
-                    : new Date()
+                  form?.values?.startDateTime &&
+                  new Date(form?.values?.startDateTime)
                 }
                 onChange={value => form.setFieldValue('startDateTime', value)}
               />
@@ -425,9 +424,8 @@ export function TaskForm({
                 placeholder="Select end date and time"
                 withAsterisk
                 value={
-                  form?.values?.endDateTime
-                    ? new Date(form?.values?.endDateTime)
-                    : new Date()
+                  form?.values?.endDateTime &&
+                  new Date(form?.values?.endDateTime)
                 }
                 onChange={value => form.setFieldValue('endDateTime', value)}
               />
