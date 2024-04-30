@@ -1,21 +1,12 @@
 // Importing necessary Mantine components and hooks
-import {
-  Anchor,
-  Container,
-  Flex,
-  Group,
-  PasswordInput,
-  Title,
-  useMantineTheme,
-} from '@mantine/core';
+import { useMantineTheme } from '@mantine/core';
 
 // Importing useFormik for form handling
 import { useFormik } from 'formik';
 
 // Importing hooks and state management tools
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 // Importing Yup for form validation
 import * as Yup from 'yup';
@@ -24,22 +15,13 @@ import * as Yup from 'yup';
 import { postData } from '../../api/api';
 
 // Importing custom components and Redux actions
-import {
-  Button,
-  Checkbox,
-  Modal,
-  Notification,
-  Paper,
-  Text,
-  TextInput,
-} from '../../concave.agri/components';
+import { Notification, Text } from '../../concave.agri/components';
 import { setUserInfo } from '../../redux/actions/user';
 
 // Importing type definitions
-import { AuthData, LoginPageProps } from '../../types/login.type';
-import { requestForToken } from '../../firebase/firebase.config';
 import axios from 'axios';
-import LoginForm from './new-login.page';
+import { requestForToken } from '../../firebase/firebase.config';
+import { AuthData, LoginPageProps } from '../../types/login.type';
 
 // Initial notification state
 const initialNotification = {
@@ -51,9 +33,6 @@ const initialNotification = {
 
 // LoginPage function component
 export function LoginPage() {
-  // Initialize navigate for routing
-  const navigate = useNavigate();
-
   // Initialize theme hook
   const theme = useMantineTheme();
 
@@ -69,14 +48,6 @@ export function LoginPage() {
   const [userDetails, setUserDetails] = useState<AuthData>();
 
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    const getToken = async () => {
-      console.log('Web Access Token: ', await requestForToken());
-    };
-
-    getToken();
-  }, []);
 
   // Initialize formik for form handling
   const formik = useFormik({

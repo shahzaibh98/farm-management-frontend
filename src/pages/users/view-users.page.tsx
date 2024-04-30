@@ -36,7 +36,7 @@ import { buildFilters, initialSearchValues } from './initial.values';
 import UserForm from './user.form';
 import { useSelector } from 'react-redux';
 
-const ManageFarmAdmin = () => {
+const ManageUser = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
@@ -61,8 +61,6 @@ const ManageFarmAdmin = () => {
     return { ...paginationInfoValue, rowPerPage, currentPage };
   };
 
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
-
   /* /////////////////////////////////////////////////
                        Variable
   /////////////////////////////////////////////////// */
@@ -70,6 +68,9 @@ const ManageFarmAdmin = () => {
   const theme = useMantineTheme();
 
   const { isSmallScreen } = useScreenSize();
+  const { roleId, ...userInfo } = useSelector(
+    (state: any) => state?.userInfo?.userInfo
+  );
 
   /* /////////////////////////////////////////////////
                       State
@@ -106,11 +107,10 @@ const ManageFarmAdmin = () => {
                       functions
   /////////////////////////////////////////////////// */
 
-  // const handleAddFarmAdmin = () => setModalInfo({ ...modalInfo, isOpen: true });
   const navigate = useNavigate();
 
   const handleAddFarmAdmin = () => {
-    navigate('/add/user');
+    navigate(roleId === '0' ? '/manage-farm/add' : '/manage-users/add');
   };
 
   const setValuesById = (valuesById: any) =>
@@ -230,7 +230,7 @@ const ManageFarmAdmin = () => {
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Farm deleted successfully',
+          message: 'Deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -250,11 +250,9 @@ const ManageFarmAdmin = () => {
 
     const farm = tableData?.find(user => user?.userId === id)?.farm;
 
-    console.log('Farm', farm);
-
     putData(
-      userInfo?.roleId === '0' ? `farm/${farm?.farmId}` : `users/${id}`,
-      userInfo?.roleId === '0'
+      roleId === '0' ? `farm/${farm?.farmId}` : `users/${id}`,
+      roleId === '0'
         ? {
             isActive: !farm?.isActive,
           }
@@ -361,21 +359,15 @@ const ManageFarmAdmin = () => {
           <TableMenu
             id={id}
             onDeleteClick={handleDeleteById}
-            onEditClick={() =>
-              setModalInfo({
-                isOpen: true,
-                type: 'Edit',
-                objectData: info?.row?.original,
-                isReadOnly: false,
-              })
+            onViewClick={id =>
+              navigate(
+                `/manage-${roleId === '0' ? 'farm' : 'users'}/view/${id}`
+              )
             }
-            onViewClick={() =>
-              setModalInfo({
-                isOpen: true,
-                type: 'View',
-                objectData: info?.row?.original,
-                isReadOnly: true,
-              })
+            onEditClick={() =>
+              navigate(
+                `/manage-${roleId === '0' ? 'farm' : 'users'}/edit/${id}`
+              )
             }
             additionalMenuItems={[
               {
@@ -397,7 +389,7 @@ const ManageFarmAdmin = () => {
   ];
 
   const columns = useMemo(() => {
-    if (userInfo?.roleId === '0') {
+    if (roleId === '0') {
       return [
         {
           header: 'FARM TITLE',
@@ -450,10 +442,10 @@ const ManageFarmAdmin = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Farm "
-        breadcrumbsText="Manage Farm "
+        headerText={roleId === '0' ? 'Farm' : 'User'}
+        breadcrumbsText={`Manage ${roleId === '0' ? 'Farm' : 'User'}`}
         isAddOrUpdateButton
-        buttonContent="Add Farm "
+        buttonContent={`Add ${roleId === '0' ? 'Farm' : 'User'}`}
         onButtonClick={handleAddFarmAdmin} // Call handleAddFarmAdmin function when button is clicked
       />
 
@@ -500,40 +492,8 @@ const ManageFarmAdmin = () => {
         </div>
       </Paper>
 
-      <Modal
-        opened={modalInfo.isOpen}
-        onClose={() => setModalInfo(initialModalInfo)}
-        title={`${modalInfo.type} Farm`}
-        size="md"
-        styles={{
-          title: {
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: theme.colors.primaryColors[0],
-          },
-        }}
-        transitionProps={{ transition: 'fade-up', duration: 300 }}
-      >
-        <UserForm
-          viewOrUpdate={modalInfo}
-          onCloseButton={() => setModalInfo(initialModalInfo)}
-          handleNotification={(
-            notification: SetStateAction<{
-              isSuccess: boolean;
-              isEnable: boolean;
-              title: string;
-              message: string;
-            }>
-          ) => {
-            setModalInfo(initialModalInfo);
-            setNotification(notification);
-            setResetTable(!resetTable);
-          }}
-        />
-      </Modal>
-
       <div className="h-4" />
     </main>
   );
 };
-export default ManageFarmAdmin;
+export default ManageUser;

@@ -3,12 +3,15 @@ import store from '../redux';
 
 // API base URL
 const API_BASE_URL = `${process.env.REACT_APP_BASE_URL}`;
+const token = store.getState()?.userInfo?.token;
+
+console.log(token);
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${sessionStorage.getItem('token')}`, // Get access token from sessionStorage
+    Authorization: `Bearer ${sessionStorage.getItem('token') ?? token}`, // Get access token from sessionStorage
   },
 });
 
