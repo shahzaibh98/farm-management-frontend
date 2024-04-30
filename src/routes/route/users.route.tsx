@@ -1,7 +1,8 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
-import ManageFarmAdmin from '../../pages/manage-farm-admin/view-farm-admin.page';
+import UserForm from '../../pages/users/user.form';
+import ManageUser from '../../pages/users/view-users.page';
 import PrivateRoute from '../private/private.routes';
 
 export const manageUsersRoutes = [
@@ -15,7 +16,7 @@ export const manageUsersRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="User" />
-            <ManageFarmAdmin />
+            <ManageUser />
           </PrivateRoute>
         ),
       },
@@ -24,7 +25,7 @@ export const manageUsersRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="User - Add" />
-            <div>User Add</div>
+            <UserForm />
           </PrivateRoute>
         ),
       },
@@ -33,7 +34,7 @@ export const manageUsersRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="User - View" />
-            <div>User View</div>
+            <UserForm type="View" />
           </PrivateRoute>
         ),
       },
@@ -42,7 +43,7 @@ export const manageUsersRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="User - Edit" />
-            <div>User Edit</div>
+            <UserForm type="Update" />
           </PrivateRoute>
         ),
       },
