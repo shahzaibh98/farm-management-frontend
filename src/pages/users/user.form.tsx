@@ -182,8 +182,10 @@ const UserForm = ({ type = 'Add' }) => {
                     }
                     styles={inputStyle}
                     error={
-                      formik.errors.farmTitle &&
-                      (formik.touched.farmTitle || formik.submitCount > 0)
+                      (formik.touched.farmTitle || formik.submitCount > 0) &&
+                      formik.errors.farmTitle
+                        ? formik.errors.farmTitle
+                        : null
                     }
                   />
                 </Grid.Col>
@@ -199,8 +201,10 @@ const UserForm = ({ type = 'Add' }) => {
                     }
                     styles={inputStyle}
                     error={
-                      formik.errors.address &&
-                      (formik.touched.address || formik.submitCount > 0)
+                      (formik.touched.address || formik.submitCount > 0) &&
+                      formik.errors.address
+                        ? formik.errors.address
+                        : null
                     }
                   />
                 </Grid.Col>
@@ -224,8 +228,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.name &&
-                  (formik.touched.name || formik.submitCount > 0)
+                  (formik.touched.name || formik.submitCount > 0) &&
+                  formik.errors.name
+                    ? formik.errors.name
+                    : null
                 }
               />
             </Grid.Col>
@@ -241,8 +247,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.email &&
-                  (formik.touched.email || formik.submitCount > 0)
+                  (formik.touched.email || formik.submitCount > 0) &&
+                  formik.errors.email
+                    ? formik.errors.email
+                    : null
                 }
               />
             </Grid.Col>
@@ -258,8 +266,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.phoneNo &&
-                  (formik.touched.phoneNo || formik.submitCount > 0)
+                  (formik.touched.phoneNo || formik.submitCount > 0) &&
+                  formik.errors.phoneNo
+                    ? formik.errors.phoneNo
+                    : null
                 }
               />
             </Grid.Col>
