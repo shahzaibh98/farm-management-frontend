@@ -154,8 +154,8 @@ const TaskView = () => {
           { label: 'Others', value: 'Others' },
           { label: 'All', value: 'All' },
           ...users.filter(
-            (user: { userId: any }) =>
-              user.userId.toString() !== userInfo.userId.toString()
+            (user: { label: string; value: string }) =>
+              user.value !== userInfo.userId?.toString()
           ),
         ];
         setUserList(newArray);
@@ -167,7 +167,6 @@ const TaskView = () => {
           { label: 'All', value: 'All' },
         ];
         setUserList(newArray);
-        console.log(error);
       });
   }, []);
   // Function to set values based on identifiers
