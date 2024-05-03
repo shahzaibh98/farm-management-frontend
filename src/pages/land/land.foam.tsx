@@ -64,13 +64,15 @@ const ManageLand = ({ type = 'Add' }) => {
       type === 'Update' || type === 'View'
         ? landData
         : {
-            name: '',
+            landName: '',
             type: '',
             farmId: '',
             area: '',
             areaUnit: '',
             country: '',
-            provinceOrState: '',
+            province: '',
+            district: '',
+            tehsil: '',
             coordinates: [],
             markLocation: [],
             address: '',
@@ -83,13 +85,15 @@ const ManageLand = ({ type = 'Add' }) => {
           },
     validationSchema: Yup.object().shape({
       // Farm Details Validation
-      name: Yup.string().required('name is required'),
+      landName: Yup.string().required('landName is required'),
       address: Yup.string().required('Address is required'),
-      area: Yup.string().required('Area is required'),
+      area: Yup.number()
+        .typeError('Area must be a number')
+        .required('Area is required'),
     }),
     onSubmit: values => {
       if (type !== 'Update')
-        postData('/users', values) // Send form data to the server
+        postData('/land', values) // Send form data to the server
           .then(() => {
             // Handle successful form submission
             setNotification({
@@ -115,10 +119,10 @@ const ManageLand = ({ type = 'Add' }) => {
         const { name, ...rest } = values;
 
         Promise.all([
-          putData(`/farm/${values?.farmId}`, {
+          putData(`/land/${values?.farmId}`, {
             name,
           }),
-          putData(`/users/${id}`, rest),
+          putData(`/land/${id}`, rest),
         ])
           .then(() => {
             // Handle successful form submission
@@ -219,30 +223,30 @@ const ManageLand = ({ type = 'Add' }) => {
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
-                id="name"
+                id="landName"
                 label="Land Name"
-                name="name"
+                name="landName"
                 placeholder="Enter your land name..."
-                value={formik.values?.name ?? ''}
+                value={formik.values?.landName ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('name', e)
+                  type !== 'View' && formik.setFieldValue('landName', e)
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.name &&
-                  (formik.touched.name || formik.submitCount > 0)
+                  formik.errors.landName &&
+                  (formik.touched.landName || formik.submitCount > 0)
                 }
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="type"
+                id="landType "
                 label="Land Type"
                 placeholder="Select type..."
                 data={locationOptions}
-                value={formik.values?.type}
+                value={formik.values?.landType}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('type', value)
+                  type !== 'View' && formik.setFieldValue('landType', value)
                 }
                 styles={inputStyle}
               />
@@ -256,7 +260,7 @@ const ManageLand = ({ type = 'Add' }) => {
                 placeholder="Enter your Land Area..."
                 value={formik.values?.area ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('type', e)
+                  type !== 'View' && formik.setFieldValue('area', parseFloat(e))
                 }
                 styles={inputStyle}
                 error={
@@ -299,18 +303,52 @@ const ManageLand = ({ type = 'Add' }) => {
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
-                id="provinceOrState"
+                id="province"
                 label="Province/State"
                 name="provinceOrState"
                 placeholder="Enter your country..."
-                value={formik.values?.provinceOrState ?? ''}
+                value={formik.values?.province ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('provinceOrState', e)
+                  type !== 'View' && formik.setFieldValue('province', e)
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.provinceOrState &&
-                  (formik.touched.provinceOrState || formik.submitCount > 0)
+                  formik.errors.province &&
+                  (formik.touched.province || formik.submitCount > 0)
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="district"
+                label="District"
+                name="district"
+                placeholder="Enter your district..."
+                value={formik.values?.district ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('district', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.district &&
+                  (formik.touched.district || formik.submitCount > 0)
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="tehsil"
+                label="Tehsil"
+                name="tehsil"
+                placeholder="Enter your tehsil..."
+                value={formik.values?.tehsil ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('tehsil', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.tehsil &&
+                  (formik.touched.tehsil || formik.submitCount > 0)
                 }
               />
             </Grid.Col>
@@ -388,6 +426,23 @@ const ManageLand = ({ type = 'Add' }) => {
                   formik.setFieldValue('irrigationMethod', value)
                 }
                 styles={inputStyle}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="coordinates"
+                label="Coordinates"
+                name="coordinates"
+                placeholder="Enter coordinates..."
+                value={formik.values?.coordinates ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('coordinates', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.coordinates &&
+                  (formik.touched.coordinates || formik.submitCount > 0)
+                }
               />
             </Grid.Col>
             {showLatLongFields && (
