@@ -1,7 +1,7 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
-import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
@@ -39,7 +39,6 @@ import {
   getDateRange,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
-import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
 
 const LandView = () => {
@@ -128,6 +127,12 @@ const LandView = () => {
   const [userList, setUserList] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState('Table');
+
+  const navigate = useNavigate();
+
+  const handleAddFarmAdmin = () => {
+    navigate('/lands/add');
+  };
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -494,7 +499,7 @@ const LandView = () => {
         breadcrumbsText="Manage Land"
         isAddOrUpdateButton
         buttonContent="Add Land"
-        onButtonClick={handleAddLand} // Call handleAddTask function when button is clicked
+        onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
       />
 
       <Paper
@@ -513,6 +518,7 @@ const LandView = () => {
           />
         </div>
       </Paper>
+
       <div className="h-4" />
     </main>
   );

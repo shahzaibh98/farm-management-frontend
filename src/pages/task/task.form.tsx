@@ -24,6 +24,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { fetchData, postData, putData } from '../../api/api';
 import { useSelector } from 'react-redux';
 import { isTemplateExpression } from 'typescript';
+import * as Yup from 'yup';
 interface ChecklistItem {
   itemName: string;
   itemDescription: string;
@@ -82,6 +83,16 @@ export function TaskForm({
             checklistItems: [],
           }
         : viewOrUpdate.objectData,
+
+    validationSchema: Yup.object().shape({
+      taskTitle: Yup.string().required('Task title is required'),
+      taskDescription: Yup.string().required('Task description is required'),
+      startDateTime: Yup.date().required('Start date is required'),
+      endDateTime: Yup.date().required('End date is required'),
+      // assignedTo: Yup.string().required('Assigned to is required'),
+      priority: Yup.string().required('Priority is required'),
+      taskStatus: Yup.string().required('Status is required'),
+    }),
     onSubmit: values => {
       viewOrUpdate?.type === 'Edit'
         ? putData(`/task/${viewOrUpdate.objectData.taskId}`, values)
@@ -207,13 +218,6 @@ export function TaskForm({
     form.setFieldValue('checklistItems', updatedChecklist);
   };
 
-  // const handleDeleteChecklistItem = (index: number) => {
-  //   // Remove checklist item from form state
-  //   const updatedChecklist = [...form.values.checklistItems];
-  //   updatedChecklist.splice(index, 1);
-  //   form.setFieldValue('checklistItems', updatedChecklist);
-  // };
-
   const handleClick = (color: string) => {
     console.log('Clicked color:', color);
   };
@@ -237,6 +241,10 @@ export function TaskForm({
                   form.setFieldValue('taskTitle', e)
                 }
                 value={form.values.taskTitle}
+                error={
+                  form.errors.taskTitle &&
+                  (form.touched.taskTitle || form.submitCount > 0)
+                }
               />
             </Grid.Col>
             <Grid.Col>
