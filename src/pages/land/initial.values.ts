@@ -1,10 +1,13 @@
-import { SearchValuesType } from '../../types/view-task.type';
+import { LandStatus, LandType } from '@agri/shared-types';
 
-export const initialSearchValues: SearchValuesType = {
+export interface SearchFilter {
+  searchValue: string;
+  type: string;
+  status: string;
+}
+
+export const initialSearchValues: SearchFilter = {
   searchValue: '',
-  assignedTo: 'All', // Default value: 'Me'
-  associatedTo: '',
-  progress: 'In Progress', // Default value: 'In Progress'
-  upcomingTask: 'Today', // Default value: 'Today'
-  dateRange: [null, null],
+  type: LandType.Fields,
+  status: LandStatus.ACTIVE,
 };

@@ -42,6 +42,7 @@ import {
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
 import { TaskForm } from './task.form';
+import { TaskStatus } from '@agri/shared-types';
 
 const TaskView = () => {
   const initializeStateFromQueryParams = () => {
@@ -154,8 +155,8 @@ const TaskView = () => {
           { label: 'Others', value: 'Others' },
           { label: 'All', value: 'All' },
           ...users.filter(
-            (user: { userId: any }) =>
-              user.userId.toString() !== userInfo.userId.toString()
+            (user: { label: string; value: string }) =>
+              user.value !== userInfo.userId?.toString()
           ),
         ];
         setUserList(newArray);
@@ -167,7 +168,6 @@ const TaskView = () => {
           { label: 'All', value: 'All' },
         ];
         setUserList(newArray);
-        console.log(error);
       });
   }, []);
   // Function to set values based on identifiers
@@ -197,7 +197,6 @@ const TaskView = () => {
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
-
     const filters = removeEmptyValueFilters([
       {
         field: 'taskTitle',
@@ -502,7 +501,7 @@ const TaskView = () => {
               value={searchValues.assignedTo ?? ''}
               onChange={value => value && setValuesById({ assignedTo: value })}
               // allowDeselect={false}
-              // searchable
+              searchable
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
@@ -517,9 +516,9 @@ const TaskView = () => {
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
               placeholder="Progress"
-              data={['In Progress', 'Pending', 'Completed']}
+              data={[...Object.keys(TaskStatus)]}
               value={searchValues.progress ?? ''}
-              onChange={value => setValuesById({ progress: value })}
+              onChange={value => value && setValuesById({ progress: value })}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
@@ -622,7 +621,6 @@ const TaskView = () => {
                   <MyCalendar
                     taskList={tableData}
                     handleClickTask={(object: any) => {
-                      console.log('Object data: ', object);
                       setModalInfo({
                         isOpen: true,
                         type: 'View',

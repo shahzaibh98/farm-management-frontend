@@ -5,7 +5,7 @@ import { useMantineTheme } from '@mantine/core';
 import { useFormik } from 'formik';
 
 // Importing hooks and state management tools
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 // Importing Yup for form validation
@@ -31,6 +31,10 @@ const initialNotification = {
   message: '', // Message of the notification
 };
 
+// Preload the background image
+const backgroundImage = new Image();
+backgroundImage.src = require('../../assets/images/login-background.avif');
+
 // LoginPage function component
 export function LoginPage() {
   // Initialize theme hook
@@ -48,6 +52,12 @@ export function LoginPage() {
   const [userDetails, setUserDetails] = useState<AuthData>();
 
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    // Preload the background image
+    const backgroundImage = new Image();
+    backgroundImage.src = require('../../assets/images/login-background.avif');
+  }, []);
 
   // Initialize formik for form handling
   const formik = useFormik({
@@ -157,8 +167,7 @@ export function LoginPage() {
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'fit',
           backgroundPosition: 'center',
-          backgroundImage:
-            'url(https://images.unsplash.com/photo-1486754735734-325b5831c3ad?q=80&w=1800&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
+          backgroundImage: `url(${backgroundImage.src})`,
         }}
       >
         {notification.isEnable && (
@@ -349,167 +358,4 @@ export function LoginPage() {
       </div>
     </>
   );
-  //   <>
-  //     {!openModal && (
-  //       <Container size={420} className="my-10">
-  //         {/* Notification component */}
-  //         {notification.isEnable && (
-  //           <Notification
-  //             title={notification.title}
-  //             withClose
-  //             color={
-  //               notification.isSuccess ? theme.colors.primaryColors[0] : 'red'
-  //             }
-  //             handleCloseNotification={handleNotificationClose}
-  //           >
-  //             <Text fw={500}>{notification.message}</Text>
-  //           </Notification>
-  //         )}
-  //         {/* Page title */}
-  //         <Title className="font-bold text-2xl text-center text-secondaryColors-100">
-  //           Welcome to Concave Farm!
-  //         </Title>
-
-  //         {/* Form submission handler */}
-  //         <form onSubmit={formik.handleSubmit}>
-  //           {/* Paper wrapper for form elements */}
-  //           <Paper withBorder shadow="md" className="p-8 mt-8 rounded-md">
-  //             {/* Email input field */}
-  //             <TextInput
-  //               label="Email"
-  //               placeholder="Enter your email"
-  //               required
-  //               value={formik.values.email}
-  //               onChange={(value: string) =>
-  //                 formik.setFieldValue('email', value)
-  //               }
-  //               error={
-  //                 formik.touched.email &&
-  //                 formik.errors.email &&
-  //                 formik.errors.email
-  //               }
-  //             />
-  //             {/* Password input field */}
-  //             <PasswordInput
-  //               label="Password"
-  //               placeholder="Enter your password"
-  //               required
-  //               className="mt-4"
-  //               value={formik.values.password}
-  //               onChange={event =>
-  //                 formik.setFieldValue('password', event.target.value)
-  //               }
-  //               error={
-  //                 formik.touched.password &&
-  //                 formik.errors.password &&
-  //                 formik.errors.password
-  //               }
-  //             />
-  //             {/* Group for checkboxes and links */}
-  //             <Group className="mt-6" justify="between">
-  //               {/* Forgot password link */}
-  //               <Text className="text-gray-500 text-sm text-center mt-5">
-  //                 Have already account{' '}
-  //                 <Anchor
-  //                   className="text-secondaryColors-100 hover:underline"
-  //                   component="button"
-  //                   onClick={() => {
-  //                     navigate('/forgot-password');
-  //                   }}
-  //                 >
-  //                   Forgot your password?
-  //                 </Anchor>
-  //               </Text>
-  //             </Group>
-  //             {/* Sign-in button */}
-  //             <Button
-  //               type="submit"
-  //               fullWidth
-  //               className="mt-10"
-  //               style={{ backgroundColor: theme.colors.secondaryColors[3] }}
-  //               loading={isLoading}
-  //             >
-  //               SIGN IN
-  //             </Button>
-  //           </Paper>
-  //         </form>
-  //       </Container>
-  //     )}
-  //     <Modal
-  //       opened={openModal}
-  //       title={`Update Credentials`}
-  //       size="md"
-  //       styles={{
-  //         root: {
-  //           display: 'flex',
-  //           justifyContent: 'center' /* Horizontally center the div */,
-  //           alignItems: 'center' /* Vertically center the div */,
-  //         },
-  //         title: {
-  //           fontSize: '24px',
-  //           fontWeight: 'bold',
-  //           color: theme.colors.primaryColors[0],
-  //         },
-  //       }}
-  //       transitionProps={{ transition: 'fade-up', duration: 300 }}
-  //     >
-  //       <form onSubmit={form.handleSubmit}>
-  //         <PasswordInput
-  //           label="New Password"
-  //           placeholder="Enter your new password"
-  //           required
-  //           className="mt-4"
-  //           value={form.values.password}
-  //           onChange={event =>
-  //             form.setFieldValue('password', event.target.value)
-  //           }
-  //           error={
-  //             form.touched.password &&
-  //             form.errors.password &&
-  //             form.errors.password
-  //           }
-  //         />
-  //         <PasswordInput
-  //           label="Confirm Password"
-  //           placeholder="Enter your password"
-  //           required
-  //           className="mt-4"
-  //           value={form.values.confirmPassword}
-  //           onChange={event =>
-  //             form.setFieldValue('confirmPassword', event.target.value)
-  //           }
-  //           error={
-  //             form.touched.confirmPassword &&
-  //             form.errors.confirmPassword &&
-  //             form.errors.confirmPassword
-  //           }
-  //         />
-
-  //         <Flex
-  //           mih={50}
-  //           gap="xs"
-  //           justify="flex-end"
-  //           align="flex-start"
-  //           direction="row"
-  //           wrap="wrap"
-  //           className="mt-5"
-  //         >
-  //           {/* Submit Button */}
-  //           <Button
-  //             type="submit"
-  //             variant="outline"
-  //             autoContrast
-  //             color={theme.colors.primaryColors[0]}
-  //             size="md"
-  //             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-  //           >
-  //             <Text tt="capitalize" fs="italic">
-  //               {'Change Password'}
-  //             </Text>
-  //           </Button>
-  //         </Flex>
-  //       </form>
-  //     </Modal>
-  //   </>
-  // );
 }

@@ -35,6 +35,14 @@ const UserForm = ({ type = 'Add' }) => {
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
 
+  // Custom validation function
+  const isPkTelePhoneNumber = (phoneNumber: string) => {
+    // Define the regular expressions
+    const regex03 = /^03\d{9}$/;
+    const regexPlus923 = /^\+923\d{9}$/;
+    return regex03.test(phoneNumber) || regexPlus923.test(phoneNumber);
+  };
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues:
@@ -66,14 +74,26 @@ const UserForm = ({ type = 'Add' }) => {
             email: Yup.string()
               .email('Invalid email format')
               .required('Email is required'),
-            phoneNo: Yup.string().required('Phone number is required'),
+            phoneNo: Yup.string()
+              .required('Phone number is required')
+              .test(
+                'is-pk-telephone-number',
+                'Invalid phone number. Please enter a valid Pakistani phone number.',
+                value => isPkTelePhoneNumber(value)
+              ),
           })
         : Yup.object().shape({
             name: Yup.string().required('Name is required'),
             email: Yup.string()
               .email('Invalid email format')
               .required('Email is required'),
-            phoneNo: Yup.string().required('Phone number is required'),
+            phoneNo: Yup.string()
+              .required('Phone number is required')
+              .test(
+                'is-pk-telephone-number',
+                'Invalid phone number. Please enter a valid Pakistani phone number.',
+                value => isPkTelePhoneNumber(value)
+              ),
           }),
     //         roleId: Yup.string().required('Role is required'),
     //       }),
@@ -108,6 +128,7 @@ const UserForm = ({ type = 'Add' }) => {
           putData(`/farm/${values?.farmId}`, {
             farmTitle,
             isActive: isActive === 'true',
+            address,
           }),
           putData(`/users/${id}`, rest),
         ])
@@ -182,8 +203,10 @@ const UserForm = ({ type = 'Add' }) => {
                     }
                     styles={inputStyle}
                     error={
-                      formik.errors.farmTitle &&
-                      (formik.touched.farmTitle || formik.submitCount > 0)
+                      (formik.touched.farmTitle || formik.submitCount > 0) &&
+                      formik.errors.farmTitle
+                        ? formik.errors.farmTitle
+                        : null
                     }
                   />
                 </Grid.Col>
@@ -199,8 +222,10 @@ const UserForm = ({ type = 'Add' }) => {
                     }
                     styles={inputStyle}
                     error={
-                      formik.errors.address &&
-                      (formik.touched.address || formik.submitCount > 0)
+                      (formik.touched.address || formik.submitCount > 0) &&
+                      formik.errors.address
+                        ? formik.errors.address
+                        : null
                     }
                   />
                 </Grid.Col>
@@ -224,8 +249,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.name &&
-                  (formik.touched.name || formik.submitCount > 0)
+                  (formik.touched.name || formik.submitCount > 0) &&
+                  formik.errors.name
+                    ? formik.errors.name
+                    : null
                 }
               />
             </Grid.Col>
@@ -241,8 +268,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.email &&
-                  (formik.touched.email || formik.submitCount > 0)
+                  (formik.touched.email || formik.submitCount > 0) &&
+                  formik.errors.email
+                    ? formik.errors.email
+                    : null
                 }
               />
             </Grid.Col>
@@ -258,8 +287,10 @@ const UserForm = ({ type = 'Add' }) => {
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.phoneNo &&
-                  (formik.touched.phoneNo || formik.submitCount > 0)
+                  (formik.touched.phoneNo || formik.submitCount > 0) &&
+                  formik.errors.phoneNo
+                    ? formik.errors.phoneNo
+                    : null
                 }
               />
             </Grid.Col>

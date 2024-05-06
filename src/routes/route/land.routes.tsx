@@ -34,7 +34,7 @@ export const landRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Land - View" />
-            <div>land View</div>
+            <ManageLand type="View" />
           </PrivateRoute>
         ),
       },
@@ -43,7 +43,7 @@ export const landRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Land - Edit" />
-            <div>land Edit</div>
+            <ManageLand type="Update" />
           </PrivateRoute>
         ),
       },

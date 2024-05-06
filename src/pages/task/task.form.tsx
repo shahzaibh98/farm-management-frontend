@@ -24,6 +24,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { fetchData, postData, putData } from '../../api/api';
 import { useSelector } from 'react-redux';
 import { isTemplateExpression } from 'typescript';
+import { TaskPriority, TaskRepeatTime, TaskStatus } from '@agri/shared-types';
 import * as Yup from 'yup';
 interface ChecklistItem {
   itemName: string;
@@ -390,14 +391,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.taskStatus}
                 onChange={value => form.setFieldValue('taskStatus', value)}
-                data={['In Progress', 'Pending', 'Completed']?.map(status => ({
-                  value: status,
-                  label: status,
-                }))}
-                error={
-                  form.errors.taskStatus &&
-                  (form.touched.taskStatus || form.submitCount > 0)
-                }
+                data={[...Object.values(TaskStatus)]}
               />
             </Grid.Col>
             <Grid.Col>
@@ -425,14 +419,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.priority}
                 onChange={value => form.setFieldValue('priority', value)}
-                data={['High', 'Medium', 'Low'].map(priority => ({
-                  value: priority,
-                  label: priority,
-                }))}
-                error={
-                  form.errors.priority &&
-                  (form.touched.priority || form.submitCount > 0)
-                }
+                data={[...Object.values(TaskPriority)]}
               />
             </Grid.Col>
             <Grid.Col>
@@ -470,10 +457,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.repeatedTask}
                 onChange={value => form.setFieldValue('repeatedTask', value)}
-                data={['Daily', 'Weekly', 'Monthly', 'Yearly'].map(option => ({
-                  value: option,
-                  label: option,
-                }))}
+                data={[...Object.values(TaskRepeatTime)]}
                 disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>

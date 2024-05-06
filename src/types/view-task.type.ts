@@ -1,3 +1,5 @@
+import { TaskStatus } from '@agri/shared-types';
+
 export interface SearchValuesType {
   searchValue: string;
   assignedTo: string;
