@@ -51,3 +51,21 @@ export const systemRoles = [
   { id: '6', name: 'Farm Worker', abbreviation: 'FW' },
   { id: '7', name: 'Auditor', abbreviation: 'AU' },
 ];
+
+export const landColors = [
+  { color: '#D2B48C', value: 'Animal Enclosures' },
+  { color: '#FFFF00', value: 'Buffer Zones' },
+  { color: '#FF8C00', value: 'Buildings' },
+  { color: '#800080', value: 'Farm Boundaries' },
+  { color: '#A8D588', value: 'Green House' },
+  { color: '#00008B', value: 'Grow Room' },
+  { color: '#87CEEB', value: 'Irrigation Zones' },
+  { color: '#D2691E', value: 'Landscaping' },
+  { color: '#006400', value: 'Pasture' },
+  { color: '#D2B48C', value: 'Paddock' },
+  { color: '#808080', value: 'Other' },
+];
+
+const GetLandColors = (value: string) => {
+  return landColors.find(color => color.value === value)?.color;
+};

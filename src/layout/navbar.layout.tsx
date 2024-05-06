@@ -2,20 +2,9 @@
 import { Code, Group, Tooltip, useMantineTheme } from '@mantine/core';
 
 // Tabler icons imports
-import {
-  IconBuildingWarehouse,
-  IconCarrot,
-  IconDashboard,
-  IconListDetails,
-  IconReceipt2,
-} from '@tabler/icons-react';
 
 // React icon imports
-import {
-  MdOutlineAdminPanelSettings,
-  MdOutlineKeyboardArrowRight,
-} from 'react-icons/md';
-import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
+import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
 
 // React library imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,8 +17,8 @@ import { Text } from '../concave.agri/components';
 import { clearUserInfo } from '../redux/actions/user';
 
 // Utility function imports
-import { extractFirstWord } from '../utils/common/function';
 import { systemRoles } from '../utils/common/constant.objects';
+import { extractFirstWord } from '../utils/common/function';
 
 import { getNavBarAgainstRole } from './role-based.navbar';
 

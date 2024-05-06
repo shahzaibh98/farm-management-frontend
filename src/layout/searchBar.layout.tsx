@@ -11,6 +11,7 @@ import useScreenSize from '../hooks/useScreenSize'; // Hook to determine the scr
 
 // Interface defining the props for the SearchComponent
 interface SearchComponentProps {
+  showButtons?: boolean;
   placeholder: string;
   searchValue: string; // The current search value
   setValuesById: (values: { searchValue: string }) => void; // Function to update search values
@@ -18,6 +19,7 @@ interface SearchComponentProps {
   handleResetButtonClick: () => void; // Function to handle reset button click
 }
 const SearchComponent = ({
+  showButtons = true,
   placeholder,
   searchValue,
   setValuesById,
@@ -43,7 +45,7 @@ const SearchComponent = ({
       </Grid.Col>
 
       {/* Conditionally render search and reset buttons based on screen size */}
-      {!isSmallScreen && (
+      {showButtons && !isSmallScreen && (
         <Grid.Col span={{ base: 12, md: 6, lg: 1 }}>
           <div className="flex flex-row">
             {/* Search button */}

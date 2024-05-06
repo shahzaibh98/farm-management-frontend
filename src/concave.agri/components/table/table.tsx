@@ -6,7 +6,7 @@ import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
 // Mantine core theme hook
-import { useMantineTheme } from '@mantine/core';
+import { Skeleton, useMantineTheme } from '@mantine/core';
 
 // Table-related imports
 import { TableProps } from '../../../types/table.type';
@@ -118,9 +118,23 @@ const Table = ({
               No data to display...
             </div>
           ) : isLoading ? (
-            <div className="flex items-center justify-center">
-              <Loader isLoading={isLoading} />
-            </div>
+            Array.from({ length: 5 }).map((_, index) => (
+              <tr
+                key={index}
+                className=" border-b border-b-lightColors-lightestGrey1  cursor-default text-body2 lg:h-10 hover:cursor-pointer hover:rounded-3xl"
+              >
+                {/* Render skeleton cells */}
+                {table?.getAllColumns().map(column => (
+                  <td key={column.id}>
+                    <div className="flex items-center justify-center">
+                      <Skeleton height={14} mt={6} width="70%" radius="xl">
+                        Data Table
+                      </Skeleton>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))
           ) : (
             table?.getRowModel()?.rows?.map(row => {
               return (
