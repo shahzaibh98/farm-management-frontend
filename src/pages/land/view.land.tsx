@@ -1,16 +1,14 @@
-import { Center, Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
-  ActionIcon,
-  Modal,
   Notification,
   Paper,
   Select,
   Table,
-  Text,
+  Text
 } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
@@ -27,6 +25,7 @@ import SearchComponent from '../../layout/searchBar.layout';
 import { LandStatus, LandType } from '@agri/shared-types';
 import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../api/api';
+import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import {
   initialModalInfo,
   initialNotification,
@@ -38,7 +37,6 @@ import {
   removeEmptyValueFilters,
 } from '../../utils/common/function';
 import { SearchFilter, initialSearchValues } from './initial.values';
-import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import LocationSearch from './searchLocation';
 
 const LandView = () => {
@@ -106,6 +104,12 @@ const LandView = () => {
   // State for table data
   const [tableData, setTableData] = useState([]);
 
+  const navigate = useNavigate();
+
+  const handleAddFarmAdmin = () => {
+    navigate('/lands/add');
+  };
+
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
@@ -117,6 +121,32 @@ const LandView = () => {
     initialPaginationFromQueryParams();
   }, [searchParams]);
 
+  // useEffect(() => {
+  //   fetchData(
+  //     `land?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+  //   )
+  //     .then((response: any) => {
+  //       const users = response.data?.map((user: { name: any; userId: any }) => {
+  //         return { label: user.name, value: user.userId?.toString() };
+  //       });
+  //       const newArray = [
+  //         { label: 'Me', value: userInfo.farmId?.toString() },
+  //         { label: 'Others', value: 'Others' },
+  //         { label: 'All', value: 'All' },
+  //         ...users,
+  //       ];
+  //       setUserList(newArray);
+  //     })
+  //     .catch(error => {
+  //       const newArray = [
+  //         { label: 'Me', value: userInfo.farmId?.toString() },
+  //         { label: 'Others', value: 'Others' },
+  //         { label: 'All', value: 'All' },
+  //       ];
+  //       setUserList(newArray);
+  //       console.log(error);
+  //     });
+  // }, []);
   // Function to set values based on identifiers
   const setValuesById = (valuesById: Partial<SearchFilter>) => {
     setSearchValues(prevFormValues => ({
@@ -382,22 +412,8 @@ const LandView = () => {
             <TableMenu
               id={id}
               onDeleteClick={handleDeleteById}
-              onEditClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'Edit',
-                  objectData: info?.row?.original,
-                  isReadOnly: false,
-                })
-              }
-              onViewClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'View',
-                  objectData: info?.row?.original,
-                  isReadOnly: true,
-                })
-              }
+              onEditClick={() => navigate(`/lands -/edit/${id}`)}
+              onViewClick={() => navigate(`/lands-/view/${id}`)}
             />
           );
         },
@@ -463,7 +479,8 @@ const LandView = () => {
         breadcrumbsText="Manage Land"
         isAddOrUpdateButton
         buttonContent="Add Land"
-        onButtonClick={() => setOpen(true)} // Call handleAddTask function when button is clicked
+        // onButtonClick={() => setOpen(true)} // Call handleAddTask function when button is clicked
+        onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
       />
 
       <Paper
@@ -502,6 +519,7 @@ const LandView = () => {
           </Modal>
         </div>
       </Paper>
+
       <div className="h-4" />
     </main>
   );
