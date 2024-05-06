@@ -69,7 +69,9 @@ export function TaskForm({
             taskTitle: '',
             taskStatus: '',
             taskDescription: '',
-            assigned: '',
+            assigned: viewOrUpdate?.objectData?.assigned
+              ? viewOrUpdate.objectData.assigned
+              : null,
             priority: '',
             startDateTime: null,
             endDateTime: null,
@@ -86,6 +88,7 @@ export function TaskForm({
 
     validationSchema: Yup.object().shape({
       taskTitle: Yup.string().required('Task title is required'),
+      hoursSpent: Yup.string().required('Hours Spent title is required'),
       taskDescription: Yup.string().required('Task description is required'),
       startDateTime: Yup.date().required('Start date is required'),
       endDateTime: Yup.date().required('End date is required'),
@@ -257,6 +260,11 @@ export function TaskForm({
                   form.setFieldValue('taskDescription', e.target.value)
                 }
                 value={form.values.taskDescription}
+                error={
+                  !!(
+                    form.errors.taskDescription && form.touched.taskDescription
+                  )
+                }
               />
 
               {/* <TextEditor /> */}
@@ -355,7 +363,7 @@ export function TaskForm({
                 name="associatedTo"
               />
             </Grid.Col>
-            <Grid.Col>
+            {/* <Grid.Col>
               <h2 className="mb-2">Task Color</h2>
               <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs">
                 {colorArray?.map((color, index) => (
@@ -370,7 +378,7 @@ export function TaskForm({
                   </div>
                 ))}
               </SimpleGrid>
-            </Grid.Col>
+            </Grid.Col> */}
           </Grid.Col>
           {/* End of Add Task Container 70% */}
           {/* Add Task Container 30% */}
@@ -386,6 +394,10 @@ export function TaskForm({
                   value: status,
                   label: status,
                 }))}
+                error={
+                  form.errors.taskStatus &&
+                  (form.touched.taskStatus || form.submitCount > 0)
+                }
               />
             </Grid.Col>
             <Grid.Col>
@@ -393,11 +405,16 @@ export function TaskForm({
               <Select
                 placeholder="Select person"
                 withAsterisk
-                value={form.values.assigned}
+                value={
+                  form.values?.assigned
+                    ? form.values?.assigned?.userId?.toString()
+                    : ''
+                }
                 onChange={value => form.setFieldValue('assigned', value)}
-                data={userList?.map((user: any) => {
-                  return { label: user.name, value: user.userId?.toString() };
-                })}
+                data={userList?.map((user: any) => ({
+                  label: user.name,
+                  value: user.userId?.toString(), // Convert userId to string
+                }))}
                 disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>
@@ -412,6 +429,10 @@ export function TaskForm({
                   value: priority,
                   label: priority,
                 }))}
+                error={
+                  form.errors.priority &&
+                  (form.touched.priority || form.submitCount > 0)
+                }
               />
             </Grid.Col>
             <Grid.Col>
@@ -424,6 +445,9 @@ export function TaskForm({
                   new Date(form?.values?.startDateTime)
                 }
                 onChange={value => form.setFieldValue('startDateTime', value)}
+                error={
+                  !!(form.errors.startDateTime && form.touched.startDateTime)
+                }
               />
             </Grid.Col>
             <Grid.Col>
@@ -436,6 +460,7 @@ export function TaskForm({
                   new Date(form?.values?.endDateTime)
                 }
                 onChange={value => form.setFieldValue('endDateTime', value)}
+                error={!!(form.errors.endDateTime && form.touched.endDateTime)}
               />
             </Grid.Col>
             <Grid.Col>
@@ -464,6 +489,10 @@ export function TaskForm({
                   form.setFieldValue('hoursSpent', e)
                 }
                 name="hoursSpent"
+                error={
+                  form.errors.hoursSpent &&
+                  (form.touched.hoursSpent || form.submitCount > 0)
+                }
               />
             </Grid.Col>
           </Grid.Col>

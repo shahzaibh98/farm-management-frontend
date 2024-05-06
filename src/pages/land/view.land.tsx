@@ -147,7 +147,7 @@ const LandView = () => {
 
   useEffect(() => {
     fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `land?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
     )
       .then((response: any) => {
         const users = response.data?.map((user: { name: any; userId: any }) => {
@@ -287,11 +287,11 @@ const LandView = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`task/${id}`)
+    deleteData(`land/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Task is deleted successfully',
+          message: 'Land is deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -409,27 +409,13 @@ const LandView = () => {
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
-          const id = info?.row?.original?.taskId;
+          const id = info?.row?.original?.landId;
           return (
             <TableMenu
               id={id}
               onDeleteClick={handleDeleteById}
-              onEditClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'Edit',
-                  objectData: info?.row?.original,
-                  isReadOnly: false,
-                })
-              }
-              onViewClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'View',
-                  objectData: info?.row?.original,
-                  isReadOnly: true,
-                })
-              }
+              onEditClick={() => navigate(`/lands -/edit/${id}`)}
+              onViewClick={() => navigate(`/lands-/view/${id}`)}
             />
           );
         },

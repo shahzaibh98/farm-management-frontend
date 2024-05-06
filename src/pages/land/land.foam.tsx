@@ -31,7 +31,7 @@ const ManageLand = ({ type = 'Add' }) => {
   });
 
   useEffect(() => {
-    fetchData(`users/${id}`)
+    fetchData(`lands/${id}`)
       .then((data: any) => setLandData(data.data))
       .catch(err => console.log(err));
   }, [id]);
