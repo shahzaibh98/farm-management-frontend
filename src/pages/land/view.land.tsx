@@ -8,7 +8,7 @@ import {
   Paper,
   Select,
   Table,
-  Text
+  Text,
 } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
@@ -121,32 +121,6 @@ const LandView = () => {
     initialPaginationFromQueryParams();
   }, [searchParams]);
 
-  // useEffect(() => {
-  //   fetchData(
-  //     `land?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
-  //   )
-  //     .then((response: any) => {
-  //       const users = response.data?.map((user: { name: any; userId: any }) => {
-  //         return { label: user.name, value: user.userId?.toString() };
-  //       });
-  //       const newArray = [
-  //         { label: 'Me', value: userInfo.farmId?.toString() },
-  //         { label: 'Others', value: 'Others' },
-  //         { label: 'All', value: 'All' },
-  //         ...users,
-  //       ];
-  //       setUserList(newArray);
-  //     })
-  //     .catch(error => {
-  //       const newArray = [
-  //         { label: 'Me', value: userInfo.farmId?.toString() },
-  //         { label: 'Others', value: 'Others' },
-  //         { label: 'All', value: 'All' },
-  //       ];
-  //       setUserList(newArray);
-  //       console.log(error);
-  //     });
-  // }, []);
   // Function to set values based on identifiers
   const setValuesById = (valuesById: Partial<SearchFilter>) => {
     setSearchValues(prevFormValues => ({
@@ -412,8 +386,8 @@ const LandView = () => {
             <TableMenu
               id={id}
               onDeleteClick={handleDeleteById}
-              onEditClick={() => navigate(`/lands -/edit/${id}`)}
-              onViewClick={() => navigate(`/lands-/view/${id}`)}
+              onEditClick={() => navigate(`/lands/edit/${id}`)}
+              onViewClick={() => navigate(`/lands/view/${id}`)}
             />
           );
         },
