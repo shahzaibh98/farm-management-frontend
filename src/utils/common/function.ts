@@ -171,3 +171,11 @@ export function formatTasks(tasks: any[]) {
     }
   );
 }
+
+// Custom validation function
+export const isPkTelePhoneNumber = (phoneNumber: string) => {
+  // Define the regular expressions
+  const regex03 = /^03\d{9}$/;
+  const regexPlus923 = /^\+923\d{9}$/;
+  return regex03.test(phoneNumber) || regexPlus923.test(phoneNumber);
+};

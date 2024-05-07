@@ -14,6 +14,7 @@ import { initialNotification } from '../../utils/common/constant.objects';
 import { Text } from '../../concave.agri/components';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'; // Importing useParams hook
+import { isPkTelePhoneNumber } from '../../utils/common/function';
 
 const UserForm = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
@@ -34,14 +35,6 @@ const UserForm = ({ type = 'Add' }) => {
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
-
-  // Custom validation function
-  const isPkTelePhoneNumber = (phoneNumber: string) => {
-    // Define the regular expressions
-    const regex03 = /^03\d{9}$/;
-    const regexPlus923 = /^\+923\d{9}$/;
-    return regex03.test(phoneNumber) || regexPlus923.test(phoneNumber);
-  };
 
   const formik = useFormik({
     enableReinitialize: true,
