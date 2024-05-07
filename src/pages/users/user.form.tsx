@@ -47,7 +47,7 @@ const UserForm = ({ type = 'Add' }) => {
     enableReinitialize: true,
     initialValues:
       type === 'Update' || type === 'View'
-        ? userData
+        ? { ...userData, address: userData?.farm?.address }
         : roleId === '0'
           ? {
               // Set initial values for farm details
