@@ -7,10 +7,18 @@ import {
   useJsApiLoader,
 } from '@react-google-maps/api';
 import { IconRestore } from '@tabler/icons-react';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  Key,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { SlActionUndo } from 'react-icons/sl';
 import { SearchForm, Button, Text } from '../../concave.agri/components';
 import { isEmpty } from '../../utils/common/function';
+import { getLandColors } from '../../utils/common/constant.objects';
 
 interface Location {
   lat: number;
@@ -18,17 +26,19 @@ interface Location {
 }
 
 interface LocationSearchProps {
-  onLocationSelect: (location: Location) => void;
+  isMultiple?: boolean;
+  onLocationSelect: (location: any) => void;
+  onClose: () => void;
   isReadOnly?: boolean;
-  centerPoint?: Location;
-  polygonCoords?: Location[];
-  color?: string;
+  data?: any;
 }
 
 const LocationSearch = ({
+  isMultiple = false,
+  onClose,
   onLocationSelect,
   isReadOnly,
-  color,
+  data,
 }: LocationSearchProps) => {
   const theme = useMantineTheme();
   const { isLoaded } = useJsApiLoader({
@@ -44,11 +54,17 @@ const LocationSearch = ({
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null
   );
-  const [polygonCoords, setPolygonCoords] = useState<Location[]>([]);
+  const [polygonCoords, setPolygonCoords] = useState<Location[]>(
+    data?.coordinates ?? []
+  );
   const [totalArea, setTotalArea] = useState<number | null>(null);
   const searchBox = useRef<any>(null); // Ref type should be any
   const polygonRef = useRef<google.maps.Polygon | null>(null);
   const listenersRef = useRef<google.maps.MapsEventListener[]>([]);
+  const [centerPoint, setCenterPoint] = useState({
+    lat: 33.6573,
+    lng: 73.0572,
+  });
 
   useEffect(() => {
     if (isLoaded) {
@@ -78,18 +94,36 @@ const LocationSearch = ({
     let totalLng = 0;
 
     // Iterate through each vertex of the polygon
-    for (let i = 0; i < polygon.length; i++) {
+    for (let i = 0; i < polygon?.length; i++) {
       totalLat += polygon[i].lat; // Summing up latitude values
       totalLng += polygon[i].lng; // Summing up longitude values
     }
 
     // Divide the total sums by the number of vertices to get the average
-    const centerLat = totalLat / polygon.length;
-    const centerLng = totalLng / polygon.length;
-    console.log(centerLat, centerLng);
+    const centerLat = totalLat / polygon?.length;
+    const centerLng = totalLng / polygon?.length;
     setLat(centerLat ?? null);
     setLng(centerLng ?? null);
   }
+
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      // Request current position
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCenterPoint({ lat, lng });
+        },
+        error => {
+          console.error('Error getting current position:', error.message);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+      setCenterPoint({ lat: 33.6573, lng: 73.0572 });
+    }
+  }, []);
 
   const handlePlaceSelect = () => {
     if (searchBox?.current) {
@@ -103,52 +137,56 @@ const LocationSearch = ({
         setLat(latitude);
         setLng(longitude);
         setSelectedLocation({ lat: latitude, lng: longitude });
-
-        // Call a function to handle the obtained latitude and longitude
-        onLocationSelect({ lat: latitude, lng: longitude });
       }
     }
   };
 
   const handleMapClick = (e: any) => {
-    const clickedLatLng = e.latLng.toJSON();
-    setPolygonCoords([...polygonCoords, clickedLatLng]);
+    if (!isReadOnly) {
+      const clickedLatLng = e.latLng.toJSON();
+      setPolygonCoords([...polygonCoords, clickedLatLng]);
+    }
   };
 
   const handleUndoPoint = () => {
-    setPolygonCoords(polygonCoords.slice(0, -1));
+    if (!isReadOnly) {
+      setPolygonCoords(polygonCoords.slice(0, -1));
+    }
   };
 
   const handleResetPolygon = () => {
-    setLat(null);
-    setLng(null);
-    setPolygonCoords([]);
+    if (!isReadOnly) {
+      setLat(null);
+      setLng(null);
+      setPolygonCoords([]);
+    }
   };
 
   // Call setPath with new edited path
   const onEdit = useCallback(() => {
-    if (polygonRef.current) {
-      const nextPath = polygonRef.current
-        .getPath()
-        .getArray()
-        .map((latLng: { lat: () => any; lng: () => any }) => {
-          return { lat: latLng.lat(), lng: latLng.lng() };
-        });
-      setPolygonCoords(nextPath);
+    if (!isReadOnly) {
+      if (polygonRef.current) {
+        const nextPath = polygonRef.current
+          .getPath()
+          .getArray()
+          .map((latLng: { lat: () => any; lng: () => any }) => {
+            return { lat: latLng.lat(), lng: latLng.lng() };
+          });
+        setPolygonCoords(nextPath);
+      }
     }
   }, [setPolygonCoords]);
 
-  // Bind refs to current Polygon and listeners
+  // Call setPath with new edited path
   const onLoad = useCallback(
-    (polygon: google.maps.Polygon | null) => {
+    (polygon: google.maps.Polygon) => {
       polygonRef.current = polygon;
-      const path = polygon && polygon.getPath();
-      path &&
-        listenersRef.current.push(
-          path.addListener('set_at', onEdit),
-          path.addListener('insert_at', onEdit),
-          path.addListener('remove_at', onEdit)
-        );
+      const path = polygon.getPath();
+      listenersRef.current.push(
+        path.addListener('set_at', onEdit),
+        path.addListener('insert_at', onEdit),
+        path.addListener('remove_at', onEdit)
+      );
     },
     [onEdit]
   );
@@ -220,47 +258,58 @@ const LocationSearch = ({
       )}
       <GoogleMap
         mapContainerStyle={{
-          height: '500px',
+          height: '450px',
           width: '100%',
           marginTop: '10px',
           borderRadius: '10px',
           border: '2px solid #ccc', // Border style, width, and color
         }}
-        center={{
-          lat: lat ?? 37.7749,
-          lng: lng ?? -122.4194,
-        }}
+        center={data?.markLocation ?? selectedLocation ?? centerPoint}
         zoom={12}
-        onDblClick={handleMapClick}
+        onDblClick={e => !isReadOnly && handleMapClick(e)}
       >
         <>
           {selectedLocation && isEmpty(polygonCoords) && (
             <Marker
-              position={{
-                lat: selectedLocation.lat,
-                lng: selectedLocation.lng,
-              }}
+              position={selectedLocation ?? { lat: 33.6573, lng: 73.0572 }}
             />
           )}
-          {!isEmpty(polygonCoords) && lat && lng && (
-            <Marker
-              label={'Name'}
-              position={{
-                lat,
-                lng,
-              }}
-              icon={{
-                url: '',
-                scaledSize: new window.google.maps.Size(20, 32),
-              }}
-            />
+
+          {isMultiple && (
+            <>
+              {/* Existing markers */}
+              {data?.map((landData: any, index: Key | null | undefined) => (
+                <Polygon
+                  key={index}
+                  paths={landData?.coordinates}
+                  // Make the Polygon editable / draggable
+                  editable={!isReadOnly}
+                  draggable={!isReadOnly}
+                  // Event used when manipulating and adding points
+                  onMouseUp={onEdit}
+                  // Event used when dragging the whole Polygon
+                  onDragEnd={onEdit}
+                  onLoad={polygon => onLoad(polygon)}
+                  onUnmount={onUnmount}
+                  options={{
+                    geodesic: true,
+                    fillColor: getLandColors(data?.type) ?? '#000000',
+                    fillOpacity: 0.35,
+                    strokeColor: getLandColors(data?.type) ?? '#000000',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 4,
+                  }}
+                />
+              ))}
+            </>
           )}
-          {polygonCoords?.length > 0 && (
+
+          {!isMultiple && !isEmpty(polygonCoords) && (
             <Polygon
               paths={polygonCoords}
               // Make the Polygon editable / draggable
-              editable={true}
-              draggable={true}
+              editable={!isReadOnly}
+              draggable={!isReadOnly}
               // Event used when manipulating and adding points
               onMouseUp={onEdit}
               // Event used when dragging the whole Polygon
@@ -269,11 +318,11 @@ const LocationSearch = ({
               onUnmount={onUnmount}
               options={{
                 geodesic: true,
-                fillColor: color ?? '#FF0000',
+                fillColor: getLandColors(data?.type) ?? '#000000',
                 fillOpacity: 0.35,
-                strokeColor: color ?? '#FF0000',
+                strokeColor: getLandColors(data?.type) ?? '#000000',
                 strokeOpacity: 0.8,
-                strokeWeight: 2,
+                strokeWeight: 4,
               }}
             ></Polygon>
           )}
@@ -288,17 +337,17 @@ const LocationSearch = ({
           align="flex-start"
           direction="row"
           wrap="wrap"
-          className="mb-5"
+          className="mb-2"
         >
           <Button
             variant="outline"
             autoContrast
             color={theme.colors.secondaryColors[3]}
             size="md"
-            onClick={() => {}}
+            onClick={onClose}
             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
           >
-            <Text tt="capitalize" fs="italic">
+            <Text tt="capitalize" fs="italic" p={2}>
               {'Cancel'}
             </Text>
           </Button>
@@ -307,16 +356,16 @@ const LocationSearch = ({
             autoContrast
             color={theme.colors.primaryColors[0]}
             size="md"
-            onClick={() => {
-              console.log('Confirm', {
+            onClick={() =>
+              onLocationSelect({
                 coordinates: polygonCoords,
                 markLocation: { lat, lng },
                 totalArea,
-              });
-            }}
+              })
+            }
             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
           >
-            <Text tt="capitalize" fs="italic">
+            <Text tt="capitalize" fs="italic" p={2}>
               {'Save'}
             </Text>
           </Button>

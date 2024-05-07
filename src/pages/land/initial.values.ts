@@ -8,6 +8,12 @@ export interface SearchFilter {
 
 export const initialSearchValues: SearchFilter = {
   searchValue: '',
-  type: LandType.Fields,
+  type: 'All',
   status: LandStatus.ACTIVE,
+};
+
+export const initialMapModalInfo = {
+  isOpened: false,
+  isReadOnly: true,
+  data: null,
 };

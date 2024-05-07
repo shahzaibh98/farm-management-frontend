@@ -1,12 +1,4 @@
-import {
-  IconDashboard,
-  IconListDetails,
-  IconCarrot,
-  IconBuildingWarehouse,
-  IconReceipt2,
-} from '@tabler/icons-react';
 import moment from 'moment';
-import { MdOutlineAdminPanelSettings } from 'react-icons/md';
 
 export function extractFirstWord(url: string): string | null {
   // Split the URL at the '?' character to separate the base URL and query parameters
@@ -16,7 +8,7 @@ export function extractFirstWord(url: string): string | null {
   const parts = baseUrl.split('/');
 
   // Return the first word from the URL if it exists, otherwise return null
-  return parts.length > 1 ? parts[3] : null;
+  return parts?.length > 1 ? parts[3] : null;
 }
 
 export function formatTime(timeText: string) {
@@ -39,7 +31,7 @@ export function formatTime(timeText: string) {
   return formattedTime;
 }
 
-export const isEmpty = <T>(item: Array<T> | string) => item.length === 0;
+export const isEmpty = <T>(item: Array<T> | string) => item?.length === 0;
 
 export function removeEmptyValueFilters(filters: any[]) {
   return filters.filter(
