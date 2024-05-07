@@ -1,19 +1,27 @@
-import { Grid, Paper, Select, Title, useMantineTheme } from '@mantine/core';
+import {
+  Button,
+  Grid,
+  Paper,
+  Select,
+  Title,
+  rem,
+  useMantineTheme,
+} from '@mantine/core';
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react'; // Importing React hooks
+import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { fetchData, postData, putData } from '../../api/api';
-import { Notification, TextInput } from '../../concave.agri/components';
-import useScreenSize from '../../hooks/useScreenSize';
+import {
+  Modal,
+  Notification,
+  NumberInput,
+  TextInput,
+} from '../../concave.agri/components';
 import GenericHeader from '../../layout/header.layout';
 import { inputStyle } from '../../theme/common.style';
 
 // Importing custom components from the 'concave.agri' project
-import { Text } from '../../concave.agri/components';
-import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom'; // Importing useParams hook
-import { initialNotification } from '../../utils/common/constant.objects';
 import {
   AreaUnitEn,
   IRRIGATIONMETHOD,
@@ -21,50 +29,46 @@ import {
   LandType,
   SoilType,
 } from '@agri/shared-types';
+import { IconMap } from '@tabler/icons-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Text } from '../../concave.agri/components';
+import { initialNotification } from '../../utils/common/constant.objects';
+import { initialMapModalInfo } from './initial.values';
+import LocationSearch from './searchLocation';
+import { Country, State, City } from 'country-state-city';
 
 const ManageLand = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
   const { id } = useParams(); // Getting the ID from URL params
 
+  const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
+
   const navigate = useNavigate();
   const [landData, setLandData] = useState<any>();
-  const [currentLocation, setCurrentLocation] = useState({
-    latitude: '',
-    longitude: '',
-  });
-  const [initialLocation, setInitialLocation] = useState({
-    latitude: '',
-    longitude: '',
+
+  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+
+  const [locationData, setLocationData] = useState({
+    countryCode: '',
+    stateCode: '',
+    cityCode: '',
   });
 
   useEffect(() => {
-    fetchData(`land/${id}`)
-      .then((data: any) => setLandData(data))
-      .catch(err => console.log(err));
-  }, [id]);
-
-  useEffect(() => {
-    // Get current location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          setInitialLocation({
-            latitude: position.coords.latitude.toFixed(6),
-            longitude: position.coords.longitude.toFixed(6),
-          });
-        },
-        error => {
-          console.error('Error getting current location:', error);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-    }
+    console.log('Country', Country.getAllCountries());
+    console.log('State', State.getStatesOfCountry('PK'));
+    console.log('City', City.getCitiesOfState('PK', 'KP'));
   }, []);
+
+  useEffect(() => {
+    if (id)
+      fetchData(`land/${id}`)
+        .then((data: any) => setLandData(data))
+        .catch((err: any) => console.log(err));
+  }, [id]);
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
-  const [showLatLongFields, setShowLatLongFields] = useState(false);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -74,34 +78,42 @@ const ManageLand = ({ type = 'Add' }) => {
         : {
             name: '',
             type: '',
-            farmId: '',
+            farmId: userInfo.farmId,
             area: '',
-            areaUnit: '',
+            areaUnit: AreaUnitEn.ACRES,
             country: '',
             provinceOrState: '',
-            district: '',
-            tehsil: '',
+            cityOrTown: '',
             coordinates: [],
-            markLocation: [],
+            markLocation: null,
             address: '',
             soilType: '',
             status: '',
             estimatedCost: '',
             irrigationMethod: '',
-            latitude: initialLocation.latitude,
-            longitude: initialLocation.longitude,
           },
     validationSchema: Yup.object().shape({
-      // Farm Details Validation
+      // Land Validation Schema
       name: Yup.string().required('Land Name is required'),
-      address: Yup.string().required('Address is required'),
+      type: Yup.string().required('Land Type is required'),
+
       area: Yup.number()
         .typeError('Area must be a number')
         .required('Area is required'),
+      areaUnit: Yup.string().required('Area Unit is required'),
+      country: Yup.string().required('Country is required'),
+      provinceOrState: Yup.string().required('Province/State is required'),
+      cityOrTown: Yup.string().required('City/Town is required'),
+      coordinates: Yup.array()
+        .min(2, 'Coordinates are required')
+        .required('Coordinates are required'),
     }),
     onSubmit: values => {
       if (type !== 'Update')
-        postData('/land', values) // Send form data to the server
+        postData('/land', {
+          ...values,
+          estimatedCost: values.estimatedCost.toString(),
+        }) // Send form data to the server
           .then(() => {
             // Handle successful form submission
             setNotification({
@@ -112,7 +124,7 @@ const ManageLand = ({ type = 'Add' }) => {
             });
             setTimeout(() => {
               navigate(-1);
-            }, 3000);
+            }, 2000);
           })
           .catch(error => {
             // Handle form submission error
@@ -124,13 +136,11 @@ const ManageLand = ({ type = 'Add' }) => {
             });
           });
       else {
-        const { name, ...rest } = values;
-
         Promise.all([
-          putData(`/land/${values?.farmId}`, {
-            name,
+          putData(`/land/${id}`, {
+            ...values,
+            estimatedCost: values.estimatedCost.toString(),
           }),
-          putData(`/land/${id}`, rest),
         ])
           .then(() => {
             // Handle successful form submission
@@ -142,7 +152,7 @@ const ManageLand = ({ type = 'Add' }) => {
             });
             setTimeout(() => {
               navigate(-1);
-            }, 3000);
+            }, 2000);
           })
           .catch(error => {
             // Handle form submission error
@@ -158,41 +168,9 @@ const ManageLand = ({ type = 'Add' }) => {
   });
 
   const handleNotificationClose = () => setNotification(initialNotification);
-  const locationOptions = [
-    { label: 'Field', value: 'Field' },
-    { label: 'Greenhouse', value: 'Greenhouse' },
-    { label: 'GrowRoom', value: 'GrowRoom' },
-    { label: 'Pasture', value: 'Pasture' },
-    { label: 'Paddock', value: 'Paddock' },
-    { label: 'Other', value: 'Other' },
-  ];
-  const Areaoptions = [
-    { label: 'Square Feet', value: 'sqft' },
-    { label: 'Square Meter', value: 'sqm' },
-    { label: 'Acre', value: 'acre' },
-    { label: 'Hectare', value: 'hectare' },
-    { label: 'Square Kilometer', value: 'sqkm' },
-    // Add more options as needed
-  ];
-  const soilTypeOptions = [
-    { label: 'Sandy', value: 'Sandy' },
-    { label: 'Clay', value: 'Clay' },
-    { label: 'Loamy', value: 'Loamy' },
-    { label: 'Silty', value: 'Silty' },
-    { label: 'Peaty', value: 'Peaty' },
-    { label: 'Chalky', value: 'Chalky' },
-    { label: 'Rocky', value: 'Rocky' },
-    // Add more options as needed
-  ];
-  const statusoptions = [
-    { label: 'Active', value: 'Active' },
-    { label: 'Fallow', value: 'Fallow' },
-    { label: 'Leased', value: 'Leased' },
-    { label: 'Other', value: 'Other' },
-  ];
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={`w-full h-screen relative bg-darkColors-700 mb-4`}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -206,8 +184,8 @@ const ManageLand = ({ type = 'Add' }) => {
       <GenericHeader
         headerText="Land"
         breadcrumbsText="Manage Land"
-        isAddOrUpdateButton
-        buttonContent="Add Land"
+        isAddOrUpdateButton={type !== 'View'}
+        buttonContent={`${type} Land`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
       <Paper
@@ -215,10 +193,11 @@ const ManageLand = ({ type = 'Add' }) => {
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
         mih={'70%'}
+        mb={10}
       >
         <form>
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Land Detail
+            Information
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
@@ -251,24 +230,54 @@ const ManageLand = ({ type = 'Add' }) => {
                   type !== 'View' && formik.setFieldValue('type', value)
                 }
                 styles={inputStyle}
+                error={
+                  (formik.errors?.type && formik.touched.type) ||
+                  formik.submitCount > 0
+                    ? (formik.errors?.type as ReactNode)
+                    : null
+                }
               />
             </Grid.Col>
-
+          </Grid>
+          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Land Location
+          </Title>
+          <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                id="area"
-                label="Land Area"
-                name="area"
-                placeholder="Enter your Land Area..."
-                value={formik.values?.area ?? ''}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('area', parseFloat(e))
-                }
+              <Select
+                id="country"
+                label="Country"
+                name="country"
+                placeholder="Enter your country..."
+                value={formik.values?.country ?? ''}
+                onChange={e => {
+                  if (type !== 'View') {
+                    const getCountry = Country.getAllCountries()?.find(
+                      country => country.name === e
+                    );
+
+                    setLocationData({
+                      ...locationData,
+                      countryCode: getCountry?.isoCode ?? '',
+                    });
+
+                    formik.setFieldValue('country', e);
+                    formik.setFieldValue('provinceOrState', '');
+                    formik.setFieldValue('cityOrTown', '');
+                  }
+                }}
+                data={[
+                  /* eslint-disable-next-line */
+                  ...Country?.getAllCountries()?.map(country => {
+                    return country?.name;
+                  }),
+                ]}
+                searchable
                 styles={inputStyle}
                 error={
-                  formik.errors.area &&
-                  (formik.touched.area || formik.submitCount > 0)
-                    ? formik.errors.area
+                  formik.errors.country &&
+                  (formik.touched.country || formik.submitCount > 0)
+                    ? (formik.errors.country as ReactNode)
                     : null
                 }
               />
@@ -276,50 +285,69 @@ const ManageLand = ({ type = 'Add' }) => {
 
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="areaUnit"
-                label="Area Unit"
-                placeholder="Select areaUnit..."
-                data={[...Object.values(AreaUnitEn)]}
-                value={formik.values?.areaUnit}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('areaUnit', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                id="country"
-                label="Country"
-                name="country"
-                placeholder="Enter your country..."
-                value={formik.values?.country ?? ''}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('country', e)
-                }
-                styles={inputStyle}
-                error={
-                  formik.errors.country &&
-                  (formik.touched.country || formik.submitCount > 0)
-                }
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
                 id="province"
                 label="Province/State"
                 name="provinceOrState"
-                placeholder="Enter your country..."
+                searchable
+                placeholder="Enter your province or state..."
                 value={formik.values?.provinceOrState ?? ''}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('provinceOrState', e)
-                }
+                disabled={!formik.values?.country}
+                data={[
+                  { label: 'None', value: '' },
+                  /* eslint-disable-next-line */
+                  ...State?.getStatesOfCountry(locationData?.countryCode)?.map(
+                    state => state?.name
+                  ),
+                ]}
+                onChange={e => {
+                  if (type !== 'View') {
+                    const getState = State.getAllStates()?.find(
+                      state =>
+                        state.name === e &&
+                        state.countryCode === locationData?.countryCode
+                    );
+
+                    setLocationData({
+                      ...locationData,
+                      stateCode: getState?.isoCode ?? '',
+                    });
+                    formik.setFieldValue('provinceOrState', e);
+                  }
+                }}
                 styles={inputStyle}
                 error={
                   formik.errors.provinceOrState &&
                   (formik.touched.provinceOrState || formik.submitCount > 0)
-                    ? formik.errors.provinceOrState
+                    ? (formik.errors.provinceOrState as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="city"
+                label="City/Town"
+                name="cityOrTown"
+                searchable
+                placeholder="Enter your city or town..."
+                value={formik.values?.cityOrTown ?? ''}
+                disabled={!formik.values?.provinceOrState}
+                data={[
+                  { label: 'None', value: '' },
+                  ...City.getCitiesOfState(
+                    locationData?.countryCode,
+                    locationData?.stateCode
+                  ).map(city => city.name),
+                ]}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('cityOrTown', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.cityOrTown &&
+                  (formik.touched.cityOrTown || formik.submitCount > 0)
+                    ? (formik.errors.cityOrTown as ReactNode)
                     : null
                 }
               />
@@ -344,6 +372,24 @@ const ManageLand = ({ type = 'Add' }) => {
                 }
               />
             </Grid.Col>
+          </Grid>
+          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Addition Info
+          </Title>
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="status"
+                label="Status"
+                placeholder="Select Status..."
+                data={[...Object.values(LandStatus)]}
+                value={formik?.values?.status ?? ''}
+                onChange={value =>
+                  type !== 'View' && formik.setFieldValue('status', value)
+                }
+                styles={inputStyle}
+              />
+            </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
                 id="soilType"
@@ -359,19 +405,20 @@ const ManageLand = ({ type = 'Add' }) => {
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="status"
-                label="Status"
-                placeholder="Select Status..."
-                data={[...Object.values(LandStatus)]}
-                value={formik?.values?.status ?? ''}
+                id="irrigationMethod"
+                label="Irrigation Method"
+                placeholder="Select Method..."
+                data={[...Object.values(IRRIGATIONMETHOD)]}
+                value={formik.values?.irrigationMethod}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('status', value)
+                  type !== 'View' &&
+                  formik.setFieldValue('irrigationMethod', value)
                 }
                 styles={inputStyle}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
+              <NumberInput
                 id="estimatedCost"
                 label="Estimate Cost"
                 name="estimatedCost"
@@ -389,31 +436,98 @@ const ManageLand = ({ type = 'Add' }) => {
                 }
               />
             </Grid.Col>
+          </Grid>
 
+          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Mark Land Boundaries
+          </Title>
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Button
+                variant="outline"
+                autoContrast
+                color={theme.colors.secondaryColors[0]}
+                size="md"
+                onClick={() => {
+                  setMapModalDetails({
+                    isOpened: true,
+                    isReadOnly: false,
+                    data: formik.values,
+                  });
+                }}
+                style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+                rightSection={
+                  <IconMap style={{ width: rem(18), height: rem(18) }} />
+                }
+              >
+                <Text tt="capitalize" fs="italic" p={2}>
+                  {'Mark Boundaries'}
+                </Text>
+              </Button>
+            </Grid.Col>
+          </Grid>
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="area"
+                label="Land Area"
+                name="area"
+                placeholder="Enter your Land Area..."
+                value={formik.values?.area ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('area', parseFloat(e))
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.area &&
+                  (formik.touched.area || formik.submitCount > 0)
+                    ? formik.errors.area
+                    : null
+                }
+              />
+            </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="irrigationMethod"
-                label="Irrigation Method"
-                placeholder="Select Method..."
-                data={[...Object.values(IRRIGATIONMETHOD)]}
-                value={formik.values?.irrigationMethod}
+                id="areaUnit"
+                label="Area Unit"
+                placeholder="Select areaUnit..."
+                data={[...Object.values(AreaUnitEn)]}
+                value={formik.values?.areaUnit}
                 onChange={value =>
-                  type !== 'View' &&
-                  formik.setFieldValue('irrigationMethod', value)
+                  type !== 'View' && formik.setFieldValue('areaUnit', value)
                 }
                 styles={inputStyle}
               />
             </Grid.Col>
           </Grid>
-          <button
-            onClick={e => {
-              e.preventDefault();
-              setShowLatLongFields(!showLatLongFields);
+
+          <Modal
+            styles={{
+              title: {
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: theme.colors.primaryColors[0],
+              },
             }}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+            transitionProps={{ transition: 'fade-up', duration: 300 }}
+            onClose={() => setMapModalDetails(initialMapModalInfo)}
+            opened={mapModalDetails?.isOpened}
+            title={'Land Boundaries'}
+            size={'xl'}
           >
-            {showLatLongFields ? 'Hide Lat Long Fields' : 'Add Lat Long Fields'}
-          </button>
+            <LocationSearch
+              onLocationSelect={object => {
+                formik.setFieldValue('coordinates', object?.coordinates);
+                formik.setFieldValue('markLocation', object?.markLocation);
+                formik.setFieldValue('area', object?.totalArea);
+                formik.setFieldValue('areaUnit', AreaUnitEn.ACRES);
+                setMapModalDetails(initialMapModalInfo);
+              }}
+              onClose={() => setMapModalDetails(initialMapModalInfo)}
+              isReadOnly={type === 'View'}
+              data={mapModalDetails?.data}
+            />
+          </Modal>
         </form>
       </Paper>
     </main>

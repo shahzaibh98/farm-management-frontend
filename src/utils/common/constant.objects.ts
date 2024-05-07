@@ -57,6 +57,7 @@ export const landColors = [
   { color: '#FFFF00', value: 'Buffer Zones' },
   { color: '#FF8C00', value: 'Buildings' },
   { color: '#800080', value: 'Farm Boundaries' },
+  { color: '#006419', value: 'Fields' },
   { color: '#A8D588', value: 'Green House' },
   { color: '#00008B', value: 'Grow Room' },
   { color: '#87CEEB', value: 'Irrigation Zones' },
@@ -66,6 +67,7 @@ export const landColors = [
   { color: '#808080', value: 'Other' },
 ];
 
-const GetLandColors = (value: string) => {
-  return landColors.find(color => color.value === value)?.color;
+export const getLandColors = (value: string) => {
+  const color = landColors.find(color => color.value === value);
+  return color?.color;
 };

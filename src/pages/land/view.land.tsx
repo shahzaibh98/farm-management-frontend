@@ -22,12 +22,11 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { LandStatus, LandType } from '@agri/shared-types';
+import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../api/api';
 import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import {
-  initialModalInfo,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
@@ -36,7 +35,11 @@ import {
   isEmpty,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
-import { SearchFilter, initialSearchValues } from './initial.values';
+import {
+  SearchFilter,
+  initialMapModalInfo,
+  initialSearchValues,
+} from './initial.values';
 import LocationSearch from './searchLocation';
 
 const LandView = () => {
@@ -73,7 +76,6 @@ const LandView = () => {
   const theme = useMantineTheme();
   const { isSmallScreen } = useScreenSize();
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
-  const [open, setOpen] = useState(false);
 
   /* /////////////////////////////////////////////////
                       State
@@ -93,7 +95,6 @@ const LandView = () => {
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
-  const [modalInfo, setModalInfo] = useState(initialModalInfo);
 
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -110,11 +111,11 @@ const LandView = () => {
     navigate('/lands/add');
   };
 
+  const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
+
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
-
-  const handleAddLand = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
     initializeStateFromQueryParams();
@@ -163,7 +164,7 @@ const LandView = () => {
       {
         field: 'type',
         operator: 'eq',
-        value: searchValues?.type ?? '',
+        value: searchValues?.type === 'All' ? '' : searchValues?.type ?? '',
       },
       {
         field: 'farmId',
@@ -319,7 +320,7 @@ const LandView = () => {
           return (
             <div className="flex items-center justify-center">
               <p className="text-sm lg:text-base text-center">
-                {`${rowInfo?.area}  ${rowInfo?.areaUnit}`}
+                {`${Number(rowInfo?.convertedArea)?.toFixed(1)}  ${AreaUnitEn.ACRES}`}
               </p>
             </div>
           );
@@ -368,6 +369,13 @@ const LandView = () => {
                   width={24}
                   opacity={0.8}
                   className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
+                  onClick={() =>
+                    setMapModalDetails({
+                      isOpened: true,
+                      isReadOnly: true,
+                      data: rowData,
+                    })
+                  }
                 />
               </Center>
             )
@@ -396,46 +404,6 @@ const LandView = () => {
     [tableData]
   );
 
-  const searchAndFilter = () => {
-    return (
-      <>
-        <SearchComponent
-          placeholder="Search by name..."
-          searchValue={searchValues.searchValue}
-          setValuesById={setValuesById}
-          handleSearchButtonClick={handleSearchButtonClick}
-          handleResetButtonClick={handleResetButtonClick}
-        />
-        <Grid className="mt-2">
-          <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
-            <Select
-              placeholder="Land Type"
-              data={[...Object.values(LandType)]}
-              value={searchValues.type ?? ''}
-              onChange={value => value && setValuesById({ type: value })}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
-            <Select
-              placeholder="Land Status"
-              data={[...Object.values(LandStatus)]}
-              value={searchValues.status ?? ''}
-              onChange={value => value && setValuesById({ status: value })}
-            />
-          </Grid.Col>
-          {isSmallScreen && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-              <div className="flex flex-row justify-between">
-                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
-                <ResetButton onResetButtonClick={handleResetButtonClick} />
-              </div>
-            </Grid.Col>
-          )}
-        </Grid>
-      </>
-    );
-  };
-
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
       {notification.isEnable && (
@@ -453,7 +421,6 @@ const LandView = () => {
         breadcrumbsText="Manage Land"
         isAddOrUpdateButton
         buttonContent="Add Land"
-        // onButtonClick={() => setOpen(true)} // Call handleAddTask function when button is clicked
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
       />
 
@@ -463,7 +430,42 @@ const LandView = () => {
         radius={12}
       >
         <div className="mt-4">
-          {searchAndFilter()}
+          <SearchComponent
+            placeholder="Search by name..."
+            searchValue={searchValues.searchValue}
+            setValuesById={setValuesById}
+            handleSearchButtonClick={handleSearchButtonClick}
+            handleResetButtonClick={handleResetButtonClick}
+          />
+          <Grid className="mt-2">
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Land Type"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...Object.values(LandType),
+                ]}
+                value={searchValues.type ?? ''}
+                onChange={value => value && setValuesById({ type: value })}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Land Status"
+                data={[...Object.values(LandStatus)]}
+                value={searchValues.status ?? ''}
+                onChange={value => value && setValuesById({ status: value })}
+              />
+            </Grid.Col>
+            {isSmallScreen && (
+              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                <div className="flex flex-row justify-between">
+                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <ResetButton onResetButtonClick={handleResetButtonClick} />
+                </div>
+              </Grid.Col>
+            )}
+          </Grid>
           <Table
             isLoading={isLoading}
             data={tableData}
@@ -480,15 +482,17 @@ const LandView = () => {
               },
             }}
             transitionProps={{ transition: 'fade-up', duration: 300 }}
-            onClose={() => setOpen(false)}
-            opened={!true}
+            onClose={() => setMapModalDetails(initialMapModalInfo)}
+            opened={mapModalDetails?.isOpened}
             title={'Land Boundaries'}
             size={'xl'}
+            centered={true} // true,
           >
             <LocationSearch
               onLocationSelect={() => {}}
-              isReadOnly={!true}
-              color="#800080"
+              onClose={() => setMapModalDetails(initialMapModalInfo)}
+              isReadOnly={mapModalDetails?.isReadOnly}
+              data={mapModalDetails?.data}
             />
           </Modal>
         </div>

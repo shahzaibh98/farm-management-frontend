@@ -500,7 +500,7 @@ export function TaskForm({
               onClick={onCloseButton}
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
             >
-              <Text tt="capitalize" fs="italic">
+              <Text tt="capitalize" fs="italic" p={2}>
                 {'Cancel'}
               </Text>
             </Button>
@@ -512,7 +512,7 @@ export function TaskForm({
               type="submit"
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
             >
-              <Text tt="capitalize" fs="italic">
+              <Text tt="capitalize" fs="italic" p={2}>
                 {mode === 'Add' ? 'Create' : 'Update'}
               </Text>
             </Button>
