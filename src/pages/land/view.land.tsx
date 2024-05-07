@@ -41,6 +41,7 @@ import {
   initialSearchValues,
 } from './initial.values';
 import LocationSearch from './searchLocation';
+import DeleteModel from '../../layout/confimation.modal';
 
 const LandView = () => {
   const initializeStateFromQueryParams = () => {
@@ -112,6 +113,12 @@ const LandView = () => {
   };
 
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
+
+  const [deleteInfo, setDeleteInfo] = useState({
+    isOpened: false,
+    id: '',
+    resourceName: '',
+  });
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -393,7 +400,9 @@ const LandView = () => {
           return (
             <TableMenu
               id={id}
-              onDeleteClick={handleDeleteById}
+              onDeleteClick={id =>
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
+              }
               onEditClick={() => navigate(`/lands/edit/${id}`)}
               onViewClick={() => navigate(`/lands/view/${id}`)}
             />
@@ -499,6 +508,19 @@ const LandView = () => {
       </Paper>
 
       <div className="h-4" />
+      <DeleteModel
+        onDelete={handleDeleteById}
+        id={deleteInfo?.id}
+        opened={deleteInfo?.isOpened}
+        setOpened={() =>
+          setDeleteInfo({
+            isOpened: false,
+            id: '',
+            resourceName: '',
+          })
+        }
+        resourceName={deleteInfo?.resourceName}
+      />
     </main>
   );
 };

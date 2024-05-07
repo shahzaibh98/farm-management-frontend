@@ -297,7 +297,7 @@ const LocationSearch = ({
                     fillOpacity: 0.35,
                     strokeColor: getLandColors(data?.type) ?? '#000000',
                     strokeOpacity: 0.8,
-                    strokeWeight: 2,
+                    strokeWeight: 4,
                   }}
                 />
               ))}
@@ -322,7 +322,7 @@ const LocationSearch = ({
                 fillOpacity: 0.35,
                 strokeColor: getLandColors(data?.type) ?? '#000000',
                 strokeOpacity: 0.8,
-                strokeWeight: 2,
+                strokeWeight: 4,
               }}
             ></Polygon>
           )}

@@ -103,7 +103,6 @@ const ManageLand = ({ type = 'Add' }) => {
       areaUnit: Yup.string().required('Area Unit is required'),
       country: Yup.string().required('Country is required'),
       provinceOrState: Yup.string().required('Province/State is required'),
-      cityOrTown: Yup.string().required('City/Town is required'),
       coordinates: Yup.array()
         .min(2, 'Coordinates are required')
         .required('Coordinates are required'),
@@ -338,7 +337,7 @@ const ManageLand = ({ type = 'Add' }) => {
                   ...City.getCitiesOfState(
                     locationData?.countryCode,
                     locationData?.stateCode
-                  ).map(city => city.name),
+                  ).map((city: { name: any }) => city.name),
                 ]}
                 onChange={e =>
                   type !== 'View' && formik.setFieldValue('cityOrTown', e)
