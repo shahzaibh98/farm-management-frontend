@@ -3,10 +3,14 @@ import { useMantineTheme } from '@mantine/core';
 import { IoChevronBackOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { Button, Text } from '../concave.agri/components';
+import { IconBrandTwitter } from '@tabler/icons-react';
 
 // Define the Props interface for the component
 interface Props {
   isBackendButton?: boolean;
+  isSecondButton?: boolean;
+  secondButtonContent?: string;
+  onSecondButtonClick?: () => void;
   headerText: string;
   breadcrumbsText: string;
   isAddOrUpdateButton?: boolean;
@@ -17,6 +21,9 @@ interface Props {
 // Define the GenericHeader functional component
 const GenericHeader: React.FC<Props> = ({
   isBackendButton = true,
+  isSecondButton = false,
+  secondButtonContent = '',
+  onSecondButtonClick = () => {},
   headerText,
   breadcrumbsText,
   isAddOrUpdateButton = false,
@@ -65,20 +72,38 @@ const GenericHeader: React.FC<Props> = ({
         </div>
       </div>
       {/* Right section with add or update button */}
-      {isAddOrUpdateButton && (
-        <Button
-          variant="outline"
-          autoContrast
-          color={theme.colors.secondaryColors[3]}
-          size="md"
-          onClick={() => onButtonClick()}
-          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-        >
-          <Text tt="capitalize" fs="italic">
-            {buttonContent}
-          </Text>
-        </Button>
-      )}
+      <div>
+        {isSecondButton && (
+          <Button
+            variant="outline"
+            mr={5}
+            autoContrast
+            color={theme.colors.secondaryColors[3]}
+            size="md"
+            onClick={() => onSecondButtonClick()}
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic" p={2}>
+              {secondButtonContent}
+            </Text>
+          </Button>
+        )}
+        {isAddOrUpdateButton && (
+          <Button
+            variant="outline"
+            autoContrast
+            ml={5}
+            color={theme.colors.secondaryColors[3]}
+            size="md"
+            onClick={() => onButtonClick()}
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic" p={2}>
+              {buttonContent}
+            </Text>
+          </Button>
+        )}
+      </div>
     </section>
   );
 };

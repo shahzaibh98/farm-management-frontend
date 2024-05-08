@@ -17,15 +17,13 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
-    <MantineProvider defaultColorScheme={'light'} theme={theme}>
-      <ErrorBoundary>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ErrorBoundary>
-    </MantineProvider>
-  </React.StrictMode>
+  <MantineProvider defaultColorScheme={'light'} theme={theme}>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ErrorBoundary>
+  </MantineProvider>
 );
 
 reportWebVitals();

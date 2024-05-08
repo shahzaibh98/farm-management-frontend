@@ -42,6 +42,7 @@ import {
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
 import { TaskForm } from './task.form';
+import { TaskStatus } from '@agri/shared-types';
 
 const TaskView = () => {
   const initializeStateFromQueryParams = () => {
@@ -143,7 +144,7 @@ const TaskView = () => {
 
   useEffect(() => {
     fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
     )
       .then((response: any) => {
         const users = response.data?.map((user: { name: any; userId: any }) => {
@@ -196,7 +197,6 @@ const TaskView = () => {
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
-
     const filters = removeEmptyValueFilters([
       {
         field: 'taskTitle',
@@ -437,8 +437,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'DUE DATE',
-        accessorKey: 'endDateTime',
+        header: 'Start DATE',
+        accessorKey: 'startDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
@@ -501,7 +501,7 @@ const TaskView = () => {
               value={searchValues.assignedTo ?? ''}
               onChange={value => value && setValuesById({ assignedTo: value })}
               // allowDeselect={false}
-              // searchable
+              searchable
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
@@ -516,9 +516,9 @@ const TaskView = () => {
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
               placeholder="Progress"
-              data={['In Progress', 'Pending', 'Completed']}
+              data={['All', ...Object.values(TaskStatus)]}
               value={searchValues.progress ?? ''}
-              onChange={value => setValuesById({ progress: value })}
+              onChange={value => value && setValuesById({ progress: value })}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
@@ -621,12 +621,11 @@ const TaskView = () => {
                   <MyCalendar
                     taskList={tableData}
                     handleClickTask={(object: any) => {
-                      console.log('Object data: ', object);
                       setModalInfo({
                         isOpen: true,
-                        type: 'View',
+                        type: 'Edit',
                         objectData: object,
-                        isReadOnly: true,
+                        isReadOnly: false,
                       });
                     }}
                   />

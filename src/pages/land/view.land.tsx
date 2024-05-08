@@ -1,16 +1,13 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
-import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
-import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
-  DatePicker,
   Notification,
   Paper,
   Select,
   Table,
-  Tabs,
   Text,
 } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
@@ -25,65 +22,49 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
+import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../api/api';
-import { SearchValuesType } from '../../types/view-task.type';
+import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import {
-  initialModalInfo,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
-  formatTimestamp,
-  getDateRange,
+  isEmpty,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
-import MyCalendar from '../calendar/calendar';
-import { initialSearchValues } from './initial.values';
+import {
+  SearchFilter,
+  initialMapModalInfo,
+  initialSearchValues,
+} from './initial.values';
+import LocationSearch from './searchLocation';
+import DeleteModel from '../../layout/confimation.modal';
 
 const LandView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
-      searchParams.get('searchValue') || initialSearchValues.searchValue;
-    const assignedTo =
-      searchParams.get('assignedTo') || initialSearchValues.assignedTo;
-    const associatedTo =
-      searchParams.get('associatedTo') || initialSearchValues.associatedTo;
-    const progress =
-      searchParams.get('progress') || initialSearchValues.progress;
-    const upcomingTask =
-      searchParams.get('upcomingTask') || initialSearchValues.upcomingTask;
-    const dateRangeStart = searchParams.get('dateRangeStart');
-    const dateRangeEnd = searchParams.get('dateRangeEnd');
-
-    // Convert dateRangeStart and dateRangeEnd to date objects
-    let dateRange: [Date | null, Date | null] = [null, null];
-    if (dateRangeStart && dateRangeEnd) {
-      dateRange = [
-        new Date(dateRangeStart) ?? null,
-        new Date(dateRangeEnd) ?? null,
-      ];
-    }
+      searchParams.get('searchValue') ?? initialSearchValues.searchValue;
+    const type = searchParams.get('type') ?? initialSearchValues.type;
+    const status = searchParams.get('status') ?? initialSearchValues.status;
 
     // Update state with extracted values
     return {
       searchValue,
-      assignedTo,
-      associatedTo,
-      progress,
-      upcomingTask,
-      dateRange,
+      type,
+      status,
     };
   };
 
   const initialPaginationFromQueryParams = () => {
     const rowPerPage =
-      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+      searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
 
     const currentPage = Number(
-      searchParams.get('currentPage') ||
+      searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
     return { ...paginationInfoValue, rowPerPage, currentPage };
@@ -109,13 +90,12 @@ const LandView = () => {
   );
 
   // State for search values
-  const [searchValues, setSearchValues] = useState<SearchValuesType>(
+  const [searchValues, setSearchValues] = useState<SearchFilter>(
     initializeStateFromQueryParams()
   );
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
-  const [modalInfo, setModalInfo] = useState(initialModalInfo);
 
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -125,49 +105,32 @@ const LandView = () => {
 
   // State for table data
   const [tableData, setTableData] = useState([]);
-  const [userList, setUserList] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState('Table');
+  const navigate = useNavigate();
+
+  const handleAddFarmAdmin = () => {
+    navigate('/lands/add');
+  };
+
+  const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
+
+  const [deleteInfo, setDeleteInfo] = useState({
+    isOpened: false,
+    id: '',
+    resourceName: '',
+  });
 
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
-
-  const handleAddLand = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
     initializeStateFromQueryParams();
     initialPaginationFromQueryParams();
   }, [searchParams]);
 
-  useEffect(() => {
-    fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
-    )
-      .then((response: any) => {
-        const users = response.data?.map((user: { name: any; userId: any }) => {
-          return { label: user.name, value: user.userId?.toString() };
-        });
-        const newArray = [
-          { label: 'Me', value: userInfo.farmId?.toString() },
-          { label: 'Others', value: 'Others' },
-          { label: 'All', value: 'All' },
-          ...users,
-        ];
-        setUserList(newArray);
-      })
-      .catch(error => {
-        const newArray = [
-          { label: 'Me', value: userInfo.farmId?.toString() },
-          { label: 'Others', value: 'Others' },
-          { label: 'All', value: 'All' },
-        ];
-        setUserList(newArray);
-        console.log(error);
-      });
-  }, []);
   // Function to set values based on identifiers
-  const setValuesById = (valuesById: Partial<SearchValuesType>) => {
+  const setValuesById = (valuesById: Partial<SearchFilter>) => {
     setSearchValues(prevFormValues => ({
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
@@ -194,14 +157,34 @@ const LandView = () => {
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
-    const filters = removeEmptyValueFilters([]);
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'name',
+        operator: 'like',
+        value: searchValues.searchValue,
+      },
+      {
+        field: 'status',
+        operator: 'eq',
+        value: searchValues?.status,
+      },
+      {
+        field: 'type',
+        operator: 'eq',
+        value: searchValues?.type,
+      },
+      {
+        field: 'farmId',
+        operator: 'eq',
+        value: userInfo?.farmId?.toString(),
+      },
+    ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    const tableFetchUrl = `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&{"task.startDateTime":"ASC"}`;
-    const calendarFetchUrl = `task?filter=${filterObject}&{"task.startDateTime":"ASC"}`;
+    const fetchUrl = `land?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`;
 
-    fetchData(activeTab === 'Table' ? tableFetchUrl : calendarFetchUrl)
+    fetchData(fetchUrl)
       .then((response: any) => {
         setTableData(response.data);
         const getPages = extractPageInfo(response.pages);
@@ -268,9 +251,9 @@ const LandView = () => {
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
     const rowPerPage =
-      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+      searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
     const currentPage = Number(
-      searchParams.get('currentPage') ||
+      searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
     if (rowPerPage !== '5') newParams.set('rowPerPage', rowPerPage);
@@ -282,11 +265,11 @@ const LandView = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`task/${id}`)
+    deleteData(`land/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Task is deleted successfully',
+          message: 'Land is deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -301,18 +284,13 @@ const LandView = () => {
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [
-    resetTable,
-    paginationInfo?.currentPage,
-    paginationInfo?.rowPerPage,
-    activeTab,
-  ]);
+  }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
 
   const columns = useMemo(
     () => [
       {
-        header: 'TITLE',
-        accessorKey: 'taskTitle',
+        header: 'LOCATION NAME',
+        accessorKey: 'name',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
@@ -325,22 +303,8 @@ const LandView = () => {
         ),
       },
       {
-        header: 'ASSIGNED TO',
-        accessorKey: 'assigned',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name ?? ''}
-            </p>
-          </div>
-        ),
-      },
-      {
-        header: 'ASSOCIATED TO',
-        accessorKey: 'associatedTo',
+        header: 'TYPE',
+        accessorKey: 'type',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -353,28 +317,41 @@ const LandView = () => {
         ),
       },
       {
-        header: 'PRIORITY',
-        accessorKey: 'priority',
+        header: 'AREA',
+        accessorKey: 'area',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 500, //enforced during column resizing
+        cell: (info: any) => {
+          const rowInfo = info?.row?.original;
+          return (
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {`${Number(rowInfo?.convertedArea)?.toFixed(1)}  ${AreaUnitEn.ACRES}`}
+              </p>
+            </div>
+          );
+        },
+      },
+      {
+        header: 'SOIL TYPE',
+        accessorKey: 'soilType',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => {
-          const priority = info.getValue();
           return (
-            <Center>
-              <div className="flex flex-wrap">
-                <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
-                />
-                <Text>{priority}</Text>
-              </div>
-            </Center>
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {info.getValue()}
+              </p>
+            </div>
           );
         },
       },
       {
         header: 'STATUS',
-        accessorKey: 'taskStatus',
+        accessorKey: 'status',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
@@ -387,44 +364,47 @@ const LandView = () => {
         ),
       },
       {
-        header: 'DUE DATE',
-        accessorKey: 'endDateTime',
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {formatTimestamp(info.getValue()) ?? ''}
-            </p>
-          </div>
-        ),
+        header: 'BOUNDARIES',
+        accessorKey: 'coordinates',
+        cell: (info: any) => {
+          const rowData = info?.row?.original;
+          return (
+            !isEmpty(rowData?.coordinates) && (
+              <Center mt={5}>
+                <FarmIcon
+                  height={24}
+                  width={24}
+                  opacity={0.8}
+                  className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
+                  onClick={() =>
+                    setMapModalDetails({
+                      isOpened: true,
+                      isReadOnly: true,
+                      data: rowData,
+                    })
+                  }
+                />
+              </Center>
+            )
+          );
+        },
       },
       {
         header: '',
-        accessorKey: 'taskId',
+        accessorKey: 'landId',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
-          const id = info?.row?.original?.taskId;
+          const id = info?.row?.original?.landId;
           return (
             <TableMenu
               id={id}
-              onDeleteClick={handleDeleteById}
-              onEditClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'Edit',
-                  objectData: info?.row?.original,
-                  isReadOnly: false,
-                })
+              onDeleteClick={id =>
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
               }
-              onViewClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'View',
-                  objectData: info?.row?.original,
-                  isReadOnly: true,
-                })
-              }
+              onEditClick={() => navigate(`/lands/edit/${id}`)}
+              onViewClick={() => navigate(`/lands/view/${id}`)}
             />
           );
         },
@@ -432,50 +412,6 @@ const LandView = () => {
     ],
     [tableData]
   );
-
-  const searchAndFilter = () => {
-    return (
-      <>
-        <SearchComponent
-          placeholder="Search by title..."
-          searchValue={searchValues.searchValue}
-          setValuesById={setValuesById}
-          handleSearchButtonClick={handleSearchButtonClick}
-          handleResetButtonClick={handleResetButtonClick}
-        />
-        <Grid className="mt-2">
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
-
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}></Grid.Col>
-          {searchValues?.upcomingTask === 'Custom Range' && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-              <DatePicker
-                type="range"
-                placeholder="Select a date range"
-                value={searchValues.dateRange ?? ''}
-                onChange={value =>
-                  setValuesById({
-                    dateRange: value as [Date | null, Date | null],
-                  })
-                }
-              />
-            </Grid.Col>
-          )}
-
-          {isSmallScreen && (
-            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-              <div className="flex flex-row justify-between">
-                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
-                <ResetButton onResetButtonClick={handleResetButtonClick} />
-              </div>
-            </Grid.Col>
-          )}
-        </Grid>
-      </>
-    );
-  };
 
   return (
     <main className={`w-full h-screen relative bg-darkColors-700`}>
@@ -490,11 +426,14 @@ const LandView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Land"
-        breadcrumbsText="Manage Land"
+        headerText="Farm Location"
+        breadcrumbsText="Manage Farm Location"
         isAddOrUpdateButton
-        buttonContent="Add Land"
-        onButtonClick={handleAddLand} // Call handleAddTask function when button is clicked
+        buttonContent="Add Location"
+        onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
+        secondButtonContent="View Farms"
+        isSecondButton
+        onSecondButtonClick={() => console.log('Second button clicked')}
       />
 
       <Paper
@@ -503,7 +442,45 @@ const LandView = () => {
         radius={12}
       >
         <div className="mt-4">
-          {searchAndFilter()}
+          <SearchComponent
+            placeholder="Search by name..."
+            searchValue={searchValues.searchValue}
+            setValuesById={setValuesById}
+            handleSearchButtonClick={handleSearchButtonClick}
+            handleResetButtonClick={handleResetButtonClick}
+          />
+          <Grid className="mt-2">
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Location Type"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...Object.values(LandType),
+                ]}
+                value={searchValues.type ?? ''}
+                onChange={value => value && setValuesById({ type: value })}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Location Status"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...Object.values(LandStatus),
+                ]}
+                value={searchValues.status ?? ''}
+                onChange={value => value && setValuesById({ status: value })}
+              />
+            </Grid.Col>
+            {isSmallScreen && (
+              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                <div className="flex flex-row justify-between">
+                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <ResetButton onResetButtonClick={handleResetButtonClick} />
+                </div>
+              </Grid.Col>
+            )}
+          </Grid>
           <Table
             isLoading={isLoading}
             data={tableData}
@@ -511,9 +488,45 @@ const LandView = () => {
             paginationInfo={paginationInfo}
             handlePagination={handlePagination}
           />
+          <Modal
+            styles={{
+              title: {
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: theme.colors.primaryColors[0],
+              },
+            }}
+            transitionProps={{ transition: 'fade-up', duration: 300 }}
+            onClose={() => setMapModalDetails(initialMapModalInfo)}
+            opened={mapModalDetails?.isOpened}
+            title={'Location Boundaries'}
+            size={'xl'}
+            centered={true} // true,
+          >
+            <LocationSearch
+              onLocationSelect={() => {}}
+              onClose={() => setMapModalDetails(initialMapModalInfo)}
+              isReadOnly={mapModalDetails?.isReadOnly}
+              data={mapModalDetails?.data}
+            />
+          </Modal>
         </div>
       </Paper>
+
       <div className="h-4" />
+      <DeleteModel
+        onDelete={handleDeleteById}
+        id={deleteInfo?.id}
+        opened={deleteInfo?.isOpened}
+        setOpened={() =>
+          setDeleteInfo({
+            isOpened: false,
+            id: '',
+            resourceName: '',
+          })
+        }
+        resourceName={deleteInfo?.resourceName}
+      />
     </main>
   );
 };

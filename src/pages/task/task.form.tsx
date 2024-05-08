@@ -24,6 +24,8 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { fetchData, postData, putData } from '../../api/api';
 import { useSelector } from 'react-redux';
 import { isTemplateExpression } from 'typescript';
+import { TaskPriority, TaskRepeatTime, TaskStatus } from '@agri/shared-types';
+import * as Yup from 'yup';
 interface ChecklistItem {
   itemName: string;
   itemDescription: string;
@@ -49,7 +51,7 @@ export function TaskForm({
 
   useEffect(() => {
     fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
     )
       .then((response: any) => {
         setUserList(response.data);
@@ -68,7 +70,10 @@ export function TaskForm({
             taskTitle: '',
             taskStatus: '',
             taskDescription: '',
-            assigned: '',
+            // assigned: viewOrUpdate?.objectData?.assigned
+            //   ? viewOrUpdate.objectData.assigned
+            //   : null,
+            assignedTo: '',
             priority: '',
             startDateTime: null,
             endDateTime: null,
@@ -82,9 +87,21 @@ export function TaskForm({
             checklistItems: [],
           }
         : viewOrUpdate.objectData,
+
+    validationSchema: Yup.object().shape({
+      taskTitle: Yup.string().required('Task title is required'),
+      hoursSpent: Yup.string().required('Hours Spent title is required'),
+      taskDescription: Yup.string().required('Task description is required'),
+      startDateTime: Yup.date().required('Start date is required'),
+      endDateTime: Yup.date().required('End date is required'),
+      assignedTo: Yup.string().required('Assigned to is required'),
+      priority: Yup.string().required('Priority is required'),
+      taskStatus: Yup.string().required('Status is required'),
+    }),
     onSubmit: values => {
+      const { assigned, ...rest } = values;
       viewOrUpdate?.type === 'Edit'
-        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, values)
+        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, rest)
             .then(() => {
               // Handle successful form submission
               handleNotification({
@@ -105,8 +122,8 @@ export function TaskForm({
             })
         : postData('/task', {
             ...values,
-            assignedTo: values.assigned,
-            assigned: Number(values.assigned),
+            assignedTo: values.assignedTo,
+            assigned: Number(values.assignedTo),
           }) // Send form data to the server
             .then(() => {
               // Handle successful form submission
@@ -207,16 +224,9 @@ export function TaskForm({
     form.setFieldValue('checklistItems', updatedChecklist);
   };
 
-  // const handleDeleteChecklistItem = (index: number) => {
-  //   // Remove checklist item from form state
-  //   const updatedChecklist = [...form.values.checklistItems];
-  //   updatedChecklist.splice(index, 1);
-  //   form.setFieldValue('checklistItems', updatedChecklist);
+  // const handleClick = (color: string) => {
+  //   console.log('Clicked color:', color);
   // };
-
-  const handleClick = (color: string) => {
-    console.log('Clicked color:', color);
-  };
   // const handleTextEditorChange = (content: string) => {
   //   form.setFieldValue('taskDescription', content);
   // };
@@ -237,6 +247,10 @@ export function TaskForm({
                   form.setFieldValue('taskTitle', e)
                 }
                 value={form.values.taskTitle}
+                error={
+                  form.errors.taskTitle &&
+                  (form.touched.taskTitle || form.submitCount > 0)
+                }
               />
             </Grid.Col>
             <Grid.Col>
@@ -249,6 +263,11 @@ export function TaskForm({
                   form.setFieldValue('taskDescription', e.target.value)
                 }
                 value={form.values.taskDescription}
+                error={
+                  !!(
+                    form.errors.taskDescription && form.touched.taskDescription
+                  )
+                }
               />
 
               {/* <TextEditor /> */}
@@ -347,7 +366,7 @@ export function TaskForm({
                 name="associatedTo"
               />
             </Grid.Col>
-            <Grid.Col>
+            {/* <Grid.Col>
               <h2 className="mb-2">Task Color</h2>
               <SimpleGrid cols={{ base: 6, md: 6, lg: 14 }} spacing="xs">
                 {colorArray?.map((color, index) => (
@@ -362,7 +381,7 @@ export function TaskForm({
                   </div>
                 ))}
               </SimpleGrid>
-            </Grid.Col>
+            </Grid.Col> */}
           </Grid.Col>
           {/* End of Add Task Container 70% */}
           {/* Add Task Container 30% */}
@@ -374,10 +393,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.taskStatus}
                 onChange={value => form.setFieldValue('taskStatus', value)}
-                data={['In Progress', 'Pending', 'Completed']?.map(status => ({
-                  value: status,
-                  label: status,
-                }))}
+                data={[...Object.values(TaskStatus)]}
               />
             </Grid.Col>
             <Grid.Col>
@@ -385,11 +401,12 @@ export function TaskForm({
               <Select
                 placeholder="Select person"
                 withAsterisk
-                value={form.values.assigned}
-                onChange={value => form.setFieldValue('assigned', value)}
-                data={userList?.map((user: any) => {
-                  return { label: user.name, value: user.userId?.toString() };
-                })}
+                value={form.values?.assignedTo?.toString() ?? ''}
+                onChange={value => form.setFieldValue('assignedTo', value)}
+                data={userList?.map((user: any) => ({
+                  label: user.name,
+                  value: user.userId?.toString(), // Convert userId to string
+                }))}
                 disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>
@@ -400,10 +417,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.priority}
                 onChange={value => form.setFieldValue('priority', value)}
-                data={['High', 'Medium', 'Low'].map(priority => ({
-                  value: priority,
-                  label: priority,
-                }))}
+                data={[...Object.values(TaskPriority)]}
               />
             </Grid.Col>
             <Grid.Col>
@@ -416,6 +430,9 @@ export function TaskForm({
                   new Date(form?.values?.startDateTime)
                 }
                 onChange={value => form.setFieldValue('startDateTime', value)}
+                error={
+                  !!(form.errors.startDateTime && form.touched.startDateTime)
+                }
               />
             </Grid.Col>
             <Grid.Col>
@@ -428,6 +445,7 @@ export function TaskForm({
                   new Date(form?.values?.endDateTime)
                 }
                 onChange={value => form.setFieldValue('endDateTime', value)}
+                error={!!(form.errors.endDateTime && form.touched.endDateTime)}
               />
             </Grid.Col>
             <Grid.Col>
@@ -437,10 +455,7 @@ export function TaskForm({
                 withAsterisk
                 value={form.values.repeatedTask}
                 onChange={value => form.setFieldValue('repeatedTask', value)}
-                data={['Daily', 'Weekly', 'Monthly', 'Yearly'].map(option => ({
-                  value: option,
-                  label: option,
-                }))}
+                data={[...Object.values(TaskRepeatTime)]}
                 disabled={viewOrUpdate?.isReadOnly}
               />
             </Grid.Col>
@@ -456,6 +471,10 @@ export function TaskForm({
                   form.setFieldValue('hoursSpent', e)
                 }
                 name="hoursSpent"
+                error={
+                  form.errors.hoursSpent &&
+                  (form.touched.hoursSpent || form.submitCount > 0)
+                }
               />
             </Grid.Col>
           </Grid.Col>
@@ -479,7 +498,7 @@ export function TaskForm({
               onClick={onCloseButton}
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
             >
-              <Text tt="capitalize" fs="italic">
+              <Text tt="capitalize" fs="italic" p={2}>
                 {'Cancel'}
               </Text>
             </Button>
@@ -491,8 +510,8 @@ export function TaskForm({
               type="submit"
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
             >
-              <Text tt="capitalize" fs="italic">
-                {mode === 'Add' ? 'Create' : 'Update'}
+              <Text tt="capitalize" fs="italic" p={2}>
+                {viewOrUpdate?.type === 'Add' ? 'Create' : 'Update'}
               </Text>
             </Button>
           </Flex>

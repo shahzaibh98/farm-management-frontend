@@ -54,8 +54,5 @@ export const buildFilters = (searchValues: {
       }
     );
   }
-
-  console.log('filters', filters);
-
   return filters;
 };

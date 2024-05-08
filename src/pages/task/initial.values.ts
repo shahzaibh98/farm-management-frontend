@@ -4,7 +4,7 @@ export const initialSearchValues: SearchValuesType = {
   searchValue: '',
   assignedTo: 'All', // Default value: 'Me'
   associatedTo: '',
-  progress: 'In Progress', // Default value: 'In Progress'
-  upcomingTask: 'Today', // Default value: 'Today'
+  progress: 'All', // Default value: 'In Progress'
+  upcomingTask: 'All', // Default value: 'Today'
   dateRange: [null, null],
 };

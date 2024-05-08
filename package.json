@@ -6,6 +6,7 @@
     "src/*"
   ],
   "dependencies": {
+    "@agri/shared-types": "git+https://privatePackages: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@github.com/concave-agri/shared-types.git#v4.19.2",
     "@fullcalendar/core": "^6.1.11",
     "@fullcalendar/daygrid": "^6.1.11",
     "@fullcalendar/react": "^6.1.11",
@@ -14,6 +15,7 @@
     "@mantine/form": "^7.8.0",
     "@mantine/hooks": "^7.7.1",
     "@mantine/tiptap": "^7.7.1",
+    "@react-google-maps/api": "^2.19.3",
     "@reduxjs/toolkit": "^2.2.1",
     "@tabler/icons-react": "^3.1.0",
     "@tanstack/react-table": "^8.15.0",
@@ -34,6 +36,7 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "axios": "^1.6.8",
+    "country-state-city": "^3.2.1",
     "dotenv": "^16.4.5",
     "firebase": "^10.11.0",
     "formik": "^2.4.5",

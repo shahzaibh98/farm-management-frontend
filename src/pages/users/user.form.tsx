@@ -14,6 +14,7 @@ import { initialNotification } from '../../utils/common/constant.objects';
 import { Text } from '../../concave.agri/components';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom'; // Importing useParams hook
+import { isPkTelePhoneNumber } from '../../utils/common/function';
 
 const UserForm = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
@@ -39,7 +40,7 @@ const UserForm = ({ type = 'Add' }) => {
     enableReinitialize: true,
     initialValues:
       type === 'Update' || type === 'View'
-        ? userData
+        ? { ...userData, address: userData?.farm?.address }
         : roleId === '0'
           ? {
               // Set initial values for farm details
@@ -66,14 +67,26 @@ const UserForm = ({ type = 'Add' }) => {
             email: Yup.string()
               .email('Invalid email format')
               .required('Email is required'),
-            phoneNo: Yup.string().required('Phone number is required'),
+            phoneNo: Yup.string()
+              .required('Phone number is required')
+              .test(
+                'is-pk-telephone-number',
+                'Invalid phone number. Please enter a valid Pakistani phone number.',
+                value => isPkTelePhoneNumber(value)
+              ),
           })
         : Yup.object().shape({
             name: Yup.string().required('Name is required'),
             email: Yup.string()
               .email('Invalid email format')
               .required('Email is required'),
-            phoneNo: Yup.string().required('Phone number is required'),
+            phoneNo: Yup.string()
+              .required('Phone number is required')
+              .test(
+                'is-pk-telephone-number',
+                'Invalid phone number. Please enter a valid Pakistani phone number.',
+                value => isPkTelePhoneNumber(value)
+              ),
           }),
     //         roleId: Yup.string().required('Role is required'),
     //       }),
@@ -108,6 +121,7 @@ const UserForm = ({ type = 'Add' }) => {
           putData(`/farm/${values?.farmId}`, {
             farmTitle,
             isActive: isActive === 'true',
+            address,
           }),
           putData(`/users/${id}`, rest),
         ])

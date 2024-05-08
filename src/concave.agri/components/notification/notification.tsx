@@ -37,10 +37,10 @@ const Notification = ({
   return (
     <>
       {isVisible && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <>
+          <div className="absolute left-1/2 min-w-[200px] transform -translate-x-1/2 transition ease-linear slide-in-out w-126 z-50 flex justify-start items-center font-light h-14 rounded mt-4">
             <MantineNotification
-              className="w-96"
+              styles={{ body: { minWidth: '300px' } }}
               title={title}
               icon={icon}
               color={color}
@@ -51,7 +51,7 @@ const Notification = ({
               {children}
             </MantineNotification>
           </div>
-        </div>
+        </>
       )}
     </>
   );

@@ -1,6 +1,7 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
+import ManageLand from '../../pages/land/land.foam';
 import LandView from '../../pages/land/view.land';
 import PrivateRoute from '../private/private.routes';
 
@@ -24,7 +25,7 @@ export const landRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Land - Add" />
-            <div>land Add</div>
+            <ManageLand />
           </PrivateRoute>
         ),
       },
@@ -33,7 +34,7 @@ export const landRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Land - View" />
-            <div>land View</div>
+            <ManageLand type="View" />
           </PrivateRoute>
         ),
       },
@@ -42,7 +43,7 @@ export const landRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Land - Edit" />
-            <div>land Edit</div>
+            <ManageLand type="Update" />
           </PrivateRoute>
         ),
       },
