@@ -327,7 +327,7 @@ const LandView = () => {
           return (
             <div className="flex items-center justify-center">
               <p className="text-sm lg:text-base text-center">
-                {`${Number(rowInfo?.convertedArea)?.toFixed(1)}  ${AreaUnitEn.ACRES}`}
+                {`${Number(rowInfo?.convertedArea)?.toFixed(2)}  ${AreaUnitEn.ACRES}`}
               </p>
             </div>
           );
@@ -432,7 +432,7 @@ const LandView = () => {
         buttonContent="Add Location"
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
         secondButtonContent="View Farms"
-        isSecondButton
+        isSecondButton={false}
         onSecondButtonClick={() => console.log('Second button clicked')}
       />
 
