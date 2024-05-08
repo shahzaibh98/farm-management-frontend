@@ -35,7 +35,10 @@ export const isEmpty = <T>(item: Array<T> | string) => item?.length === 0;
 
 export function removeEmptyValueFilters(filters: any[]) {
   return filters.filter(
-    filter => filter.value !== undefined && filter.value !== ''
+    filter =>
+      filter.value !== undefined &&
+      filter.value !== '' &&
+      filter.value !== 'All'
   );
 }
 

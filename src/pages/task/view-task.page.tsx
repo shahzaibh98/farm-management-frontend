@@ -144,7 +144,7 @@ const TaskView = () => {
 
   useEffect(() => {
     fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
     )
       .then((response: any) => {
         const users = response.data?.map((user: { name: any; userId: any }) => {
@@ -437,8 +437,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'DUE DATE',
-        accessorKey: 'endDateTime',
+        header: 'Start DATE',
+        accessorKey: 'startDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
@@ -516,7 +516,7 @@ const TaskView = () => {
           <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
             <Select
               placeholder="Progress"
-              data={[...Object.keys(TaskStatus)]}
+              data={['All', ...Object.values(TaskStatus)]}
               value={searchValues.progress ?? ''}
               onChange={value => value && setValuesById({ progress: value })}
             />
@@ -623,9 +623,9 @@ const TaskView = () => {
                     handleClickTask={(object: any) => {
                       setModalInfo({
                         isOpen: true,
-                        type: 'View',
+                        type: 'Edit',
                         objectData: object,
-                        isReadOnly: true,
+                        isReadOnly: false,
                       });
                     }}
                   />

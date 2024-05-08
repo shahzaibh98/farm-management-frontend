@@ -11,6 +11,7 @@ import {
 } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
 import store from '../redux';
+import { TfiMapAlt } from 'react-icons/tfi';
 
 export function getNavBarAgainstRole() {
   const currentRole = store.getState()?.userInfo?.userInfo?.roleId;
@@ -21,7 +22,7 @@ export function getNavBarAgainstRole() {
 
   const clientCommonNavBar = [
     { link: '/task', label: 'Task', icon: IconListDetails },
-    { link: '/lands', label: 'Lands', icon: MdOutlineLandslide },
+    { link: '/lands', label: 'Farm Locations', icon: TfiMapAlt },
     { link: '/crop', label: 'Crop', icon: IconCarrot },
     { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
     { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },

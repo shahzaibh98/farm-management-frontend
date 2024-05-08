@@ -109,7 +109,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
             <img
               src={
                 userInfo?.profilePic ??
-                'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
+                'https://res.cloudinary.com/demo/image/twitter/1330457336.jpg'
               }
               className="rounded-md"
             />

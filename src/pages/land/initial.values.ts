@@ -9,7 +9,7 @@ export interface SearchFilter {
 export const initialSearchValues: SearchFilter = {
   searchValue: '',
   type: 'All',
-  status: LandStatus.ACTIVE,
+  status: 'All',
 };
 
 export const initialMapModalInfo = {

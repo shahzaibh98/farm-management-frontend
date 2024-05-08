@@ -63,7 +63,24 @@ const ManageLand = ({ type = 'Add' }) => {
   useEffect(() => {
     if (id)
       fetchData(`land/${id}`)
-        .then((data: any) => setLandData(data))
+        .then((data: any) => {
+          setLandData(data);
+          const getCountry = Country.getAllCountries()?.find(
+            country => country.name === data?.country
+          );
+
+          const getState = State.getAllStates()?.find(
+            state =>
+              state.name === data?.provinceOrState &&
+              state.countryCode === getCountry?.isoCode
+          );
+
+          setLocationData({
+            ...locationData,
+            countryCode: getCountry?.isoCode ?? '',
+            stateCode: getState?.isoCode ?? '',
+          });
+        })
         .catch((err: any) => console.log(err));
   }, [id]);
 
@@ -181,10 +198,10 @@ const ManageLand = ({ type = 'Add' }) => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Land"
-        breadcrumbsText="Manage Land"
+        headerText="Farm Location"
+        breadcrumbsText="Manage Farm Location"
         isAddOrUpdateButton={type !== 'View'}
-        buttonContent={`${type} Land`}
+        buttonContent={`${type} Location`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
       <Paper
@@ -202,9 +219,9 @@ const ManageLand = ({ type = 'Add' }) => {
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
                 id="name"
-                label="Land Name"
+                label="Location Name"
                 name="name"
-                placeholder="Enter your land name..."
+                placeholder="Enter your location name..."
                 value={formik.values?.name ?? ''}
                 onChange={e =>
                   type !== 'View' && formik.setFieldValue('name', e)
@@ -221,7 +238,7 @@ const ManageLand = ({ type = 'Add' }) => {
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
                 id="landType "
-                label="Land Type"
+                label="Type"
                 placeholder="Select type..."
                 data={[...Object.values(LandType)]}
                 value={formik.values?.type}
@@ -239,7 +256,7 @@ const ManageLand = ({ type = 'Add' }) => {
             </Grid.Col>
           </Grid>
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Land Location
+            Location
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
@@ -438,7 +455,7 @@ const ManageLand = ({ type = 'Add' }) => {
           </Grid>
 
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Mark Land Boundaries
+            Mark Location Boundaries
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
@@ -511,7 +528,7 @@ const ManageLand = ({ type = 'Add' }) => {
             transitionProps={{ transition: 'fade-up', duration: 300 }}
             onClose={() => setMapModalDetails(initialMapModalInfo)}
             opened={mapModalDetails?.isOpened}
-            title={'Land Boundaries'}
+            title={'Location Boundaries'}
             size={'xl'}
           >
             <LocationSearch

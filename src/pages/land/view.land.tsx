@@ -166,12 +166,12 @@ const LandView = () => {
       {
         field: 'status',
         operator: 'eq',
-        value: searchValues?.status ?? '',
+        value: searchValues?.status,
       },
       {
         field: 'type',
         operator: 'eq',
-        value: searchValues?.type === 'All' ? '' : searchValues?.type ?? '',
+        value: searchValues?.type,
       },
       {
         field: 'farmId',
@@ -289,7 +289,7 @@ const LandView = () => {
   const columns = useMemo(
     () => [
       {
-        header: 'LAND NAME',
+        header: 'LOCATION NAME',
         accessorKey: 'name',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -303,7 +303,7 @@ const LandView = () => {
         ),
       },
       {
-        header: 'LAND TYPE',
+        header: 'TYPE',
         accessorKey: 'type',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -426,11 +426,14 @@ const LandView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Land"
-        breadcrumbsText="Manage Land"
+        headerText="Farm Location"
+        breadcrumbsText="Manage Farm Location"
         isAddOrUpdateButton
-        buttonContent="Add Land"
+        buttonContent="Add Location"
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
+        secondButtonContent="View Farms"
+        isSecondButton
+        onSecondButtonClick={() => console.log('Second button clicked')}
       />
 
       <Paper
@@ -449,7 +452,7 @@ const LandView = () => {
           <Grid className="mt-2">
             <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
               <Select
-                placeholder="Land Type"
+                placeholder="Location Type"
                 data={[
                   { label: 'All', value: 'All' },
                   ...Object.values(LandType),
@@ -460,8 +463,11 @@ const LandView = () => {
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
               <Select
-                placeholder="Land Status"
-                data={[...Object.values(LandStatus)]}
+                placeholder="Location Status"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...Object.values(LandStatus),
+                ]}
                 value={searchValues.status ?? ''}
                 onChange={value => value && setValuesById({ status: value })}
               />
@@ -493,7 +499,7 @@ const LandView = () => {
             transitionProps={{ transition: 'fade-up', duration: 300 }}
             onClose={() => setMapModalDetails(initialMapModalInfo)}
             opened={mapModalDetails?.isOpened}
-            title={'Land Boundaries'}
+            title={'Location Boundaries'}
             size={'xl'}
             centered={true} // true,
           >

@@ -266,7 +266,7 @@ const LocationSearch = ({
         }}
         center={data?.markLocation ?? selectedLocation ?? centerPoint}
         zoom={12}
-        onDblClick={e => !isReadOnly && handleMapClick(e)}
+        onClick={e => !isReadOnly && handleMapClick(e)}
       >
         <>
           {selectedLocation && isEmpty(polygonCoords) && (

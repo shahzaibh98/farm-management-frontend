@@ -51,7 +51,7 @@ export function TaskForm({
 
   useEffect(() => {
     fetchData(
-      `users?rpp=10&page=1&filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
     )
       .then((response: any) => {
         setUserList(response.data);
@@ -70,9 +70,10 @@ export function TaskForm({
             taskTitle: '',
             taskStatus: '',
             taskDescription: '',
-            assigned: viewOrUpdate?.objectData?.assigned
-              ? viewOrUpdate.objectData.assigned
-              : null,
+            // assigned: viewOrUpdate?.objectData?.assigned
+            //   ? viewOrUpdate.objectData.assigned
+            //   : null,
+            assignedTo: '',
             priority: '',
             startDateTime: null,
             endDateTime: null,
@@ -93,13 +94,14 @@ export function TaskForm({
       taskDescription: Yup.string().required('Task description is required'),
       startDateTime: Yup.date().required('Start date is required'),
       endDateTime: Yup.date().required('End date is required'),
-      // assignedTo: Yup.string().required('Assigned to is required'),
+      assignedTo: Yup.string().required('Assigned to is required'),
       priority: Yup.string().required('Priority is required'),
       taskStatus: Yup.string().required('Status is required'),
     }),
     onSubmit: values => {
+      const { assigned, ...rest } = values;
       viewOrUpdate?.type === 'Edit'
-        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, values)
+        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, rest)
             .then(() => {
               // Handle successful form submission
               handleNotification({
@@ -120,8 +122,8 @@ export function TaskForm({
             })
         : postData('/task', {
             ...values,
-            assignedTo: values.assigned,
-            assigned: Number(values.assigned),
+            assignedTo: values.assignedTo,
+            assigned: Number(values.assignedTo),
           }) // Send form data to the server
             .then(() => {
               // Handle successful form submission
@@ -222,9 +224,9 @@ export function TaskForm({
     form.setFieldValue('checklistItems', updatedChecklist);
   };
 
-  const handleClick = (color: string) => {
-    console.log('Clicked color:', color);
-  };
+  // const handleClick = (color: string) => {
+  //   console.log('Clicked color:', color);
+  // };
   // const handleTextEditorChange = (content: string) => {
   //   form.setFieldValue('taskDescription', content);
   // };
@@ -399,12 +401,8 @@ export function TaskForm({
               <Select
                 placeholder="Select person"
                 withAsterisk
-                value={
-                  form.values?.assigned
-                    ? form.values?.assigned?.userId?.toString()
-                    : ''
-                }
-                onChange={value => form.setFieldValue('assigned', value)}
+                value={form.values?.assignedTo?.toString() ?? ''}
+                onChange={value => form.setFieldValue('assignedTo', value)}
                 data={userList?.map((user: any) => ({
                   label: user.name,
                   value: user.userId?.toString(), // Convert userId to string
@@ -513,7 +511,7 @@ export function TaskForm({
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
             >
               <Text tt="capitalize" fs="italic" p={2}>
-                {mode === 'Add' ? 'Create' : 'Update'}
+                {viewOrUpdate?.type === 'Add' ? 'Create' : 'Update'}
               </Text>
             </Button>
           </Flex>
