@@ -48,6 +48,7 @@ export function TaskForm({
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
   const [userList, setUserList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchData(
@@ -99,9 +100,13 @@ export function TaskForm({
       taskStatus: Yup.string().required('Status is required'),
     }),
     onSubmit: values => {
+      setIsLoading(true);
       const { assigned, ...rest } = values;
       viewOrUpdate?.type === 'Edit'
-        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, rest)
+        ? putData(`/task/${viewOrUpdate.objectData.taskId}`, {
+            ...rest,
+            assignedTo: values.assignedTo?.toString(),
+          })
             .then(() => {
               // Handle successful form submission
               handleNotification({
@@ -119,6 +124,9 @@ export function TaskForm({
                 title: 'Something went wrong',
                 isEnable: true,
               });
+            })
+            .finally(() => {
+              setIsLoading(false);
             })
         : postData('/task', {
             ...values,
@@ -142,6 +150,9 @@ export function TaskForm({
                 title: 'Something went wrong',
                 isEnable: true,
               });
+            })
+            .finally(() => {
+              setIsLoading(false);
             });
     },
   });
@@ -224,12 +235,6 @@ export function TaskForm({
     form.setFieldValue('checklistItems', updatedChecklist);
   };
 
-  // const handleClick = (color: string) => {
-  //   console.log('Clicked color:', color);
-  // };
-  // const handleTextEditorChange = (content: string) => {
-  //   form.setFieldValue('taskDescription', content);
-  // };
   return (
     <div>
       {/* Add Task Container */}
@@ -506,6 +511,7 @@ export function TaskForm({
               variant="outline"
               autoContrast
               color={theme.colors.primaryColors[0]}
+              loading={isLoading}
               size="md"
               type="submit"
               style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}

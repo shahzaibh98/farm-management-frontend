@@ -113,11 +113,7 @@ const Table = ({
           }}
           // className="mt-4"
         >
-          {table?.getRowModel()?.rows?.length === 0 ? (
-            <div className="flex items-center justify-center min-h-[80%] bold">
-              No data to display...
-            </div>
-          ) : isLoading ? (
+          {isLoading ? (
             Array.from({ length: 5 }).map((_, index) => (
               <tr
                 key={index}
@@ -135,6 +131,10 @@ const Table = ({
                 ))}
               </tr>
             ))
+          ) : table?.getRowModel()?.rows?.length === 0 ? (
+            <div className="flex items-center justify-center min-h-[80%] bold">
+              No data to display...
+            </div>
           ) : (
             table?.getRowModel()?.rows?.map(row => {
               return (

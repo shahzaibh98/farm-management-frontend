@@ -1,12 +1,4 @@
-import {
-  Button,
-  Flex,
-  Group,
-  Modal,
-  Text,
-  Title,
-  useMantineTheme,
-} from '@mantine/core';
+import { Button, Flex, Modal, Text, useMantineTheme } from '@mantine/core';
 
 const DeleteModel = ({
   id,
@@ -26,7 +18,7 @@ const DeleteModel = ({
         title: {
           fontSize: '24px',
           fontWeight: 'bold',
-          color: theme.colors.primaryColors[0],
+          color: theme.colors.secondaryColors[3],
         },
       }}
       transitionProps={{ transition: 'fade-up', duration: 300 }}
@@ -58,7 +50,7 @@ const DeleteModel = ({
         <Button
           variant="outline"
           autoContrast
-          color={theme.colors.primaryColors[0]}
+          color={theme.colors.secondaryColors[3]}
           size="md"
           onClick={() => {
             onDelete(id);

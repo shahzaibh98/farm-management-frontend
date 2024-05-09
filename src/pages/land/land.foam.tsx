@@ -46,6 +46,8 @@ const ManageLand = ({ type = 'Add' }) => {
   const navigate = useNavigate();
   const [landData, setLandData] = useState<any>();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
   const [locationData, setLocationData] = useState({
@@ -53,12 +55,6 @@ const ManageLand = ({ type = 'Add' }) => {
     stateCode: '',
     cityCode: '',
   });
-
-  useEffect(() => {
-    console.log('Country', Country.getAllCountries());
-    console.log('State', State.getStatesOfCountry('PK'));
-    console.log('City', City.getCitiesOfState('PK', 'KP'));
-  }, []);
 
   useEffect(() => {
     if (id)
@@ -125,6 +121,7 @@ const ManageLand = ({ type = 'Add' }) => {
         .required('Coordinates are required'),
     }),
     onSubmit: values => {
+      setIsLoading(true);
       if (type !== 'Update')
         postData('/land', {
           ...values,
@@ -150,6 +147,9 @@ const ManageLand = ({ type = 'Add' }) => {
               title: 'Something went wrong',
               isEnable: true,
             });
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
       else {
         Promise.all([
@@ -178,6 +178,9 @@ const ManageLand = ({ type = 'Add' }) => {
               title: 'Something went wrong',
               isEnable: true,
             });
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
       }
     },
@@ -201,6 +204,7 @@ const ManageLand = ({ type = 'Add' }) => {
         headerText="Farm Location"
         breadcrumbsText="Manage Farm Location"
         isAddOrUpdateButton={type !== 'View'}
+        isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} Location`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
@@ -468,6 +472,7 @@ const ManageLand = ({ type = 'Add' }) => {
                   setMapModalDetails({
                     isOpened: true,
                     isReadOnly: false,
+                    isMultiple: false,
                     data: formik.values,
                   });
                 }}
@@ -484,14 +489,14 @@ const ManageLand = ({ type = 'Add' }) => {
           </Grid>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
+              <NumberInput
                 id="area"
                 label="Land Area"
                 name="area"
                 placeholder="Enter your Land Area..."
                 value={formik.values?.area ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('area', parseFloat(e))
+                  type !== 'View' && formik.setFieldValue('area', e)
                 }
                 styles={inputStyle}
                 error={
@@ -535,7 +540,10 @@ const ManageLand = ({ type = 'Add' }) => {
               onLocationSelect={object => {
                 formik.setFieldValue('coordinates', object?.coordinates);
                 formik.setFieldValue('markLocation', object?.markLocation);
-                formik.setFieldValue('area', object?.totalArea);
+                formik.setFieldValue(
+                  'area',
+                  isNaN(object?.totalArea) ? 0 : object?.totalArea
+                );
                 formik.setFieldValue('areaUnit', AreaUnitEn.ACRES);
                 setMapModalDetails(initialMapModalInfo);
               }}

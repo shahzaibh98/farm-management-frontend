@@ -27,6 +27,7 @@ import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../api/api';
 import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import {
+  getLandColors,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
@@ -42,6 +43,7 @@ import {
 } from './initial.values';
 import LocationSearch from './searchLocation';
 import DeleteModel from '../../layout/confimation.modal';
+import { IconBorderCorners } from '@tabler/icons-react';
 
 const LandView = () => {
   const initializeStateFromQueryParams = () => {
@@ -106,6 +108,8 @@ const LandView = () => {
   // State for table data
   const [tableData, setTableData] = useState([]);
 
+  const [allLocationData, setAllLocationData] = useState<any[]>();
+
   const navigate = useNavigate();
 
   const handleAddFarmAdmin = () => {
@@ -123,6 +127,43 @@ const LandView = () => {
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
+
+  useEffect(() => {
+    getAllLandsAgainstFarm();
+  }, [resetTable]);
+
+  const getAllLandsAgainstFarm = () => {
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'farmId',
+        operator: 'eq',
+        value: userInfo?.farmId?.toString(),
+      },
+    ]);
+
+    const filterObject = JSON.stringify({ filter: filters });
+
+    const fetchUrl = `land?filter=${filterObject}`;
+
+    fetchData(fetchUrl)
+      .then((response: any) => {
+        setAllLocationData(response?.data);
+      })
+      .catch((error: any) => console.log(error))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const handleViewAllLocation = () => {
+    setMapModalDetails({
+      ...mapModalDetails,
+      isOpened: true,
+      isMultiple: true,
+      isReadOnly: true,
+      data: allLocationData,
+    });
+  };
 
   useEffect(() => {
     initializeStateFromQueryParams();
@@ -289,13 +330,13 @@ const LandView = () => {
   const columns = useMemo(
     () => [
       {
-        header: 'LOCATION NAME',
+        header: <div className="flex text-start ml-2">NAME</div>,
         accessorKey: 'name',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
+          <div className="flex ml-2">
             <p className="text-sm lg:text-base text-center">
               {info.getValue()}
             </p>
@@ -303,21 +344,25 @@ const LandView = () => {
         ),
       },
       {
-        header: 'TYPE',
+        header: <div className="flex text-start">TYPE</div>,
         accessorKey: 'type',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
+        cell: (info: any) => {
+          const rowData = info?.row?.original;
+          return (
+            <div className="flex flex-row">
+              <IconBorderCorners color={getLandColors(rowData?.type ?? '')} />
+              <p className="text-sm lg:text-base text-center ml-4">
+                {rowData?.type}
+              </p>
+            </div>
+          );
+        },
       },
       {
-        header: 'AREA',
+        header: <div className="flex text-start">AREA</div>,
         accessorKey: 'area',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -325,7 +370,7 @@ const LandView = () => {
         cell: (info: any) => {
           const rowInfo = info?.row?.original;
           return (
-            <div className="flex items-center justify-center">
+            <div className="flex">
               <p className="text-sm lg:text-base text-center">
                 {`${Number(rowInfo?.convertedArea)?.toFixed(1)}  ${AreaUnitEn.ACRES}`}
               </p>
@@ -334,14 +379,14 @@ const LandView = () => {
         },
       },
       {
-        header: 'SOIL TYPE',
+        header: <div className="flex text-start">SOIL TYPE</div>,
         accessorKey: 'soilType',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => {
           return (
-            <div className="flex items-center justify-center">
+            <div className="flex">
               <p className="text-sm lg:text-base text-center">
                 {info.getValue()}
               </p>
@@ -380,6 +425,7 @@ const LandView = () => {
                     setMapModalDetails({
                       isOpened: true,
                       isReadOnly: true,
+                      isMultiple: false,
                       data: rowData,
                     })
                   }
@@ -431,9 +477,9 @@ const LandView = () => {
         isAddOrUpdateButton
         buttonContent="Add Location"
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
-        secondButtonContent="View Farms"
-        isSecondButton
-        onSecondButtonClick={() => console.log('Second button clicked')}
+        secondButtonContent="View All Farms"
+        isSecondButton={allLocationData && allLocationData?.length > 0}
+        onSecondButtonClick={handleViewAllLocation}
       />
 
       <Paper
@@ -508,6 +554,7 @@ const LandView = () => {
               onClose={() => setMapModalDetails(initialMapModalInfo)}
               isReadOnly={mapModalDetails?.isReadOnly}
               data={mapModalDetails?.data}
+              isMultiple={mapModalDetails?.isMultiple}
             />
           </Modal>
         </div>

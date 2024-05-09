@@ -182,3 +182,62 @@ export const isPkTelePhoneNumber = (phoneNumber: string) => {
   const regexPlus923 = /^\+923\d{9}$/;
   return regex03.test(phoneNumber) || regexPlus923.test(phoneNumber);
 };
+
+export function getCenterPoint(polygon: any) {
+  let totalLat = 0;
+  let totalLng = 0;
+
+  // Iterate through each vertex of the polygon
+  for (let i = 0; i < polygon?.length; i++) {
+    totalLat += polygon[i].lat; // Summing up latitude values
+    totalLng += polygon[i].lng; // Summing up longitude values
+  }
+
+  // Divide the total sums by the number of vertices to get the average
+  const centerLat = totalLat / polygon?.length;
+  const centerLng = totalLng / polygon?.length;
+  return { lat: centerLat, lng: centerLng };
+}
+
+export function calculateCenterPointAndZoom(
+  allPolygons: any[],
+  mapWidth: number,
+  mapHeight: number
+) {
+  if (!allPolygons || allPolygons.length === 0)
+    return { lat: 0, lng: 0, zoom: 0 };
+  // Initialize variables for the bounding box coordinates
+  else {
+    let minX = Number.MAX_VALUE;
+    let minY = Number.MAX_VALUE;
+    let maxX = Number.MIN_VALUE;
+    let maxY = Number.MIN_VALUE;
+
+    // Iterate through all polygons to find the bounding box
+    allPolygons?.forEach((polygon: any) => {
+      polygon?.coordinates?.forEach((point: { lat: number; lng: number }) => {
+        minX = Math.min(minX, point.lat);
+        minY = Math.min(minY, point.lng);
+        maxX = Math.max(maxX, point.lat);
+        maxY = Math.max(maxY, point.lng);
+      });
+    });
+
+    // Calculate the center of the bounding box
+    const centerLat = (minX + maxX) / 2;
+    const centerLng = (minY + maxY) / 2;
+
+    // Calculate distance between center and farthest point
+    const distanceLat = Math.abs(maxX - minX);
+    const distanceLng = Math.abs(maxY - minY);
+    const distanceHorizontal = Math.max(distanceLat, distanceLng);
+
+    // Calculate zoom level based on the distance and map dimensions
+    const zoomX = Math.log2((360 * (mapWidth / 256)) / distanceHorizontal);
+    const zoomY = Math.log2((180 * (mapHeight / 256)) / distanceLat);
+    const zoom = Math.floor(Math.min(zoomX, zoomY));
+
+    // Return the center point and zoom level
+    return { center: { lat: centerLat, lng: centerLng }, zoom };
+  }
+}
