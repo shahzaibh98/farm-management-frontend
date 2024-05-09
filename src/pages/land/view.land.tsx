@@ -372,7 +372,7 @@ const LandView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {`${Number(rowInfo?.convertedArea)?.toFixed(2)}  ${AreaUnitEn.ACRES}`}
+                {`${Number(rowInfo?.convertedArea) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.convertedArea).toFixed(2)}  ${AreaUnitEn.ACRES}`}
               </p>
             </div>
           );

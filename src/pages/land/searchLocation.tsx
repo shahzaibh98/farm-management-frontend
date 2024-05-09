@@ -333,7 +333,7 @@ const LocationSearch = ({
                     }}
                     icon={{
                       url: require(
-                        `../../assets/images/${landData?.type ?? 'map-pin'}.png`
+                        `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
                       ),
                       scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
                       fillColor: darkenColors(
@@ -387,7 +387,7 @@ const LocationSearch = ({
                 }}
                 icon={{
                   url: require(
-                    `../../assets/images/${data?.type ?? 'map-pin'}.png`
+                    `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
                   ), // Specify the relative path to the icon image file
                   scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
                   fillColor: darkenColors(getLandColors(data?.type ?? ''), 0.2), // Darken fill color
