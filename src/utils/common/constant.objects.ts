@@ -86,7 +86,7 @@ export const landColors = [
   { color: '#CC6600', value: 'Buildings' },
   { color: '#4B0082', value: 'Farm Boundaries' },
   { color: '#004717', value: 'Fields' },
-  { color: '#7C9A74', value: 'Green House' }, // Dark Color
+  { color: '#7C9A74', value: 'Greenhouse' }, // Dark Color
   { color: '#00004B', value: 'Grow Room' },
   { color: '#4C8099', value: 'Irrigation Zones' }, // Dark Color
   { color: '#7F5217', value: 'Landscaping' },
