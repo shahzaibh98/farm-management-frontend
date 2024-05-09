@@ -376,7 +376,6 @@ const LocationSearch = ({
           {!isMultiple && !isEmpty(polygonCoords) && (
             <>
               <Marker
-                onClick={() => navigate(`/lands/edit/${data?.landId}`)}
                 position={getCenterPoint(polygonCoords)}
                 label={{
                   text: zoomLevel > 12 ? `${data?.name}` : '',
