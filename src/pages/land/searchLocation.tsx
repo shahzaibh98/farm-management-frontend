@@ -351,7 +351,6 @@ const LocationSearch = ({
                   <Polygon
                     key={index}
                     paths={landData?.coordinates}
-                    // Make the Polygon editable / draggable
                     editable={!isReadOnly}
                     draggable={!isReadOnly}
                     // Event used when manipulating and adding points
