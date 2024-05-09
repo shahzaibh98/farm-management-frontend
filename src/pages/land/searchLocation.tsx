@@ -350,9 +350,7 @@ const LocationSearch = ({
                   ></Marker>
                   <Polygon
                     key={index}
-                    onClick={() => navigate(`/lands/edit/${landData?.landId}`)}
                     paths={landData?.coordinates}
-                    // Make the Polygon editable / draggable
                     editable={!isReadOnly}
                     draggable={!isReadOnly}
                     // Event used when manipulating and adding points
