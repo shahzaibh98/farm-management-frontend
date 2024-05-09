@@ -126,8 +126,6 @@ export function LoginPage() {
     const userId = userDetails?.userInfo?.userId;
     const token = userDetails?.token;
 
-    console.log(`reset password for user ${userId} with token ${token}`);
-
     const axiosInstance = axios.create({
       headers: {
         Authorization: `Bearer ${token}`,
@@ -161,6 +159,16 @@ export function LoginPage() {
 
   return (
     <>
+      {notification.isEnable && (
+        <Notification
+          title={notification.title}
+          withClose
+          color={notification.isSuccess ? theme.colors.primaryColors[0] : 'red'}
+          handleCloseNotification={handleNotificationClose}
+        >
+          <Text fw={500}>{notification.message}</Text>
+        </Notification>
+      )}
       <div
         className="flex min-h-screen items-center justify-center bg-gray-50"
         style={{
@@ -170,18 +178,6 @@ export function LoginPage() {
           backgroundImage: `url(${backgroundImage.src})`,
         }}
       >
-        {notification.isEnable && (
-          <Notification
-            title={notification.title}
-            withClose
-            color={
-              notification.isSuccess ? theme.colors.primaryColors[0] : 'red'
-            }
-            handleCloseNotification={handleNotificationClose}
-          >
-            <Text fw={500}>{notification.message}</Text>
-          </Notification>
-        )}
         <div className="relative">
           <div className="flex flex-col sm:w-[30rem] rounded-lg border-gray-400 bg-white bg-opacity-20 shadow-lg px-4 backdrop-filter backdrop-blur-xl">
             <div className="flex-auto p-6">

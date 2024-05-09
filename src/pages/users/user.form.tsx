@@ -27,10 +27,13 @@ const UserForm = ({ type = 'Add' }) => {
     (state: any) => state?.userInfo?.userInfo
   );
 
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    fetchData(`users/${id}`)
-      .then((data: any) => setUserData(data.data))
-      .catch(err => console.log(err));
+    if (id)
+      fetchData(`users/${id}`)
+        .then((data: any) => setUserData(data.data))
+        .catch(err => console.log(err));
   }, [id]);
 
   // State for notification
@@ -91,6 +94,8 @@ const UserForm = ({ type = 'Add' }) => {
     //         roleId: Yup.string().required('Role is required'),
     //       }),
     onSubmit: values => {
+      // Handle form submission
+      setIsLoading(true);
       if (type !== 'Update')
         postData('/users', values) // Send form data to the server
           .then(() => {
@@ -113,6 +118,9 @@ const UserForm = ({ type = 'Add' }) => {
               title: 'Something went wrong',
               isEnable: true,
             });
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
       else {
         const { farmTitle, address, isActive, ...rest } = values;
@@ -145,6 +153,9 @@ const UserForm = ({ type = 'Add' }) => {
               title: 'Something went wrong',
               isEnable: true,
             });
+          })
+          .finally(() => {
+            setIsLoading(false);
           });
       }
     },
@@ -168,6 +179,7 @@ const UserForm = ({ type = 'Add' }) => {
         headerText={roleId === '0' ? `Farms` : `Users`}
         breadcrumbsText={`${type} ${roleId === '0' ? `Farms` : `Users`} to System`} // Call handleAddFarmAdmin function when button is clicked
         isAddOrUpdateButton={type !== 'View'}
+        isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} ${roleId === '0' ? `Farm` : `User`}`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />

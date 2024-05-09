@@ -16,9 +16,17 @@ import {
   useState,
 } from 'react';
 import { SlActionUndo } from 'react-icons/sl';
-import { SearchForm, Button, Text } from '../../concave.agri/components';
-import { isEmpty } from '../../utils/common/function';
-import { getLandColors } from '../../utils/common/constant.objects';
+import { useNavigate } from 'react-router-dom';
+import { Button, SearchForm, Text } from '../../concave.agri/components';
+import {
+  darkenColors,
+  getLandColors,
+} from '../../utils/common/constant.objects';
+import {
+  calculateCenterPointAndZoom,
+  getCenterPoint,
+  isEmpty,
+} from '../../utils/common/function';
 
 interface Location {
   lat: number;
@@ -41,6 +49,7 @@ const LocationSearch = ({
   data,
 }: LocationSearchProps) => {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAP_KEY ?? '',
@@ -57,14 +66,34 @@ const LocationSearch = ({
   const [polygonCoords, setPolygonCoords] = useState<Location[]>(
     data?.coordinates ?? []
   );
+  const [zoomLevel, setZoomLevel] = useState<number>(0);
+
   const [totalArea, setTotalArea] = useState<number | null>(null);
   const searchBox = useRef<any>(null); // Ref type should be any
   const polygonRef = useRef<google.maps.Polygon | null>(null);
   const listenersRef = useRef<google.maps.MapsEventListener[]>([]);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const handleZoomChanged = () => {
+    if (mapRef.current) {
+      setZoomLevel(mapRef.current.getZoom() ?? 0);
+    }
+  };
+
   const [centerPoint, setCenterPoint] = useState({
     lat: 33.6573,
     lng: 73.0572,
   });
+
+  const [multiCenterPoint] = useState(
+    isMultiple
+      ? calculateCenterPointAndZoom(data, 600, 450)
+      : {
+          lat: 33.6573,
+          lng: 73.0572,
+          zoom: 12,
+        }
+  );
 
   useEffect(() => {
     if (isLoaded) {
@@ -264,9 +293,17 @@ const LocationSearch = ({
           borderRadius: '10px',
           border: '2px solid #ccc', // Border style, width, and color
         }}
-        center={data?.markLocation ?? selectedLocation ?? centerPoint}
-        zoom={12}
+        center={
+          isMultiple
+            ? multiCenterPoint.center
+            : data?.markLocation ?? selectedLocation ?? centerPoint
+        }
+        zoom={isMultiple ? multiCenterPoint?.zoom : 12}
         onClick={e => !isReadOnly && handleMapClick(e)}
+        onLoad={map => {
+          mapRef.current = map;
+          mapRef.current.addListener('zoom_changed', handleZoomChanged);
+        }}
       >
         <>
           {selectedLocation && isEmpty(polygonCoords) && (
@@ -279,52 +316,114 @@ const LocationSearch = ({
             <>
               {/* Existing markers */}
               {data?.map((landData: any, index: Key | null | undefined) => (
-                <Polygon
-                  key={index}
-                  paths={landData?.coordinates}
-                  // Make the Polygon editable / draggable
-                  editable={!isReadOnly}
-                  draggable={!isReadOnly}
-                  // Event used when manipulating and adding points
-                  onMouseUp={onEdit}
-                  // Event used when dragging the whole Polygon
-                  onDragEnd={onEdit}
-                  onLoad={polygon => onLoad(polygon)}
-                  onUnmount={onUnmount}
-                  options={{
-                    geodesic: true,
-                    fillColor: getLandColors(data?.type) ?? '#000000',
-                    fillOpacity: 0.35,
-                    strokeColor: getLandColors(data?.type) ?? '#000000',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 4,
-                  }}
-                />
+                <>
+                  <Marker
+                    onClick={() => navigate(`/lands/edit/${landData?.landId}`)}
+                    position={getCenterPoint(landData?.coordinates)}
+                    label={{
+                      text: zoomLevel > 12 ? `${landData?.name}` : '', // Only show label if zoomed in beyond a certain threshold
+                      color:
+                        zoomLevel > 12
+                          ? darkenColors(
+                              getLandColors(landData?.type ?? ''),
+                              0.2
+                            )
+                          : 'transparent', // Adjust color only if label is shown
+                      fontSize: '18px',
+                    }}
+                    icon={{
+                      url: require(
+                        `../../assets/images/${landData?.type ?? 'map-pin'}.png`
+                      ),
+                      scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
+                      fillColor: darkenColors(
+                        getLandColors(landData?.type ?? ''),
+                        0.2
+                      ), // Darken fill color
+                      fillOpacity: 1, // Full opacity for fill
+                      strokeWeight: 1, // Stroke weight
+                      strokeColor: darkenColors(
+                        getLandColors(landData?.type ?? ''),
+                        0.2
+                      ), // Darken stroke color
+                    }}
+                  ></Marker>
+                  <Polygon
+                    key={index}
+                    onClick={() => navigate(`/lands/edit/${landData?.landId}`)}
+                    paths={landData?.coordinates}
+                    // Make the Polygon editable / draggable
+                    editable={!isReadOnly}
+                    draggable={!isReadOnly}
+                    // Event used when manipulating and adding points
+                    onMouseUp={onEdit}
+                    // Event used when dragging the whole Polygon
+                    onDragEnd={onEdit}
+                    onLoad={polygon => onLoad(polygon)}
+                    onUnmount={onUnmount}
+                    options={{
+                      geodesic: true,
+                      fillColor: getLandColors(landData?.type) ?? '#000000',
+                      fillOpacity: 0.15,
+                      strokeColor: getLandColors(landData?.type) ?? '#000000',
+                      strokeOpacity: 0.8,
+                      strokeWeight: 4,
+                    }}
+                  />
+                </>
               ))}
             </>
           )}
 
           {!isMultiple && !isEmpty(polygonCoords) && (
-            <Polygon
-              paths={polygonCoords}
-              // Make the Polygon editable / draggable
-              editable={!isReadOnly}
-              draggable={!isReadOnly}
-              // Event used when manipulating and adding points
-              onMouseUp={onEdit}
-              // Event used when dragging the whole Polygon
-              onDragEnd={onEdit}
-              onLoad={polygon => onLoad(polygon)}
-              onUnmount={onUnmount}
-              options={{
-                geodesic: true,
-                fillColor: getLandColors(data?.type) ?? '#000000',
-                fillOpacity: 0.35,
-                strokeColor: getLandColors(data?.type) ?? '#000000',
-                strokeOpacity: 0.8,
-                strokeWeight: 4,
-              }}
-            ></Polygon>
+            <>
+              <Marker
+                onClick={() => navigate(`/lands/edit/${data?.landId}`)}
+                position={getCenterPoint(polygonCoords)}
+                label={{
+                  text: zoomLevel > 12 ? `${data?.name}` : '',
+                  color:
+                    zoomLevel > 12
+                      ? darkenColors(getLandColors(data?.type ?? ''), 0.2)
+                      : 'transparent', // Adjust color only if label is shown,
+                  fontSize: '18px',
+                }}
+                icon={{
+                  url: require(
+                    `../../assets/images/${data?.type ?? 'map-pin'}.png`
+                  ), // Specify the relative path to the icon image file
+                  scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
+                  fillColor: darkenColors(getLandColors(data?.type ?? ''), 0.2), // Darken fill color
+                  fillOpacity: 1, // Full opacity for fill
+                  strokeWeight: 1, // Stroke weight
+                  strokeColor: darkenColors(
+                    getLandColors(data?.type ?? ''),
+                    0.2
+                  ), // Darken stroke color
+                }}
+              />
+              <Polygon
+                paths={polygonCoords}
+                // Make the Polygon editable / draggable
+                editable={!isReadOnly}
+                draggable={!isReadOnly}
+                onClick={() => navigate(`/lands/edit/${data?.landId}`)}
+                // Event used when manipulating and adding points
+                onMouseUp={onEdit}
+                // Event used when dragging the whole Polygon
+                onDragEnd={onEdit}
+                onLoad={polygon => onLoad(polygon)}
+                onUnmount={onUnmount}
+                options={{
+                  geodesic: true,
+                  fillColor: getLandColors(data?.type) ?? '#000000',
+                  fillOpacity: 0.15,
+                  strokeColor: getLandColors(data?.type) ?? '#000000',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 4,
+                }}
+              ></Polygon>
+            </>
           )}
         </>
       </GoogleMap>
@@ -358,7 +457,7 @@ const LocationSearch = ({
             size="md"
             onClick={() =>
               onLocationSelect({
-                coordinates: polygonCoords,
+                coordinates: polygonCoords ?? [],
                 markLocation: { lat, lng },
                 totalArea,
               })

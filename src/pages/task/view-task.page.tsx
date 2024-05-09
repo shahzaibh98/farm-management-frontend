@@ -437,7 +437,7 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'Start DATE',
+        header: 'START DATE',
         accessorKey: 'startDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">

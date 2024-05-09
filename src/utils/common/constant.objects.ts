@@ -52,22 +52,45 @@ export const systemRoles = [
   { id: '7', name: 'Auditor', abbreviation: 'AU' },
 ];
 
-export const landColors = [
-  { color: '#D2B48C', value: 'Animal Enclosures' },
-  { color: '#FFFF00', value: 'Buffer Zones' },
-  { color: '#FF8C00', value: 'Buildings' },
-  { color: '#800080', value: 'Farm Boundaries' },
-  { color: '#006419', value: 'Fields' },
-  { color: '#A8D588', value: 'Green House' },
-  { color: '#00008B', value: 'Grow Room' },
-  { color: '#87CEEB', value: 'Irrigation Zones' },
-  { color: '#D2691E', value: 'Landscaping' },
-  { color: '#006400', value: 'Pasture' },
-  { color: '#D2B48C', value: 'Paddock' },
-  { color: '#808080', value: 'Other' },
-];
-
 export const getLandColors = (value: string) => {
   const color = landColors.find(color => color.value === value);
   return color?.color;
 };
+export function darkenColors(
+  color: string | null | undefined,
+  percentage: number
+) {
+  if (color) {
+    // Parse the color string to get the RGB components
+    const [r, g, b] = color.match(/\w\w/g)!.map(x => parseInt(x, 16)); // Use the non-null assertion operator !
+
+    // Calculate the new RGB components by reducing the brightness
+    const newR = Math.round(r * (1 - percentage));
+    const newG = Math.round(g * (1 - percentage));
+    const newB = Math.round(b * (1 - percentage));
+
+    // Convert the new RGB components back to hexadecimal format
+    const newColor = `#${(newR * 0x10000 + newG * 0x100 + newB).toString(16).padStart(6, '0')}`;
+
+    return newColor;
+  } else {
+    // Handle the case when color is null or undefined
+    // For example, you might return a default color or throw an error
+    return '#000000'; // Default black color
+  }
+}
+
+export const landColors = [
+  { color: '#A67D5F', value: 'Animal Enclosures' }, // Dark Color
+  { color: '#B2B200', value: 'Buffer Zones' },
+  { color: '#CC6600', value: 'Buildings' },
+  { color: '#4B0082', value: 'Farm Boundaries' },
+  { color: '#004717', value: 'Fields' },
+  { color: '#7C9A74', value: 'Green House' }, // Dark Color
+  { color: '#00004B', value: 'Grow Room' },
+  { color: '#4C8099', value: 'Irrigation Zones' }, // Dark Color
+  { color: '#7F5217', value: 'Landscaping' },
+  { color: '#003300', value: 'Pasture' },
+  { color: '#A67D5F', value: 'Paddock' }, // Dark Color
+  { color: '#404040', value: 'Other' }, // Dark Color
+];

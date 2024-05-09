@@ -14,6 +14,7 @@ interface Props {
   headerText: string;
   breadcrumbsText: string;
   isAddOrUpdateButton?: boolean;
+  isAddOrUpdateButtonLoading?: boolean;
   buttonContent?: string;
   onButtonClick?: () => void;
 }
@@ -21,6 +22,7 @@ interface Props {
 // Define the GenericHeader functional component
 const GenericHeader: React.FC<Props> = ({
   isBackendButton = true,
+  isAddOrUpdateButtonLoading = false,
   isSecondButton = false,
   secondButtonContent = '',
   onSecondButtonClick = () => {},
@@ -76,7 +78,7 @@ const GenericHeader: React.FC<Props> = ({
         {isSecondButton && (
           <Button
             variant="outline"
-            mr={5}
+            m={5}
             autoContrast
             color={theme.colors.secondaryColors[3]}
             size="md"
@@ -92,8 +94,9 @@ const GenericHeader: React.FC<Props> = ({
           <Button
             variant="outline"
             autoContrast
-            ml={5}
+            m={5}
             color={theme.colors.secondaryColors[3]}
+            loading={isAddOrUpdateButtonLoading}
             size="md"
             onClick={() => onButtonClick()}
             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
