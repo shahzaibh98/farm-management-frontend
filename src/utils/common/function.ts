@@ -241,3 +241,24 @@ export function calculateCenterPointAndZoom(
     return { center: { lat: centerLat, lng: centerLng }, zoom };
   }
 }
+
+export const calculateOverlayBounds = (polygonCoords: any[]) => {
+  let minLat = Number.MAX_VALUE;
+  let maxLat = Number.MIN_VALUE;
+  let minLng = Number.MAX_VALUE;
+  let maxLng = Number.MIN_VALUE;
+
+  polygonCoords.forEach((coord: { lat: number; lng: number }) => {
+    minLat = Math.min(minLat, coord.lat);
+    maxLat = Math.max(maxLat, coord.lat);
+    minLng = Math.min(minLng, coord.lng);
+    maxLng = Math.max(maxLng, coord.lng);
+  });
+
+  return {
+    north: maxLat,
+    south: minLat,
+    east: maxLng,
+    west: minLng,
+  };
+};
