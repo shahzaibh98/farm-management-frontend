@@ -27,6 +27,20 @@ import {
   getCenterPoint,
   isEmpty,
 } from '../../utils/common/function';
+import AnimalEnclosures from '../../assets/images/Animal Enclosures.png';
+import BufferZone from '../../assets/images/Buffer Zones.png';
+import Buildings from '../../assets/images/Buildings.png';
+import FarmBoundaries from '../../assets/images/Farm Boundaries.png';
+import Fields from '../../assets/images/Fields.png';
+import GreenHouse from '../../assets/images/Greenhouse.png';
+import GreenRoom from '../../assets/images/Grow Room.png';
+import IrrigationZones from '../../assets/images/Irrigation Zones.png';
+import MapPin from '../../assets/images/map-pin.png';
+import Other from '../../assets/images/Other.png';
+import Paddock from '../../assets/images/Paddock.png';
+import Pasture from '../../assets/images/Pasture.png';
+
+import { LandType } from '@agri/shared-types';
 
 interface Location {
   lat: number;
@@ -332,9 +346,32 @@ const LocationSearch = ({
                       fontSize: '18px',
                     }}
                     icon={{
-                      url: require(
-                        `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
-                      ),
+                      url:
+                        landData?.type === LandType.Animal_Enclosures
+                          ? AnimalEnclosures
+                          : landData?.type === LandType.Buffer_Zones
+                            ? BufferZone
+                            : landData?.type === LandType.Buildings
+                              ? Buildings
+                              : landData?.type === LandType.Farm_Boundaries
+                                ? FarmBoundaries
+                                : landData?.type === LandType.Fields
+                                  ? Fields
+                                  : landData?.type === LandType.Green_House
+                                    ? GreenHouse
+                                    : landData?.type === LandType.Grow_Room
+                                      ? GreenRoom
+                                      : landData?.type ===
+                                          LandType.Irrigation_Zones
+                                        ? IrrigationZones
+                                        : landData?.type === LandType.Other
+                                          ? Other
+                                          : landData?.type === LandType.Paddock
+                                            ? Paddock
+                                            : landData?.type ===
+                                                LandType.Pasture
+                                              ? Pasture
+                                              : MapPin,
                       scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
                       fillColor: darkenColors(
                         getLandColors(landData?.type ?? ''),
@@ -348,6 +385,11 @@ const LocationSearch = ({
                       ), // Darken stroke color
                     }}
                   ></Marker>
+                  {/* <GroundOverlay
+                    bounds={calculateOverlayBounds(landData?.coordinates)}
+                    url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAETe8_bHwPe8gNRU7EfRXvlMWWsjA2ehWlLkzcTb5bA&s"
+                    options={{ opacity: 0.95 }} // Adjust opacity as needed
+                  /> */}
                   <Polygon
                     key={index}
                     paths={landData?.coordinates}
@@ -386,11 +428,35 @@ const LocationSearch = ({
                   fontSize: '18px',
                 }}
                 icon={{
-                  url: require(
-                    `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
-                  ), // Specify the relative path to the icon image file
+                  url:
+                    data?.type === LandType.Animal_Enclosures
+                      ? AnimalEnclosures
+                      : data?.type === LandType.Buffer_Zones
+                        ? BufferZone
+                        : data?.type === LandType.Buildings
+                          ? Buildings
+                          : data?.type === LandType.Farm_Boundaries
+                            ? FarmBoundaries
+                            : data?.type === LandType.Fields
+                              ? Fields
+                              : data?.type === LandType.Green_House
+                                ? GreenHouse
+                                : data?.type === LandType.Grow_Room
+                                  ? GreenRoom
+                                  : data?.type === LandType.Irrigation_Zones
+                                    ? IrrigationZones
+                                    : data?.type === LandType.Other
+                                      ? Other
+                                      : data?.type === LandType.Paddock
+                                        ? Paddock
+                                        : data?.type === LandType.Pasture
+                                          ? Pasture
+                                          : MapPin,
                   scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
-                  fillColor: darkenColors(getLandColors(data?.type ?? ''), 0.2), // Darken fill color
+                  fillColor: darkenColors(
+                    getLandColors(data?.type ?? 'map-pin'),
+                    0.2
+                  ), // Darken fill color
                   fillOpacity: 1, // Full opacity for fill
                   strokeWeight: 1, // Stroke weight
                   strokeColor: darkenColors(
@@ -399,6 +465,7 @@ const LocationSearch = ({
                   ), // Darken stroke color
                 }}
               />
+
               <Polygon
                 paths={polygonCoords}
                 // Make the Polygon editable / draggable
