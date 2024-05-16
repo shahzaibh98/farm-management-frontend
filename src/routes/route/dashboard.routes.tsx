@@ -1,5 +1,6 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
+import DemoDashboard from '../../pages/dashboard/view-dashboard';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
 
@@ -14,7 +15,7 @@ export const dashboardRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Dashboard" />
-            <div>DashBoard</div>
+            <DemoDashboard />
           </PrivateRoute>
         ),
       },

@@ -13,12 +13,13 @@ import {
   manageUsersRoutes,
 } from './route';
 import { landRoutes } from './route/land.routes';
+import { cropAdminRoutes } from './route/cropAdmin.routes';
 
 export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];
 
   const roleRoutesMapping: any = {
-    0: [...farmAdminRoutes],
+    0: [...farmAdminRoutes, ...cropAdminRoutes],
     1: [
       ...taskRoutes,
       ...cropRoutes,

@@ -1,13 +1,15 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
-import ManageCrop from '../../pages/crops/crops.form';
-import CropView from '../../pages/crops/view.crop';
+import CropForm from '../../pages/crops/crop.form.admin';
+import ManageCrops from '../../pages/crops/view-admin-crops.page';
 import { ErrorPage } from '../../pages/error';
+import UserForm from '../../pages/users/user.form';
+
 import PrivateRoute from '../private/private.routes';
 
-export const cropRoutes = [
+export const cropAdminRoutes = [
   {
-    path: '/crop',
+    path: '/admin-crops',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
@@ -15,8 +17,8 @@ export const cropRoutes = [
         index: true,
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop" />
-            <CropView />
+            <DocumentTitle title="Crops" />
+            <ManageCrops />
           </PrivateRoute>
         ),
       },
@@ -25,16 +27,7 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop - Add" />
-            <ManageCrop />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: 'view/:id',
-        element: (
-          <PrivateRoute>
-            <DocumentTitle title="Crop - View" />
-            <div>Crop View</div>
+            <CropForm />
           </PrivateRoute>
         ),
       },
@@ -42,8 +35,17 @@ export const cropRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop - Edit" />
-            <div>Crop Edit</div>
+            <DocumentTitle title="Farm - Edit" />
+            <UserForm type="Update" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'view/:id',
+        element: (
+          <PrivateRoute>
+            <DocumentTitle title="Farm - View" />
+            <UserForm type="View" />
           </PrivateRoute>
         ),
       },
