@@ -8,6 +8,7 @@ import {
 import {
   MdOutlineAdminPanelSettings,
   MdOutlineLandslide,
+  MdGrass,
 } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
 import store from '../redux';
@@ -35,6 +36,11 @@ export function getNavBarAgainstRole() {
         link: '/manage-farm',
         label: 'Manage Farm',
         icon: MdOutlineAdminPanelSettings,
+      },
+      {
+        link: '/admin-crops',
+        label: 'Crops',
+        icon: MdGrass,
       },
     ],
     1: [
