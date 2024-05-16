@@ -1,6 +1,6 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
-import CropForm from '../../pages/crops/crop.form';
+import CropForm from '../../pages/crops/crop.form.admin';
 import ManageCrops from '../../pages/crops/view-admin-crops.page';
 import { ErrorPage } from '../../pages/error';
 import UserForm from '../../pages/users/user.form';

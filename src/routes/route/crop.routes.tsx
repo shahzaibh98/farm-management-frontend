@@ -1,5 +1,7 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
+import ManageCrop from '../../pages/crops/crops.form';
+import CropView from '../../pages/crops/view.crop';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
 
@@ -14,7 +16,7 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop" />
-            <div>Crop</div>
+            <CropView />
           </PrivateRoute>
         ),
       },
@@ -23,7 +25,7 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop - Add" />
-            <div>Crop Add</div>
+            <ManageCrop />
           </PrivateRoute>
         ),
       },
