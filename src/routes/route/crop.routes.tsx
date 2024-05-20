@@ -1,7 +1,7 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
-import ManageCrop from '../../pages/crops/crops.form';
-import CropView from '../../pages/crops/view.crop';
+import ManageCrop from '../../pages/planting-crop/crops.form';
+import CropView from '../../pages/planting-crop/view.crop';
 import { ErrorPage } from '../../pages/error';
 import PrivateRoute from '../private/private.routes';
 

@@ -34,9 +34,9 @@ import { IconMap } from '@tabler/icons-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Text } from '../../concave.agri/components';
 import { initialNotification } from '../../utils/common/constant.objects';
-import { initialMapModalInfo } from './initial.values';
+import { initialMapModalInfo } from '../crops/initial.values';
 import { Country, State, City } from 'country-state-city';
-import { DatePicker } from '@mantine/dates';
+import { DatePicker, DateTimePicker } from '@mantine/dates';
 
 const ManageCrop = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
@@ -260,152 +260,156 @@ const ManageCrop = ({ type = 'Add' }) => {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Popover withArrow>
-                <TextInput
-                  label="Select Date"
-                  value={formik.values?.selectedDate}
-                  onChange={value =>
-                    type !== 'View' &&
-                    formik.setFieldValue('selectedDate', value)
-                  }
-                  style={inputStyle}
-                  error={
-                    formik.errors.selectedDate &&
-                    (formik.touched.selectedDate || formik.submitCount > 0)
-                      ? formik.errors.selectedDate
-                      : null
-                  }
-                />
-                <DatePicker
-                  value={formik.values?.selectedDate}
-                  onChange={value =>
-                    type !== 'View' &&
-                    formik.setFieldValue('selectedDate', value)
-                  }
-                />
-              </Popover>
+              <label>Planting Date and Time</label>
+              <DateTimePicker
+                placeholder="Planting start date and time"
+                withAsterisk
+                value={
+                  formik?.values?.startDateTime &&
+                  new Date(formik?.values?.startDateTime)
+                }
+                onChange={value => formik.setFieldValue('startDateTime', value)}
+                error={
+                  !!(
+                    formik.errors.startDateTime && formik.touched.startDateTime
+                  )
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="status"
+                label="Planting Status"
+                placeholder="Select Status..."
+                data={[...Object.values(LandStatus)]}
+                value={formik?.values?.status ?? ''}
+                onChange={value =>
+                  type !== 'View' && formik.setFieldValue('status', value)
+                }
+                styles={inputStyle}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="name"
+                label="No of Plant"
+                name="name"
+                placeholder="Enter your no of plants..."
+                value={formik.values?.name ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('name', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.name &&
+                  (formik.touched.name || formik.submitCount > 0)
+                    ? formik.errors.name
+                    : null
+                }
+              />
             </Grid.Col>
           </Grid>
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Location
+            Land Information
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="country"
-                label="Country"
-                name="country"
-                placeholder="Enter your country..."
-                value={formik.values?.country ?? ''}
-                onChange={e => {
-                  if (type !== 'View') {
-                    const getCountry = Country.getAllCountries()?.find(
-                      country => country.name === e
-                    );
-
-                    setLocationData({
-                      ...locationData,
-                      countryCode: getCountry?.isoCode ?? '',
-                    });
-
-                    formik.setFieldValue('country', e);
-                    formik.setFieldValue('provinceOrState', '');
-                    formik.setFieldValue('cityOrTown', '');
-                  }
-                }}
-                data={[
-                  /* eslint-disable-next-line */
-                  ...Country?.getAllCountries()?.map(country => {
-                    return country?.name;
-                  }),
-                ]}
-                searchable
-                styles={inputStyle}
-                error={
-                  formik.errors.country &&
-                  (formik.touched.country || formik.submitCount > 0)
-                    ? (formik.errors.country as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="province"
-                label="Province/State"
-                name="provinceOrState"
-                searchable
-                placeholder="Enter your province or state..."
-                value={formik.values?.provinceOrState ?? ''}
-                disabled={!formik.values?.country}
-                data={[
-                  { label: 'None', value: '' },
-                  /* eslint-disable-next-line */
-                  ...State?.getStatesOfCountry(locationData?.countryCode)?.map(
-                    state => state?.name
-                  ),
-                ]}
-                onChange={e => {
-                  if (type !== 'View') {
-                    const getState = State.getAllStates()?.find(
-                      state =>
-                        state.name === e &&
-                        state.countryCode === locationData?.countryCode
-                    );
-
-                    setLocationData({
-                      ...locationData,
-                      stateCode: getState?.isoCode ?? '',
-                    });
-                    formik.setFieldValue('provinceOrState', e);
-                  }
-                }}
-                styles={inputStyle}
-                error={
-                  formik.errors.provinceOrState &&
-                  (formik.touched.provinceOrState || formik.submitCount > 0)
-                    ? (formik.errors.provinceOrState as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="city"
-                label="City/Town"
-                name="cityOrTown"
-                searchable
-                placeholder="Enter your city or town..."
-                value={formik.values?.cityOrTown ?? ''}
-                disabled={!formik.values?.provinceOrState}
-                data={[
-                  { label: 'None', value: '' },
-                  ...City.getCitiesOfState(
-                    locationData?.countryCode,
-                    locationData?.stateCode
-                  ).map((city: { name: any }) => city.name),
-                ]}
+              <TextInput
+                id="address"
+                label="Row Spacing"
+                name="address"
+                placeholder="Enter your Address..."
+                value={formik.values?.address ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('cityOrTown', e)
+                  type !== 'View' && formik.setFieldValue('address', e)
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.cityOrTown &&
-                  (formik.touched.cityOrTown || formik.submitCount > 0)
-                    ? (formik.errors.cityOrTown as ReactNode)
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
                     : null
                 }
               />
             </Grid.Col>
-
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
                 id="address"
-                label="Address"
+                label="Row Length"
                 name="address"
                 placeholder="Enter your Address..."
+                value={formik.values?.address ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('address', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <label>Expected Harvesting Date and Time</label>
+              <DateTimePicker
+                placeholder="expected start date and time"
+                withAsterisk
+                value={
+                  formik?.values?.startDateTime &&
+                  new Date(formik?.values?.startDateTime)
+                }
+                onChange={value => formik.setFieldValue('startDateTime', value)}
+                error={
+                  !!(
+                    formik.errors.startDateTime && formik.touched.startDateTime
+                  )
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <label>Actual Harvesting Date and Time</label>
+              <DateTimePicker
+                placeholder="actual start date and time"
+                withAsterisk
+                value={
+                  formik?.values?.startDateTime &&
+                  new Date(formik?.values?.startDateTime)
+                }
+                onChange={value => formik.setFieldValue('startDateTime', value)}
+                error={
+                  !!(
+                    formik.errors.startDateTime && formik.touched.startDateTime
+                  )
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="address"
+                label="Actual Yield"
+                name="address"
+                placeholder="Enter your yield..."
+                value={formik.values?.address ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('address', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="address"
+                label="Expected Yield"
+                name="address"
+                placeholder="Enter your expected yield..."
                 value={formik.values?.address ?? ''}
                 onChange={e =>
                   type !== 'View' && formik.setFieldValue('address', e)
@@ -425,10 +429,29 @@ const ManageCrop = ({ type = 'Add' }) => {
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="address"
+                label="Seed Company"
+                name="address"
+                placeholder="Enter your company..."
+                value={formik.values?.address ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('address', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
                 id="status"
-                label="Status"
-                placeholder="Select Status..."
+                label="Seed Type"
+                placeholder="Select type..."
                 data={[...Object.values(LandStatus)]}
                 value={formik?.values?.status ?? ''}
                 onChange={value =>
@@ -437,39 +460,109 @@ const ManageCrop = ({ type = 'Add' }) => {
                 styles={inputStyle}
               />
             </Grid.Col>
+
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="soilType"
-                label="Soil Type"
-                placeholder="Select Soil Type..."
-                data={[...Object.values(SoilType)]}
-                value={formik.values?.soilType}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('soilType', value)
+              <NumberInput
+                id="estimatedCost"
+                label="Iot Number"
+                name="estimatedCost"
+                placeholder="Enter your iot number..."
+                value={formik.values?.estimatedCost ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('estimatedCost', e)
                 }
                 styles={inputStyle}
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="irrigationMethod"
-                label="Irrigation Method"
-                placeholder="Select Method..."
-                data={[...Object.values(IRRIGATIONMETHOD)]}
-                value={formik.values?.irrigationMethod}
-                onChange={value =>
-                  type !== 'View' &&
-                  formik.setFieldValue('irrigationMethod', value)
+                error={
+                  formik.errors.estimatedCost &&
+                  (formik.touched.estimatedCost || formik.submitCount > 0)
+                    ? formik.errors.estimatedCost
+                    : null
                 }
-                styles={inputStyle}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <NumberInput
                 id="estimatedCost"
-                label="Estimate Cost"
+                label="Seed Per Hole"
                 name="estimatedCost"
-                placeholder="Enter your Estimate Cost..."
+                placeholder="Enter your iot number..."
+                value={formik.values?.estimatedCost ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('estimatedCost', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.estimatedCost &&
+                  (formik.touched.estimatedCost || formik.submitCount > 0)
+                    ? formik.errors.estimatedCost
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="address"
+                label="Tray Size"
+                name="address"
+                placeholder="Enter your tray size..."
+                value={formik.values?.address ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('address', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                id="address"
+                label="Starts Per Tray"
+                name="address"
+                placeholder="Enter your starts per tray..."
+                value={formik.values?.address ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('address', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.address &&
+                  (formik.touched.address || formik.submitCount > 0)
+                    ? formik.errors.address
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <NumberInput
+                id="estimatedCost"
+                label="Number of trays"
+                name="estimatedCost"
+                placeholder="Enter your no of trays..."
+                value={formik.values?.estimatedCost ?? ''}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('estimatedCost', e)
+                }
+                styles={inputStyle}
+                error={
+                  formik.errors.estimatedCost &&
+                  (formik.touched.estimatedCost || formik.submitCount > 0)
+                    ? formik.errors.estimatedCost
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <NumberInput
+                id="estimatedCost"
+                label="Tray Number"
+                name="estimatedCost"
+                placeholder="Enter your tray
+                 number..."
                 value={formik.values?.estimatedCost ?? ''}
                 onChange={e =>
                   type !== 'View' && formik.setFieldValue('estimatedCost', e)
@@ -484,101 +577,6 @@ const ManageCrop = ({ type = 'Add' }) => {
               />
             </Grid.Col>
           </Grid>
-
-          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Mark Location Boundaries
-          </Title>
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Button
-                variant="outline"
-                autoContrast
-                color={theme.colors.secondaryColors[0]}
-                size="md"
-                onClick={() => {
-                  setMapModalDetails({
-                    isOpened: true,
-                    isReadOnly: false,
-                    isMultiple: false,
-                    data: formik.values,
-                  });
-                }}
-                style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-                rightSection={
-                  <IconMap style={{ width: rem(18), height: rem(18) }} />
-                }
-              >
-                <Text tt="capitalize" fs="italic" p={2}>
-                  {'Mark Boundaries'}
-                </Text>
-              </Button>
-            </Grid.Col>
-          </Grid>
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <NumberInput
-                id="area"
-                label="Land Area"
-                name="area"
-                placeholder="Enter your Land Area..."
-                value={formik.values?.area ?? ''}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('area', e)
-                }
-                styles={inputStyle}
-                error={
-                  formik.errors.area &&
-                  (formik.touched.area || formik.submitCount > 0)
-                    ? formik.errors.area
-                    : null
-                }
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="areaUnit"
-                label="Area Unit"
-                placeholder="Select areaUnit..."
-                data={[...Object.values(AreaUnitEn)]}
-                value={formik.values?.areaUnit}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('areaUnit', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-          </Grid>
-
-          {/* <Modal
-            styles={{
-              title: {
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: theme.colors.primaryColors[0],
-              },
-            }}
-            transitionProps={{ transition: 'fade-up', duration: 300 }}
-            onClose={() => setMapModalDetails(initialMapModalInfo)}
-            opened={mapModalDetails?.isOpened}
-            title={'Location Boundaries'}
-            size={'xl'}
-          >
-            <LocationSearch
-              onLocationSelect={object => {
-                formik.setFieldValue('coordinates', object?.coordinates);
-                formik.setFieldValue('markLocation', object?.markLocation);
-                formik.setFieldValue(
-                  'area',
-                  isNaN(object?.totalArea) ? 0 : object?.totalArea
-                );
-                formik.setFieldValue('areaUnit', AreaUnitEn.ACRES);
-                setMapModalDetails(initialMapModalInfo);
-              }}
-              onClose={() => setMapModalDetails(initialMapModalInfo)}
-              isReadOnly={type === 'View'}
-              data={mapModalDetails?.data}
-            />
-          </Modal> */}
         </form>
       </Paper>
     </main>
