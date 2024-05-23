@@ -10,6 +10,7 @@ import {
   MdOutlineLandslide,
   MdGrass,
 } from 'react-icons/md';
+import { GiPlantRoots } from 'react-icons/gi';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
 import store from '../redux';
 import { TfiMapAlt } from 'react-icons/tfi';
@@ -41,6 +42,11 @@ export function getNavBarAgainstRole() {
         link: '/admin-crops',
         label: 'Crops',
         icon: MdGrass,
+      },
+      {
+        link: '/admin-crops-planning',
+        label: 'Crops Planning',
+        icon: GiPlantRoots,
       },
     ],
     1: [
