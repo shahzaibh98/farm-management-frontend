@@ -1,15 +1,14 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
-import CropForm from '../../pages/crops/crop.form.admin';
-import ManageCrops from '../../pages/crops/view-admin-crops.page';
+import CropForm from '../../pages/crops/crop.form';
+import ManageCrops from '../../pages/crops/view-crops.page';
 import { ErrorPage } from '../../pages/error';
-import UserForm from '../../pages/users/user.form';
 
 import PrivateRoute from '../private/private.routes';
 
 export const cropAdminRoutes = [
   {
-    path: '/admin-crops',
+    path: '/crops',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
@@ -18,7 +17,11 @@ export const cropAdminRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crops" />
-            <ManageCrops />
+            <ManageCrops
+              apiEndPoint="crop"
+              pageLabel="Crops"
+              routeName="crops"
+            />
           </PrivateRoute>
         ),
       },
@@ -27,7 +30,7 @@ export const cropAdminRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop - Add" />
-            <CropForm />
+            <CropForm apiEndPoint="crop" pageLabel="Crops" />
           </PrivateRoute>
         ),
       },
@@ -36,7 +39,7 @@ export const cropAdminRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Farm - Edit" />
-            <UserForm type="Update" />
+            <CropForm type="Update" apiEndPoint="crop" pageLabel="Crops" />
           </PrivateRoute>
         ),
       },
@@ -45,7 +48,7 @@ export const cropAdminRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Farm - View" />
-            <UserForm type="View" />
+            <CropForm type="View" apiEndPoint="crop" pageLabel="Crops" />
           </PrivateRoute>
         ),
       },

@@ -97,7 +97,9 @@ const TaskView = () => {
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
   const { isSmallScreen } = useScreenSize();
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const userInfo = useSelector(
+    (state: any) => state?.userInfo?.currentFarmRole
+  );
 
   /* /////////////////////////////////////////////////
                       State
@@ -142,14 +144,31 @@ const TaskView = () => {
     initialPaginationFromQueryParams();
   }, [searchParams]);
 
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
+
   useEffect(() => {
     fetchData(
-      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users/farm-users?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
     )
       .then((response: any) => {
-        const users = response.data?.map((user: { name: any; userId: any }) => {
-          return { label: user.name, value: user.userId?.toString() };
-        });
+        console.log('Response', response);
+        const users = response.data?.map(
+          (user: { systemUser: { name: any; userId: any } }) => {
+            return {
+              label: user.systemUser.name,
+              value: user.systemUser.userId?.toString(),
+            };
+          }
+        );
+        console.log('Users', users);
         const newArray = [
           { label: 'Me', value: userInfo.userId?.toString() },
           { label: 'Others', value: 'Others' },
@@ -161,9 +180,9 @@ const TaskView = () => {
         ];
         setUserList(newArray);
       })
-      .catch(error => {
+      .catch(() => {
         const newArray = [
-          { label: 'Me', value: userInfo.farmId?.toString() },
+          { label: 'Me', value: currentUser?.userId?.toString() },
           { label: 'Others', value: 'Others' },
           { label: 'All', value: 'All' },
         ];
@@ -261,7 +280,7 @@ const TaskView = () => {
           totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -344,7 +363,7 @@ const TaskView = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   };
 
@@ -376,17 +395,19 @@ const TaskView = () => {
       },
       {
         header: 'ASSIGNED TO',
-        accessorKey: 'assigned',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name ?? ''}
-            </p>
-          </div>
-        ),
+        cell: (info: any) => {
+          const rowData = info?.row?.original;
+          return (
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {rowData?.assigned?.systemUser?.name}
+              </p>
+            </div>
+          );
+        },
       },
       {
         header: 'ASSOCIATED TO',
@@ -566,7 +587,7 @@ const TaskView = () => {
   };
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}

@@ -1,4 +1,6 @@
 import moment from 'moment';
+import { useSelector } from 'react-redux';
+import store from '../../redux';
 
 export function extractFirstWord(url: string): string | null {
   // Split the URL at the '?' character to separate the base URL and query parameters
@@ -120,7 +122,7 @@ export function getDateRange(option: string): [string, string] {
 export function extractPageInfo(
   pageInfo: string
 ): { currentPage: number; totalPages: number } | null {
-  const match = pageInfo.match(/Page (\d+) of (\d+)/);
+  const match = pageInfo?.match(/Page (\d+) of (\d+)/);
   if (match) {
     const currentPage = parseInt(match[1]);
     const totalPages = parseInt(match[2]);
@@ -154,7 +156,6 @@ export function formatTimestamp(timestamp: string | number | Date) {
 
   let hours = date.getHours();
   const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
   const period = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12 || 12;
 
@@ -261,4 +262,24 @@ export const calculateOverlayBounds = (polygonCoords: any[]) => {
     east: maxLng,
     west: minLng,
   };
+};
+
+export const organizeDropDownData = (data: { name: string; id: string }[]) =>
+  data?.map(item => ({ label: item.name, value: item?.id?.toString() }));
+
+export const numberInputValue = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return undefined;
+  if (value === 0) return undefined;
+  return value;
+};
+
+export const getReferenceName = (objectKey: string, findingValue: string) => {
+  const state = store.getState();
+  const { referenceData } = state.referenceData;
+
+  return (
+    referenceData[objectKey]?.find(
+      (object: { id: string }) => object?.id === findingValue
+    )?.name ?? ''
+  );
 };

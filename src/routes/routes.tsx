@@ -8,11 +8,19 @@ import {
 import { getRoutesAgainstRole } from './role-based.routes';
 
 const AppRouter: React.FC = () => {
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
-  const role = userInfo?.roleId?.toString();
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUserRole = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole?.roleId
+      : currentRole?.currentCompanyRole?.roleId;
+
   const authRouter = createBrowserRouter(
     [
-      ...getRoutesAgainstRole(role),
+      ...getRoutesAgainstRole(currentUserRole),
       {
         path: '*',
         element: <Navigate to="/" />,

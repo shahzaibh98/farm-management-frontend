@@ -1,62 +1,52 @@
-import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
   Notification,
   Paper,
-  Select,
   Table,
   Text,
-} from '../../concave.agri/components';
-import { SearchButton } from '../../concave.agri/components/searchbar';
-import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+} from '../../../concave.agri/components';
 
 // Importing a custom hook to get the screen size
-import useScreenSize from '../../hooks/useScreenSize';
 
 // Importing custom components and layouts
-import { TableMenu } from '../../layout';
-import GenericHeader from '../../layout/header.layout';
-import SearchComponent from '../../layout/searchBar.layout';
+import { TableMenu } from '../../../layout';
+import GenericHeader from '../../../layout/header.layout';
+import SearchComponent from '../../../layout/searchBar.layout';
 
 // Importing types and constants
-import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { useSelector } from 'react-redux';
-import { deleteData, fetchData } from '../../api/api';
-import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
+import { deleteData, fetchData } from '../../../api/api';
+import DeleteModel from '../../../layout/confimation.modal';
 import {
-  getLandColors,
   initialNotification,
   paginationInfoValue,
-} from '../../utils/common/constant.objects';
+} from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
   isEmpty,
   removeEmptyValueFilters,
-} from '../../utils/common/function';
+} from '../../../utils/common/function';
+import { ReactComponent as FarmIcon } from '../../../assets/svg/farm-boundary.svg';
 import {
   SearchFilter,
   initialMapModalInfo,
   initialSearchValues,
 } from './initial.values';
-import DeleteModel from '../../layout/confimation.modal';
-import { IconBorderCorners } from '@tabler/icons-react';
+import LocationSearch from '../searchLocation';
 
-const CropView = () => {
+const BedsView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') ?? initialSearchValues.searchValue;
-    const type = searchParams.get('type') ?? initialSearchValues.type;
-    const status = searchParams.get('status') ?? initialSearchValues.status;
 
     // Update state with extracted values
     return {
       searchValue,
-      type,
-      status,
     };
   };
 
@@ -76,7 +66,7 @@ const CropView = () => {
   /////////////////////////////////////////////////// */
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
-  const { isSmallScreen } = useScreenSize();
+  const { id } = useParams(); // Getting the ID from URL params
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
   /* /////////////////////////////////////////////////
@@ -111,9 +101,7 @@ const CropView = () => {
 
   const navigate = useNavigate();
 
-  const handleAddFarmAdmin = () => {
-    navigate('/crop/add');
-  };
+  const { referenceData } = useSelector((state: any) => state?.referenceData);
 
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
 
@@ -122,6 +110,16 @@ const CropView = () => {
     id: '',
     resourceName: '',
   });
+
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -138,6 +136,16 @@ const CropView = () => {
         operator: 'eq',
         value: userInfo?.farmId?.toString(),
       },
+      {
+        field: 'landId',
+        operator: 'eq',
+        value: id,
+      },
+      {
+        field: 'isActive',
+        operator: 'eq',
+        value: true,
+      },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
@@ -148,7 +156,7 @@ const CropView = () => {
       .then((response: any) => {
         setAllLocationData(response?.data);
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -180,14 +188,7 @@ const CropView = () => {
   const handleSetParams = () => {
     const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(searchValues).forEach(([key, value]) => {
-      if (key === 'dateRange') {
-        if (value[0]) {
-          newParams.set('dateRangeStart', value[0].toISOString());
-        }
-        if (value[1]) {
-          newParams.set('dateRangeEnd', value[1].toISOString());
-        }
-      } else if (value) {
+      if (value) {
         newParams.set(key, value);
       }
     });
@@ -204,19 +205,19 @@ const CropView = () => {
         value: searchValues.searchValue,
       },
       {
-        field: 'status',
+        field: 'landId',
         operator: 'eq',
-        value: searchValues?.status,
+        value: id,
       },
       {
-        field: 'type',
+        field: 'isActive',
         operator: 'eq',
-        value: searchValues?.type,
+        value: true,
       },
       {
         field: 'farmId',
         operator: 'eq',
-        value: userInfo?.farmId?.toString(),
+        value: currentUser?.farmId,
       },
     ]);
 
@@ -234,7 +235,7 @@ const CropView = () => {
           totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -317,7 +318,7 @@ const CropView = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   };
 
@@ -329,8 +330,8 @@ const CropView = () => {
   const columns = useMemo(
     () => [
       {
-        header: <div className="flex text-start ml-2">PLANTING METHOD</div>,
-        accessorKey: 'Planting Method',
+        header: <div className="flex text-start ml-2">NAME</div>,
+        accessorKey: 'name',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
@@ -343,8 +344,8 @@ const CropView = () => {
         ),
       },
       {
-        header: <div className="flex text-start">ROW SPACING</div>,
-        accessorKey: 'row spacing',
+        header: <div className="flex text-start">LENGTH</div>,
+        accessorKey: 'length',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
@@ -352,16 +353,33 @@ const CropView = () => {
           const rowData = info?.row?.original;
           return (
             <div className="flex flex-row">
-              <IconBorderCorners color={getLandColors(rowData?.type ?? '')} />
               <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.type}
+                {rowData?.length}
               </p>
             </div>
           );
         },
       },
       {
-        header: <div className="flex text-start">SEED COMPANY</div>,
+        header: <div className="flex text-start">WIDTH</div>,
+        accessorKey: 'width',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 500, //enforced during column resizing
+        cell: (info: any) => {
+          const rowData = info?.row?.original;
+
+          return (
+            <div className="flex flex-row">
+              <p className="text-sm lg:text-base text-center ml-4">
+                {rowData?.width}
+              </p>
+            </div>
+          );
+        },
+      },
+      {
+        header: <div className="flex text-start">AREA</div>,
         accessorKey: 'area',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -371,41 +389,11 @@ const CropView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {`${Number(rowInfo?.convertedArea) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.convertedArea).toFixed(2)}  ${AreaUnitEn.ACRES}`}
+                {`${Number(rowInfo?.area) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.area).toFixed(2)}`}
               </p>
             </div>
           );
         },
-      },
-      {
-        header: <div className="flex text-start">ACTUAL YEILD</div>,
-        accessorKey: 'soilType',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => {
-          return (
-            <div className="flex">
-              <p className="text-sm lg:text-base text-center">
-                {info.getValue()}
-              </p>
-            </div>
-          );
-        },
-      },
-      {
-        header: 'PLANTING STATUS',
-        accessorKey: 'status',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
       },
       {
         header: 'BOUNDARIES',
@@ -436,20 +424,20 @@ const CropView = () => {
       },
       {
         header: '',
-        accessorKey: 'landId',
+        accessorKey: 'bedId',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
-          const id = info?.row?.original?.landId;
+          const id = info?.row?.original?.bedId;
           return (
             <TableMenu
               id={id}
               onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
               }
-              onEditClick={() => navigate(`/lands/edit/${id}`)}
-              onViewClick={() => navigate(`/lands/view/${id}`)}
+              onEditClick={() => navigate(`/lands/beds/edit/${id}`)}
+              onViewClick={() => navigate(`/lands/beds/view/${id}`)}
             />
           );
         },
@@ -459,7 +447,7 @@ const CropView = () => {
   );
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -471,12 +459,10 @@ const CropView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Crops"
-        breadcrumbsText="Manage Crop"
-        isAddOrUpdateButton
-        buttonContent="Add Crop"
-        onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
-        secondButtonContent="View All Crops"
+        headerText="Beds"
+        breadcrumbsText="Manage Beds"
+        isAddOrUpdateButton={false}
+        secondButtonContent="View All Beds"
         isSecondButton={allLocationData && allLocationData?.length > 0}
         onSecondButtonClick={handleViewAllLocation}
       />
@@ -494,38 +480,6 @@ const CropView = () => {
             handleSearchButtonClick={handleSearchButtonClick}
             handleResetButtonClick={handleResetButtonClick}
           />
-          <Grid className="mt-2">
-            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
-              <Select
-                placeholder="Location Type"
-                data={[
-                  { label: 'All', value: 'All' },
-                  ...Object.values(LandType),
-                ]}
-                value={searchValues.type ?? ''}
-                onChange={value => value && setValuesById({ type: value })}
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
-              <Select
-                placeholder="Location Status"
-                data={[
-                  { label: 'All', value: 'All' },
-                  ...Object.values(LandStatus),
-                ]}
-                value={searchValues.status ?? ''}
-                onChange={value => value && setValuesById({ status: value })}
-              />
-            </Grid.Col>
-            {isSmallScreen && (
-              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                <div className="flex flex-row justify-between">
-                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
-                  <ResetButton onResetButtonClick={handleResetButtonClick} />
-                </div>
-              </Grid.Col>
-            )}
-          </Grid>
           <Table
             isLoading={isLoading}
             data={tableData}
@@ -533,7 +487,7 @@ const CropView = () => {
             paginationInfo={paginationInfo}
             handlePagination={handlePagination}
           />
-          {/* <Modal
+          <Modal
             styles={{
               title: {
                 fontSize: '24px',
@@ -555,7 +509,7 @@ const CropView = () => {
               data={mapModalDetails?.data}
               isMultiple={mapModalDetails?.isMultiple}
             />
-          </Modal> */}
+          </Modal>
         </div>
       </Paper>
 
@@ -576,4 +530,4 @@ const CropView = () => {
     </main>
   );
 };
-export default CropView;
+export default BedsView;

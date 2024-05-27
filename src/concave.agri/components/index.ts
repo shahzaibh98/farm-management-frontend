@@ -14,6 +14,7 @@ import { AutoComplete, MultiSelect, Select } from './dropdown';
 import { Checkbox } from './checkbox';
 import { Table } from './table';
 import { SearchForm } from './searchbar';
+import { GlassCard } from './card';
 
 export {
   BreadCrumbs,
@@ -38,4 +39,5 @@ export {
   Checkbox,
   Table,
   SearchForm,
+  GlassCard,
 };

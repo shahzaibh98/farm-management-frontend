@@ -1,8 +1,7 @@
 import React from 'react';
 import { Container, Paper, Title, Text } from '@mantine/core';
-import { AreaChart, BarChart, RadarChart } from '@mantine/charts';
-import '@mantine/charts/styles.css';
 import { dataArea, data, dataRadar } from './data';
+import { AreaChart, BarChart, RadarChart } from '@mantine/charts';
 
 const DemoDashboard = () => {
   return (

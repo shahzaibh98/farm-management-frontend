@@ -1,7 +1,6 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
-
 // Importing custom components from the 'concave.agri' project
 import {
   Notification,
@@ -22,10 +21,15 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
+import { AreaUnitEn } from '@agri/shared-types';
+import { IconBorderCorners } from '@tabler/icons-react';
+import { MdOutlineLineStyle } from 'react-icons/md';
+import { TbReportSearch } from 'react-icons/tb';
 import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../api/api';
 import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
+import { ReactComponent as FertilizerBag } from '../../assets/svg/fertilizer.svg';
+import DeleteModel from '../../layout/confimation.modal';
 import {
   getLandColors,
   initialNotification,
@@ -34,6 +38,7 @@ import {
 import {
   extractPageInfo,
   isEmpty,
+  organizeDropDownData,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
 import {
@@ -42,21 +47,20 @@ import {
   initialSearchValues,
 } from './initial.values';
 import LocationSearch from './searchLocation';
-import DeleteModel from '../../layout/confimation.modal';
-import { IconBorderCorners } from '@tabler/icons-react';
 
 const LandView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') ?? initialSearchValues.searchValue;
-    const type = searchParams.get('type') ?? initialSearchValues.type;
+    const locationTypeId =
+      searchParams.get('locationTypeId') ?? initialSearchValues.locationTypeId;
     const status = searchParams.get('status') ?? initialSearchValues.status;
 
     // Update state with extracted values
     return {
       searchValue,
-      type,
+      locationTypeId,
       status,
     };
   };
@@ -112,6 +116,8 @@ const LandView = () => {
 
   const navigate = useNavigate();
 
+  const { referenceData } = useSelector((state: any) => state?.referenceData);
+
   const handleAddFarmAdmin = () => {
     navigate('/lands/add');
   };
@@ -123,6 +129,16 @@ const LandView = () => {
     id: '',
     resourceName: '',
   });
+
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -149,7 +165,7 @@ const LandView = () => {
       .then((response: any) => {
         setAllLocationData(response?.data);
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -205,19 +221,14 @@ const LandView = () => {
         value: searchValues.searchValue,
       },
       {
-        field: 'status',
+        field: 'locationTypeId',
         operator: 'eq',
-        value: searchValues?.status,
-      },
-      {
-        field: 'type',
-        operator: 'eq',
-        value: searchValues?.type,
+        value: searchValues?.locationTypeId,
       },
       {
         field: 'farmId',
         operator: 'eq',
-        value: userInfo?.farmId?.toString(),
+        value: currentUser?.farmId,
       },
     ]);
 
@@ -235,7 +246,7 @@ const LandView = () => {
           totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -318,7 +329,7 @@ const LandView = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   };
 
@@ -345,17 +356,20 @@ const LandView = () => {
       },
       {
         header: <div className="flex text-start">TYPE</div>,
-        accessorKey: 'type',
+        accessorKey: 'locationTypeId',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
         cell: (info: any) => {
           const rowData = info?.row?.original;
+          console.log('Roe Date', rowData?.locationType?.name);
           return (
             <div className="flex flex-row">
-              <IconBorderCorners color={getLandColors(rowData?.type ?? '')} />
+              <IconBorderCorners
+                color={getLandColors(rowData?.locationType?.name ?? '')}
+              />
               <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.type}
+                {rowData?.locationType?.name}
               </p>
             </div>
           );
@@ -388,26 +402,13 @@ const LandView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {info.getValue()}
+                {info.getValue()?.name ?? ''}
               </p>
             </div>
           );
         },
       },
-      {
-        header: 'STATUS',
-        accessorKey: 'status',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
-      },
+
       {
         header: 'BOUNDARIES',
         accessorKey: 'coordinates',
@@ -444,14 +445,45 @@ const LandView = () => {
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
-              }
-              onEditClick={() => navigate(`/lands/edit/${id}`)}
-              onViewClick={() => navigate(`/lands/view/${id}`)}
-            />
+            <div className="flex relative overflow-visible">
+              <TableMenu
+                id={id}
+                onDeleteClick={id =>
+                  setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
+                }
+                onEditClick={() => navigate(`/lands/edit/${id}`)}
+                onViewClick={() => navigate(`/lands/view/${id}`)}
+                additionalMenuItems={
+                  // info?.row?.original?.plantingMethod === '1'
+                  // eslint-disable-next-line no-constant-condition
+                  true
+                    ? [
+                        {
+                          label: 'Beds',
+                          icon: <MdOutlineLineStyle />,
+                          onClick: () => navigate(`/beds/${id}`),
+                        },
+                        {
+                          label: 'Soil Test',
+                          icon: <TbReportSearch />,
+                          onClick: () => navigate(`/beds/${id}`),
+                        },
+                        {
+                          label: 'Fertilizers',
+                          icon: (
+                            <FertilizerBag
+                              height={14}
+                              width={14}
+                              className="cursor-pointer"
+                            />
+                          ),
+                          onClick: () => navigate(`/beds/${id}`),
+                        },
+                      ]
+                    : []
+                }
+              />
+            </div>
           );
         },
       },
@@ -460,7 +492,7 @@ const LandView = () => {
   );
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -501,21 +533,12 @@ const LandView = () => {
                 placeholder="Location Type"
                 data={[
                   { label: 'All', value: 'All' },
-                  ...Object.values(LandType),
+                  ...organizeDropDownData(referenceData?.locationType),
                 ]}
-                value={searchValues.type ?? ''}
-                onChange={value => value && setValuesById({ type: value })}
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
-              <Select
-                placeholder="Location Status"
-                data={[
-                  { label: 'All', value: 'All' },
-                  ...Object.values(LandStatus),
-                ]}
-                value={searchValues.status ?? ''}
-                onChange={value => value && setValuesById({ status: value })}
+                value={searchValues?.locationTypeId ?? ''}
+                onChange={value =>
+                  value && setValuesById({ locationTypeId: value })
+                }
               />
             </Grid.Col>
             {isSmallScreen && (

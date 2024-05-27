@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { fetchData, postData, putData } from '../../api/api';
 import {
+  GlassCard,
   Modal,
   Notification,
   NumberInput,
@@ -22,20 +23,25 @@ import GenericHeader from '../../layout/header.layout';
 import { inputStyle } from '../../theme/common.style';
 
 // Importing custom components from the 'concave.agri' project
-import {
-  AreaUnitEn,
-  IRRIGATIONMETHOD,
-  LandStatus,
-  LandType,
-  SoilType,
-} from '@agri/shared-types';
+import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { IconMap } from '@tabler/icons-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Text } from '../../concave.agri/components';
 import { initialNotification } from '../../utils/common/constant.objects';
+import {
+  numberInputValue,
+  organizeDropDownData,
+} from '../../utils/common/function';
+import {
+  getDistricts,
+  getDivisions,
+  getTehsils,
+  handleDistrict,
+  handleDivision,
+  handleTehsil,
+} from '../../utils/common/location.Helper';
 import { initialMapModalInfo } from './initial.values';
 import LocationSearch from './searchLocation';
-import { Country, State, City } from 'country-state-city';
 
 const ManageLand = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
@@ -43,42 +49,68 @@ const ManageLand = ({ type = 'Add' }) => {
 
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
 
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
+
   const navigate = useNavigate();
   const [landData, setLandData] = useState<any>();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
-
-  const [locationData, setLocationData] = useState({
-    countryCode: '',
-    stateCode: '',
-    cityCode: '',
-  });
+  const { locationData, referenceData } = useSelector(
+    (state: any) => state?.referenceData
+  );
 
   useEffect(() => {
     if (id)
       fetchData(`land/${id}`)
         .then((data: any) => {
           setLandData(data);
-          const getCountry = Country.getAllCountries()?.find(
-            country => country.name === data?.country
-          );
-
-          const getState = State.getAllStates()?.find(
-            state =>
-              state.name === data?.provinceOrState &&
-              state.countryCode === getCountry?.isoCode
-          );
-
-          setLocationData({
-            ...locationData,
-            countryCode: getCountry?.isoCode ?? '',
-            stateCode: getState?.isoCode ?? '',
-          });
         })
-        .catch((err: any) => console.log(err));
+        .catch((err: any) => console.error(err));
   }, [id]);
+
+  const updateFormikValues = (values: {
+    [x: string]: any;
+    provinceId?: any;
+    divisionId?: any;
+    districtId?: any;
+    tehsilId?: any;
+  }) => {
+    Object.keys(values).forEach(key => {
+      formik.setFieldValue(key, values[key]);
+    });
+  };
+
+  const handleProvinceChange = (value: string) =>
+    updateFormikValues({
+      provinceId: value,
+      divisionId: '',
+      districtId: '',
+      tehsilId: '',
+    });
+
+  const handleDivisionChange = (value: string) => {
+    const data = handleDivision(locationData, value);
+    if (data) updateFormikValues(data);
+  };
+
+  const handleDistrictChange = (value: string) => {
+    const data = handleDistrict(locationData, value);
+    if (data) updateFormikValues(data);
+  };
+
+  const handleTehsilChange = (value: string) => {
+    const data = handleTehsil(locationData, value);
+    if (data) updateFormikValues(data);
+  };
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
@@ -90,32 +122,40 @@ const ManageLand = ({ type = 'Add' }) => {
         ? landData
         : {
             name: '',
-            type: '',
-            farmId: userInfo.farmId,
+            locationTypeId: '',
+            farmId: currentUser?.farmId?.toString(),
             area: '',
-            areaUnit: AreaUnitEn.ACRES,
-            country: '',
-            provinceOrState: '',
-            cityOrTown: '',
+            areaUnitId: '1',
+
+            provinceId: '',
+            divisionId: '',
+            districtId: '',
+            tehsilId: '',
+
+            plantingMethodId: '',
+
+            // For Beds
+            noOfBeds: '',
+            width: '',
+            length: '',
+
             coordinates: [],
             markLocation: null,
-            address: '',
-            soilType: '',
-            status: '',
+            postalAddress: '',
+            soilTypeId: '',
+            ownershipId: '',
             estimatedCost: '',
-            irrigationMethod: '',
+            irrigationMethodId: '',
           },
     validationSchema: Yup.object().shape({
       // Land Validation Schema
       name: Yup.string().required('Land Name is required'),
-      type: Yup.string().required('Land Type is required'),
+      locationTypeId: Yup.string().required('Land Type is required'),
 
       area: Yup.number()
         .typeError('Area must be a number')
         .required('Area is required'),
-      areaUnit: Yup.string().required('Area Unit is required'),
-      country: Yup.string().required('Country is required'),
-      provinceOrState: Yup.string().required('Province/State is required'),
+      areaUnitId: Yup.string().required('Area Unit is required'),
       coordinates: Yup.array()
         .min(2, 'Coordinates are required')
         .required('Coordinates are required'),
@@ -189,7 +229,7 @@ const ManageLand = ({ type = 'Add' }) => {
   const handleNotificationClose = () => setNotification(initialNotification);
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700 mb-4`}>
+    <main className={'w-full h-screen relative bg-darkColors-700 mb-4'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -244,16 +284,18 @@ const ManageLand = ({ type = 'Add' }) => {
                 id="landType "
                 label="Type"
                 placeholder="Select type..."
-                data={[...Object.values(LandType)]}
-                value={formik.values?.type}
+                data={organizeDropDownData(referenceData?.locationType)}
+                value={formik.values?.locationTypeId}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('type', value)
+                  type !== 'View' &&
+                  formik.setFieldValue('locationTypeId', value)
                 }
                 styles={inputStyle}
                 error={
-                  (formik.errors?.type && formik.touched.type) ||
+                  (formik.errors?.locationTypeId &&
+                    formik.touched.locationTypeId) ||
                   formik.submitCount > 0
-                    ? (formik.errors?.type as ReactNode)
+                    ? (formik.errors?.locationTypeId as ReactNode)
                     : null
                 }
               />
@@ -262,83 +304,35 @@ const ManageLand = ({ type = 'Add' }) => {
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
             Location
           </Title>
+
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="country"
-                label="Country"
-                name="country"
-                placeholder="Enter your country..."
-                value={formik.values?.country ?? ''}
-                onChange={e => {
-                  if (type !== 'View') {
-                    const getCountry = Country.getAllCountries()?.find(
-                      country => country.name === e
-                    );
-
-                    setLocationData({
-                      ...locationData,
-                      countryCode: getCountry?.isoCode ?? '',
-                    });
-
-                    formik.setFieldValue('country', e);
-                    formik.setFieldValue('provinceOrState', '');
-                    formik.setFieldValue('cityOrTown', '');
-                  }
-                }}
-                data={[
-                  /* eslint-disable-next-line */
-                  ...Country?.getAllCountries()?.map(country => {
-                    return country?.name;
-                  }),
-                ]}
-                searchable
-                styles={inputStyle}
-                error={
-                  formik.errors.country &&
-                  (formik.touched.country || formik.submitCount > 0)
-                    ? (formik.errors.country as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
                 id="province"
-                label="Province/State"
+                label="Province"
                 name="provinceOrState"
                 searchable
-                placeholder="Enter your province or state..."
-                value={formik.values?.provinceOrState ?? ''}
-                disabled={!formik.values?.country}
+                placeholder="Enter your province..."
+                value={formik.values?.provinceId ?? ''}
                 data={[
                   { label: 'None', value: '' },
-                  /* eslint-disable-next-line */
-                  ...State?.getStatesOfCountry(locationData?.countryCode)?.map(
-                    state => state?.name
-                  ),
+                  ...(locationData && locationData.provinces
+                    ? locationData.provinces.map(
+                        (e: { name: any; provinceId: any }) => ({
+                          label: e.name || '',
+                          value: e.provinceId || '',
+                        })
+                      )
+                    : []),
                 ]}
-                onChange={e => {
-                  if (type !== 'View') {
-                    const getState = State.getAllStates()?.find(
-                      state =>
-                        state.name === e &&
-                        state.countryCode === locationData?.countryCode
-                    );
-
-                    setLocationData({
-                      ...locationData,
-                      stateCode: getState?.isoCode ?? '',
-                    });
-                    formik.setFieldValue('provinceOrState', e);
-                  }
-                }}
+                onChange={(e: string | null) =>
+                  type !== 'View' && handleProvinceChange(e ?? '')
+                }
                 styles={inputStyle}
                 error={
-                  formik.errors.provinceOrState &&
-                  (formik.touched.provinceOrState || formik.submitCount > 0)
-                    ? (formik.errors.provinceOrState as ReactNode)
+                  formik.errors.provinceId &&
+                  (formik.touched.provinceId || formik.submitCount > 0)
+                    ? (formik.errors.provinceId as ReactNode)
                     : null
                 }
               />
@@ -346,28 +340,61 @@ const ManageLand = ({ type = 'Add' }) => {
 
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="city"
-                label="City/Town"
-                name="cityOrTown"
+                id="division"
+                label="Division"
+                name="division"
                 searchable
-                placeholder="Enter your city or town..."
-                value={formik.values?.cityOrTown ?? ''}
-                disabled={!formik.values?.provinceOrState}
-                data={[
-                  { label: 'None', value: '' },
-                  ...City.getCitiesOfState(
-                    locationData?.countryCode,
-                    locationData?.stateCode
-                  ).map((city: { name: any }) => city.name),
-                ]}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('cityOrTown', e)
-                }
+                placeholder="Enter your division..."
+                value={formik.values?.divisionId ?? ''}
+                data={getDivisions(formik.values?.provinceId, locationData)}
+                onChange={e => {
+                  type !== 'View' && handleDivisionChange(e ?? '');
+                }}
                 styles={inputStyle}
                 error={
-                  formik.errors.cityOrTown &&
-                  (formik.touched.cityOrTown || formik.submitCount > 0)
-                    ? (formik.errors.cityOrTown as ReactNode)
+                  formik.errors.divisionId &&
+                  (formik.touched.divisionId || formik.submitCount > 0)
+                    ? (formik.errors.divisionId as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="district"
+                label="District"
+                name="district"
+                searchable
+                placeholder="Enter your district..."
+                value={formik.values?.districtId ?? ''}
+                data={getDistricts(formik.values?.divisionId, locationData)}
+                onChange={e => type !== 'View' && handleDistrictChange(e ?? '')}
+                styles={inputStyle}
+                error={
+                  formik.errors?.districtId &&
+                  (formik.touched?.districtId || formik.submitCount > 0)
+                    ? (formik.errors?.districtId as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="tehsil"
+                label="Tehsil"
+                name="=tehsil"
+                searchable
+                placeholder="Enter your tehsil..."
+                value={formik.values?.tehsilId ?? ''}
+                data={getTehsils(formik.values?.districtId, locationData)}
+                onChange={e => type !== 'View' && handleTehsilChange(e ?? '')}
+                styles={inputStyle}
+                error={
+                  formik.errors.tehsilId &&
+                  (formik.touched.tehsilId || formik.submitCount > 0)
+                    ? (formik.errors.tehsilId as ReactNode)
                     : null
                 }
               />
@@ -375,19 +402,19 @@ const ManageLand = ({ type = 'Add' }) => {
 
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
-                id="address"
+                id="postalAddress"
                 label="Address"
-                name="address"
-                placeholder="Enter your Address..."
-                value={formik.values?.address ?? ''}
+                name="postalAddress"
+                placeholder="Enter your address..."
+                value={formik.values?.postalAddress ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('address', e)
+                  type !== 'View' && formik.setFieldValue('postalAddress', e)
                 }
                 styles={inputStyle}
                 error={
-                  formik.errors.address &&
-                  (formik.touched.address || formik.submitCount > 0)
-                    ? formik.errors.address
+                  formik.errors.postalAddress &&
+                  (formik.touched.postalAddress || formik.submitCount > 0)
+                    ? formik.errors.postalAddress
                     : null
                 }
               />
@@ -399,26 +426,27 @@ const ManageLand = ({ type = 'Add' }) => {
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
-                id="status"
-                label="Status"
-                placeholder="Select Status..."
-                data={[...Object.values(LandStatus)]}
-                value={formik?.values?.status ?? ''}
+                id="Ownership"
+                label="Ownership"
+                placeholder="Select Ownership..."
+                data={organizeDropDownData(referenceData?.ownership)}
+                value={formik?.values?.ownershipId ?? ''}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('status', value)
+                  type !== 'View' && formik.setFieldValue('ownershipId', value)
                 }
                 styles={inputStyle}
               />
             </Grid.Col>
+
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <Select
                 id="soilType"
                 label="Soil Type"
                 placeholder="Select Soil Type..."
-                data={[...Object.values(SoilType)]}
-                value={formik.values?.soilType}
+                data={organizeDropDownData(referenceData?.soilType)}
+                value={formik.values?.soilTypeId}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('soilType', value)
+                  type !== 'View' && formik.setFieldValue('soilTypeId', value)
                 }
                 styles={inputStyle}
               />
@@ -428,11 +456,11 @@ const ManageLand = ({ type = 'Add' }) => {
                 id="irrigationMethod"
                 label="Irrigation Method"
                 placeholder="Select Method..."
-                data={[...Object.values(IRRIGATIONMETHOD)]}
-                value={formik.values?.irrigationMethod}
+                data={organizeDropDownData(referenceData?.irrigationMethod)}
+                value={formik.values?.irrigationMethodId}
                 onChange={value =>
                   type !== 'View' &&
-                  formik.setFieldValue('irrigationMethod', value)
+                  formik.setFieldValue('irrigationMethodId', value)
                 }
                 styles={inputStyle}
               />
@@ -442,8 +470,10 @@ const ManageLand = ({ type = 'Add' }) => {
                 id="estimatedCost"
                 label="Estimate Cost"
                 name="estimatedCost"
+                prefix="Rs."
+                min={0}
                 placeholder="Enter your Estimate Cost..."
-                value={formik.values?.estimatedCost ?? ''}
+                value={numberInputValue(formik.values?.estimatedCost)}
                 onChange={e =>
                   type !== 'View' && formik.setFieldValue('estimatedCost', e)
                 }
@@ -456,6 +486,102 @@ const ManageLand = ({ type = 'Add' }) => {
                 }
               />
             </Grid.Col>
+          </Grid>
+          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Planting Method
+          </Title>
+          <Grid gutter="md">
+            {organizeDropDownData(referenceData?.plantingMethod)?.map(card => (
+              <Grid.Col key={card.label} span={{ base: 12, md: 6, lg: 3 }}>
+                <GlassCard
+                  label={card.label}
+                  value={card.value}
+                  isSelected={formik.values?.plantingMethodId === card.value}
+                  onSelected={label =>
+                    type !== 'View' &&
+                    formik.setFieldValue('plantingMethodId', label)
+                  }
+                />
+              </Grid.Col>
+            ))}
+
+            {formik.values?.plantingMethodId ===
+              organizeDropDownData(referenceData?.plantingMethod)?.find(
+                e => e.label === 'Beds'
+              )?.value && (
+              <Grid.Col span={{ base: 12, md: 3, lg: 4 }}>
+                <NumberInput
+                  id="noOfBeds"
+                  label="Number of beds"
+                  name="Number of beds"
+                  allowDecimal={false}
+                  min={0}
+                  max={100}
+                  placeholder="Enter number of beds..."
+                  value={numberInputValue(formik.values?.noOfBeds)}
+                  onChange={e =>
+                    type !== 'View' && formik.setFieldValue('noOfBeds', e)
+                  }
+                  styles={inputStyle}
+                  error={
+                    formik.errors.noOfBeds &&
+                    (formik.touched.noOfBeds || formik.submitCount > 0)
+                      ? formik.errors.noOfBeds
+                      : null
+                  }
+                />
+              </Grid.Col>
+            )}
+            {formik.values?.plantingMethodId ===
+              organizeDropDownData(referenceData?.plantingMethod)?.find(
+                e => e.label === 'Beds'
+              )?.value && (
+              <Grid.Col span={{ base: 12, md: 3, lg: 4 }}>
+                <NumberInput
+                  id="budWidth"
+                  label="Width of beds"
+                  name="Width of  beds"
+                  min={0}
+                  placeholder="Enter width of Beds..."
+                  value={numberInputValue(formik.values?.width)}
+                  onChange={e =>
+                    type !== 'View' && formik.setFieldValue('width', e)
+                  }
+                  styles={inputStyle}
+                  error={
+                    formik.errors.width &&
+                    (formik.touched.width || formik.submitCount > 0)
+                      ? formik.errors.width
+                      : null
+                  }
+                />
+              </Grid.Col>
+            )}
+            {formik.values?.plantingMethodId ===
+              organizeDropDownData(referenceData?.plantingMethod)?.find(
+                e => e.label === 'Beds'
+              )?.value && (
+              <Grid.Col span={{ base: 12, md: 3, lg: 4 }}>
+                <NumberInput
+                  id="bedsLength"
+                  label="Length of beds"
+                  name="Length of beds"
+                  min={0}
+                  placeholder="Enter length of Beds..."
+                  value={numberInputValue(formik.values?.length)}
+                  onChange={e =>
+                    type !== 'View' && formik.setFieldValue('length', e)
+                  }
+                  styles={inputStyle}
+                  error={
+                    formik.errors.length &&
+                    (formik.touched.length || formik.submitCount > 0)
+                      ? formik.errors.width
+                      : null
+                  }
+                />
+              </Grid.Col>
+            )}
           </Grid>
 
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
@@ -512,10 +638,10 @@ const ManageLand = ({ type = 'Add' }) => {
                 id="areaUnit"
                 label="Area Unit"
                 placeholder="Select areaUnit..."
-                data={[...Object.values(AreaUnitEn)]}
-                value={formik.values?.areaUnit}
+                data={organizeDropDownData(referenceData?.areaUnit)}
+                value={formik.values?.areaUnitId}
                 onChange={value =>
-                  type !== 'View' && formik.setFieldValue('areaUnit', value)
+                  type !== 'View' && formik.setFieldValue('areaUnitId', value)
                 }
                 styles={inputStyle}
               />
@@ -549,6 +675,7 @@ const ManageLand = ({ type = 'Add' }) => {
               }}
               onClose={() => setMapModalDetails(initialMapModalInfo)}
               isReadOnly={type === 'View'}
+              type={type}
               data={mapModalDetails?.data}
             />
           </Modal>

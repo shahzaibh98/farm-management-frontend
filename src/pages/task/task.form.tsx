@@ -1,31 +1,20 @@
-import {
-  Flex,
-  Grid,
-  SimpleGrid,
-  Textarea,
-  useMantineTheme,
-} from '@mantine/core';
+import { TaskPriority, TaskRepeatTime, TaskStatus } from '@agri/shared-types';
+import { Flex, Grid, Text, Textarea, useMantineTheme } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useFormik } from 'formik';
 import { ChangeEvent, useEffect, useState } from 'react'; // Import ChangeEvent type
-import { FaCircle } from 'react-icons/fa';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { HiOutlineLocationMarker } from 'react-icons/hi';
+import { MdAttachFile, MdChecklistRtl } from 'react-icons/md';
+import { useSelector } from 'react-redux';
+import * as Yup from 'yup';
+import { fetchData, postData, putData } from '../../api/api';
 import {
   Button,
   Checkbox,
   Select,
   TextInput,
 } from '../../concave.agri/components';
-import { colorArray } from '../../utils/common/constant.objects';
-import { Text } from '@mantine/core';
-import { HiOutlineLocationMarker } from 'react-icons/hi';
-import { MdAttachFile } from 'react-icons/md';
-import { MdChecklistRtl } from 'react-icons/md';
-import { AiOutlineDelete } from 'react-icons/ai';
-import { fetchData, postData, putData } from '../../api/api';
-import { useSelector } from 'react-redux';
-import { isTemplateExpression } from 'typescript';
-import { TaskPriority, TaskRepeatTime, TaskStatus } from '@agri/shared-types';
-import * as Yup from 'yup';
 interface ChecklistItem {
   itemName: string;
   itemDescription: string;
@@ -45,20 +34,33 @@ export function TaskForm({
 }) {
   // Initialize the useMantineTheme hook for accessing theme variables
 
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const userInfo = useSelector(
+    (state: any) => state?.userInfo?.currentFarmRole
+  );
 
   const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
+
   useEffect(() => {
     fetchData(
-      `users?filter={"filter":[{"field":"farmId","operator":"eq","value":${userInfo.farmId}}]}`
+      `users/farm-users?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
     )
       .then((response: any) => {
+        console.log('Response', response);
         setUserList(response.data);
       })
       .catch(error => {
-        console.log(error);
+        console.error(error);
       });
   }, []);
 
@@ -86,6 +88,7 @@ export function TaskForm({
             longitude: '',
             attachments: [],
             checklistItems: [],
+            farmId: currentUser?.farmId?.toString(),
           }
         : viewOrUpdate.objectData,
 
@@ -409,8 +412,8 @@ export function TaskForm({
                 value={form.values?.assignedTo?.toString() ?? ''}
                 onChange={value => form.setFieldValue('assignedTo', value)}
                 data={userList?.map((user: any) => ({
-                  label: user.name,
-                  value: user.userId?.toString(), // Convert userId to string
+                  label: user.systemUser.name,
+                  value: user.farmUserId?.toString(), // Convert userId to string
                 }))}
                 disabled={viewOrUpdate?.isReadOnly}
               />

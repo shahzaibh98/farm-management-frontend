@@ -1,4 +1,5 @@
 import store from '../../redux';
+import { farmAdminId } from '../../utils/common/constant.objects';
 
 export const initialSearchValues = {
   searchValue: '',
@@ -9,7 +10,18 @@ export const buildFilters = (searchValues: {
   searchValue: any;
   status: string;
 }) => {
-  const userInfo = store.getState()?.userInfo?.userInfo;
+  const userInfo = store.getState()?.userInfo;
+
+  const roleId = userInfo?.isSystemAdmin
+    ? '0'
+    : userInfo?.currentRole?.roleMode === 'farms'
+      ? userInfo?.currentRole?.currentFarmRole?.roleId
+      : userInfo?.currentRole?.currentCompanyRole?.roleId;
+
+  const currentRole =
+    userInfo?.currentRole?.roleMode === 'farms'
+      ? userInfo?.currentRole?.currentFarmRole?.roleId
+      : userInfo?.currentRole?.currentCompanyRole?.roleId;
 
   const filters = [
     {
@@ -22,20 +34,20 @@ export const buildFilters = (searchValues: {
       operator: 'eq',
       value:
         searchValues?.status === 'Active'
-          ? 'true'
+          ? true
           : searchValues?.status === 'Blocked'
-            ? 'false'
+            ? false
             : '',
     },
   ];
 
-  if (userInfo?.roleId === '0') {
+  if (roleId === '0') {
     filters.push({
       field: 'roleId',
       operator: 'eq',
-      value: 1,
+      value: Number(farmAdminId),
     });
-  } else if (userInfo?.roleId === '1') {
+  } else if (roleId === farmAdminId) {
     filters.push(
       {
         field: 'roleId',
@@ -45,12 +57,12 @@ export const buildFilters = (searchValues: {
       {
         field: 'roleId',
         operator: 'neq',
-        value: 1,
+        value: Number(farmAdminId),
       },
       {
         field: 'farmId',
         operator: 'eq',
-        value: userInfo?.farmId?.toString(),
+        value: currentRole.farmId?.toString(),
       }
     );
   }

@@ -1,19 +1,20 @@
 import { Grid, Paper, Select, Title, useMantineTheme } from '@mantine/core';
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react'; // Importing React hooks
+import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { fetchData, postData, putData } from '../../api/api';
 import { Notification, TextInput } from '../../concave.agri/components';
-import useScreenSize from '../../hooks/useScreenSize';
 import GenericHeader from '../../layout/header.layout';
 import { inputStyle } from '../../theme/common.style';
-import { initialNotification } from '../../utils/common/constant.objects';
+import {
+  farmAdminId,
+  initialNotification,
+} from '../../utils/common/constant.objects';
 
 // Importing custom components from the 'concave.agri' project
+import { useNavigate, useParams } from 'react-router-dom';
 import { Text } from '../../concave.agri/components';
-import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom'; // Importing useParams hook
 import { isPkTelePhoneNumber } from '../../utils/common/function';
 
 const UserForm = ({ type = 'Add' }) => {
@@ -23,18 +24,32 @@ const UserForm = ({ type = 'Add' }) => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<any>();
 
-  const { roleId, ...userInfo } = useSelector(
-    (state: any) => state?.userInfo?.userInfo
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
   );
+
+  const roleId = isSystemAdmin
+    ? '0'
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole?.roleId
+      : currentRole?.currentCompanyRole?.roleId;
+
+  const currentUserRole =
+    currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
 
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (id)
-      fetchData(`users/${id}`)
-        .then((data: any) => setUserData(data.data))
-        .catch(err => console.log(err));
-  }, [id]);
+      fetchData(`users/farm-user/${id}`)
+        .then((data: any) => {
+          console.log('data', data);
+          setUserData(data);
+        })
+        .catch(err => console.error(err));
+  }, []);
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
@@ -42,27 +57,70 @@ const UserForm = ({ type = 'Add' }) => {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues:
-      type === 'Update' || type === 'View'
-        ? { ...userData, address: userData?.farm?.address }
-        : roleId === '0'
-          ? {
-              // Set initial values for farm details
-              farmTitle: '',
-              address: '',
-              isActive: 'true',
-              // For Farm Admin
-              name: '',
-              email: '',
-              phoneNo: '',
-              roleId: '1',
-            }
-          : { name: '', email: '', phoneNo: '', roleId: '1', isActive: 'true' },
+      roleId === '0'
+        ? {
+            farmTitle:
+              type === 'Update' || type === 'View'
+                ? userData?.farm?.farmTitle
+                : '',
+            postalAddress:
+              type === 'Update' || type === 'View'
+                ? userData?.farm?.postalAddress
+                : '',
+            isActive:
+              type === 'Update' || type === 'View'
+                ? userData?.farm?.isActive
+                  ? 'true'
+                  : 'false'
+                : 'true',
+            // For Farm Admin
+            name:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.name
+                : '',
+            email:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.email
+                : '',
+            phoneNo:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.phoneNo
+                : '',
+            roleId:
+              type === 'Update' || type === 'View' ? userData?.roleId : '1',
+          }
+        : {
+            name:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.name
+                : '',
+            email:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.email
+                : '',
+            phoneNo:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.phoneNo
+                : '',
+            roleId:
+              type === 'Update' || type === 'View' ? userData?.roleId : '',
+            isActive:
+              type === 'Update' || type === 'View'
+                ? userData?.systemUser?.isActive
+                  ? 'true'
+                  : 'false'
+                : 'true',
+            farmId:
+              type === 'Update' || type === 'View'
+                ? userData?.farm?.farmId?.toString()
+                : currentUserRole?.farmId?.toString(),
+          },
     validationSchema:
       roleId === '0'
         ? Yup.object().shape({
             // Farm Details Validation
             farmTitle: Yup.string().required('Farm title is required'),
-            address: Yup.string().required('Address is required'),
+            postalAddress: Yup.string().required('Address is required'),
             isActive: Yup.boolean().required('Active status is required'),
 
             // Farm Admin Validation
@@ -77,6 +135,7 @@ const UserForm = ({ type = 'Add' }) => {
                 'Invalid phone number. Please enter a valid Pakistani phone number.',
                 value => isPkTelePhoneNumber(value)
               ),
+            roleId: Yup.string().required('Role is required'),
           })
         : Yup.object().shape({
             name: Yup.string().required('Name is required'),
@@ -90,14 +149,14 @@ const UserForm = ({ type = 'Add' }) => {
                 'Invalid phone number. Please enter a valid Pakistani phone number.',
                 value => isPkTelePhoneNumber(value)
               ),
+            roleId: Yup.string().required('Role is required'),
           }),
-    //         roleId: Yup.string().required('Role is required'),
-    //       }),
+
     onSubmit: values => {
       // Handle form submission
       setIsLoading(true);
-      if (type !== 'Update')
-        postData('/users', values) // Send form data to the server
+      if (type !== 'Update') {
+        postData('/users', { ...values, isActive: values?.isActive === 'true' }) // Send form data to the server
           .then(() => {
             // Handle successful form submission
             setNotification({
@@ -122,16 +181,32 @@ const UserForm = ({ type = 'Add' }) => {
           .finally(() => {
             setIsLoading(false);
           });
-      else {
-        const { farmTitle, address, isActive, ...rest } = values;
+      } else {
+        const { farmTitle, postalAddress, isActive, roleId, farmId, ...rest } =
+          values;
+
+        const farmObject: {
+          farmTitle: string;
+          postalAddress: string;
+          isActive?: boolean;
+        } = {
+          farmTitle,
+          postalAddress,
+        };
+
+        const farmUserObject: { roleId: string; isActive?: boolean } = {
+          roleId,
+        };
+
+        if (isSystemAdmin) farmObject['isActive'] = isActive === 'true';
 
         Promise.all([
-          putData(`/farm/${values?.farmId}`, {
-            farmTitle,
+          putData(`/farm/${userData?.farm?.farmId}`, farmObject),
+          putData(`/users/farm-user/${userData?.farmUserId}`, farmUserObject),
+          putData(`/users/${userData?.userId}`, {
+            ...rest,
             isActive: isActive === 'true',
-            address,
           }),
-          putData(`/users/${id}`, rest),
         ])
           .then(() => {
             // Handle successful form submission
@@ -164,7 +239,7 @@ const UserForm = ({ type = 'Add' }) => {
   const handleNotificationClose = () => setNotification(initialNotification);
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -176,11 +251,11 @@ const UserForm = ({ type = 'Add' }) => {
         </Notification>
       )}
       <GenericHeader
-        headerText={roleId === '0' ? `Farms` : `Users`}
-        breadcrumbsText={`${type} ${roleId === '0' ? `Farms` : `Users`} to System`} // Call handleAddFarmAdmin function when button is clicked
+        headerText={roleId === '0' ? 'Farms' : 'Users'}
+        breadcrumbsText={`${type} ${roleId === '0' ? 'Farms' : 'Users'} to System`} // Call handleAddFarmAdmin function when button is clicked
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
-        buttonContent={`${type} ${roleId === '0' ? `Farm` : `User`}`}
+        buttonContent={`${type} ${roleId === '0' ? 'Farm' : 'User'}`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
       <Paper
@@ -221,15 +296,17 @@ const UserForm = ({ type = 'Add' }) => {
                     id="address"
                     name="address"
                     placeholder="Enter your farm address..."
-                    value={formik.values?.address ?? ''}
+                    value={formik.values?.postalAddress ?? ''}
                     onChange={e =>
-                      type !== 'View' && formik.setFieldValue('address', e)
+                      type !== 'View' &&
+                      formik.setFieldValue('postalAddress', e)
                     }
                     styles={inputStyle}
                     error={
-                      (formik.touched.address || formik.submitCount > 0) &&
-                      formik.errors.address
-                        ? formik.errors.address
+                      (formik.touched.postalAddress ||
+                        formik.submitCount > 0) &&
+                      formik.errors.postalAddress
+                        ? formik.errors.postalAddress
                         : null
                     }
                   />
@@ -308,7 +385,7 @@ const UserForm = ({ type = 'Add' }) => {
                   { label: 'Active', value: 'true' },
                   { label: 'Blocked', value: 'false' },
                 ]}
-                value={formik.values?.isActive}
+                value={formik.values?.isActive?.toString()}
                 onChange={value =>
                   type !== 'View' && formik.setFieldValue('isActive', value)
                 }
@@ -316,25 +393,31 @@ const UserForm = ({ type = 'Add' }) => {
               />
             </Grid.Col>
 
-            {roleId === '1' && (
+            {roleId === farmAdminId && (
               <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
                 <Select
                   label="User Role"
                   id="roleId"
                   placeholder="Select User Role"
                   data={[
-                    { value: '2', label: 'Farm Manager' },
-                    { value: '3', label: 'Accountant' },
-                    { value: '4', label: 'Service Manager' },
-                    { value: '5', label: 'Warehouse Manager' },
-                    { value: '6', label: 'Farm Worker' },
-                    { value: '7', label: 'Auditor' },
+                    { value: '4', label: 'Farm Manager' },
+                    { value: '6', label: 'Accountant' },
+                    { value: '8', label: 'Service Manager' },
+                    { value: '10', label: 'Warehouse Manager' },
+                    { value: '12', label: 'Farm Worker' },
+                    { value: '14', label: 'Auditor' },
                   ]}
                   value={formik.values?.roleId}
                   onChange={value =>
                     type !== 'View' && formik.setFieldValue('roleId', value)
                   }
                   styles={inputStyle}
+                  error={
+                    (formik.touched.roleId || formik.submitCount > 0) &&
+                    formik.errors.roleId
+                      ? (formik.errors.roleId as ReactNode)
+                      : null
+                  }
                 />
               </Grid.Col>
             )}

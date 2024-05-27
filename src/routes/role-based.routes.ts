@@ -1,19 +1,17 @@
-import { Navigate } from 'react-router-dom';
-import store from '../redux';
 import {
-  farmAdminRoutes,
+  cropRoutes,
   dashboardRoutes,
+  farmAdminRoutes,
+  financialRoutes,
+  inventoryRoutes,
+  livestockRoutes,
+  manageUsersRoutes,
   profileRoutes,
   publicRoutes,
   taskRoutes,
-  cropRoutes,
-  livestockRoutes,
-  financialRoutes,
-  inventoryRoutes,
-  manageUsersRoutes,
 } from './route';
-import { landRoutes } from './route/land.routes';
 import { cropAdminRoutes } from './route/cropAdmin.routes';
+import { landRoutes } from './route/land.routes';
 
 export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];
