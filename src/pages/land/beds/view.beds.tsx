@@ -27,6 +27,7 @@ import {
 } from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
+  getReferenceName,
   isEmpty,
   removeEmptyValueFilters,
 } from '../../../utils/common/function';
@@ -36,7 +37,7 @@ import {
   initialMapModalInfo,
   initialSearchValues,
 } from './initial.values';
-import LocationSearch from '../searchLocation';
+import LocationSearch from '../land/searchLocation';
 
 const BedsView = () => {
   const initializeStateFromQueryParams = () => {
@@ -101,8 +102,6 @@ const BedsView = () => {
 
   const navigate = useNavigate();
 
-  const { referenceData } = useSelector((state: any) => state?.referenceData);
-
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
 
   const [deleteInfo, setDeleteInfo] = useState({
@@ -110,16 +109,6 @@ const BedsView = () => {
     id: '',
     resourceName: '',
   });
-
-  const { isSystemAdmin, currentRole } = useSelector(
-    (state: any) => state?.userInfo
-  );
-
-  const currentUser = isSystemAdmin
-    ? 0
-    : currentRole?.roleMode === 'farms'
-      ? currentRole?.currentFarmRole
-      : currentRole?.currentCompanyRole;
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -141,16 +130,12 @@ const BedsView = () => {
         operator: 'eq',
         value: id,
       },
-      {
-        field: 'isActive',
-        operator: 'eq',
-        value: true,
-      },
+      { field: 'isBed', operator: 'eq', value: true },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    const fetchUrl = `land?filter=${filterObject}`;
+    const fetchUrl = `bed?filter=${filterObject}`;
 
     fetchData(fetchUrl)
       .then((response: any) => {
@@ -209,21 +194,12 @@ const BedsView = () => {
         operator: 'eq',
         value: id,
       },
-      {
-        field: 'isActive',
-        operator: 'eq',
-        value: true,
-      },
-      {
-        field: 'farmId',
-        operator: 'eq',
-        value: currentUser?.farmId,
-      },
+      { field: 'isBed', operator: 'eq', value: true },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    const fetchUrl = `land?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`;
+    const fetchUrl = `bed?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`;
 
     fetchData(fetchUrl)
       .then((response: any) => {
@@ -306,11 +282,11 @@ const BedsView = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`land/${id}`)
+    deleteData(`bed/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Land is deleted successfully',
+          message: 'Bed is deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -389,7 +365,7 @@ const BedsView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {`${Number(rowInfo?.area) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.area).toFixed(2)}`}
+                {`${Number(rowInfo?.area) > 0.01 ? Number(rowInfo?.area).toFixed(2) + ' ' + getReferenceName('areaUnit', rowInfo?.areaUnitId) : Number(rowInfo?.area) === 0 ? '' : 'Less than 0.01'} `}
               </p>
             </div>
           );
@@ -436,8 +412,8 @@ const BedsView = () => {
               onDeleteClick={id =>
                 setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
               }
-              onEditClick={() => navigate(`/lands/beds/edit/${id}`)}
-              onViewClick={() => navigate(`/lands/beds/view/${id}`)}
+              onEditClick={() => navigate(`/beds/edit/${id}`)}
+              onViewClick={() => navigate(`/beds/view/${id}`)}
             />
           );
         },
