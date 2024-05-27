@@ -1,13 +1,15 @@
 import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
-import ManageCrop from '../../pages/planting-crop/crops.form';
-import CropView from '../../pages/planting-crop/view.crop';
+import CropPlanningForm from '../../pages/crop-planning/crop.planning.form.admin';
+import ManageCropsPlanning from '../../pages/crop-planning/view.admin-crop-planning';
 import { ErrorPage } from '../../pages/error';
+import UserForm from '../../pages/users/user.form';
+
 import PrivateRoute from '../private/private.routes';
 
-export const cropRoutes = [
+export const cropAdminPlanningRoutes = [
   {
-    path: '/crop',
+    path: '/admin-crops-planning',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
@@ -15,7 +17,8 @@ export const cropRoutes = [
         index: true,
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop" />
+            <DocumentTitle title="Crops" />
+            <ManageCropsPlanning />
           </PrivateRoute>
         ),
       },
@@ -24,15 +27,7 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop - Add" />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: 'view/:id',
-        element: (
-          <PrivateRoute>
-            <DocumentTitle title="Crop - View" />
-            <div>Crop View</div>
+            <CropPlanningForm />
           </PrivateRoute>
         ),
       },
@@ -40,8 +35,17 @@ export const cropRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop - Edit" />
-            <div>Crop Edit</div>
+            <DocumentTitle title="Farm - Edit" />
+            <UserForm type="Update" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'view/:id',
+        element: (
+          <PrivateRoute>
+            <DocumentTitle title="Farm - View" />
+            <UserForm type="View" />
           </PrivateRoute>
         ),
       },
