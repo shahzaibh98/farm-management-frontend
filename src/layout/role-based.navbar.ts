@@ -30,9 +30,14 @@ export function getNavBarAgainstRole(currentRole: string | number) {
       link: '/lands',
       label: 'Farm Locations',
       icon: TfiMapAlt,
-      activeLinks: ['/lands', '/beds'],
+      activeLinks: ['/lands', '/beds', '/soil-tests'],
     },
-    { link: '/crop', label: 'Crop', icon: IconCarrot, activeLinks: ['/crop'] },
+    {
+      link: '/planting',
+      label: 'Planting',
+      icon: MdGrass,
+      activeLinks: ['/planting'],
+    },
     {
       link: '/livestock',
       label: 'LiveStock',
@@ -64,7 +69,7 @@ export function getNavBarAgainstRole(currentRole: string | number) {
       {
         link: '/crops',
         label: 'Crops',
-        icon: MdGrass,
+        icon: IconCarrot,
         activeLinks: ['/crops'],
       },
     ],
