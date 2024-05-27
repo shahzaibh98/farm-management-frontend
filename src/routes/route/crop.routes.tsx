@@ -5,7 +5,7 @@ import PrivateRoute from '../private/private.routes';
 
 export const cropRoutes = [
   {
-    path: '/crop',
+    path: '/planting',
     element: <AppShell />,
     errorElement: <ErrorPage />,
     children: [
@@ -13,7 +13,7 @@ export const cropRoutes = [
         index: true,
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop" />
+            <DocumentTitle title="Planting" />
           </PrivateRoute>
         ),
       },
@@ -21,7 +21,7 @@ export const cropRoutes = [
         path: 'add',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop - Add" />
+            <DocumentTitle title="Planting - Add" />
           </PrivateRoute>
         ),
       },
@@ -29,7 +29,7 @@ export const cropRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop - View" />
+            <DocumentTitle title="Planting - View" />
             <div>Crop View</div>
           </PrivateRoute>
         ),
@@ -38,7 +38,7 @@ export const cropRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Crop - Edit" />
+            <DocumentTitle title="Planting - Edit" />
             <div>Crop Edit</div>
           </PrivateRoute>
         ),
