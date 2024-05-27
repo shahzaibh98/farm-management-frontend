@@ -8,17 +8,17 @@ import {
   Select,
   Table,
   Text,
-} from '../../concave.agri/components';
-import { SearchButton } from '../../concave.agri/components/searchbar';
-import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+} from '../../../concave.agri/components';
+import { SearchButton } from '../../../concave.agri/components/searchbar';
+import ResetButton from '../../../concave.agri/components/searchbar/resetButton';
 
 // Importing a custom hook to get the screen size
-import useScreenSize from '../../hooks/useScreenSize';
+import useScreenSize from '../../../hooks/useScreenSize';
 
 // Importing custom components and layouts
-import { TableMenu } from '../../layout';
-import GenericHeader from '../../layout/header.layout';
-import SearchComponent from '../../layout/searchBar.layout';
+import { TableMenu } from '../../../layout';
+import GenericHeader from '../../../layout/header.layout';
+import SearchComponent from '../../../layout/searchBar.layout';
 
 // Importing types and constants
 import { AreaUnitEn } from '@agri/shared-types';
@@ -26,21 +26,20 @@ import { IconBorderCorners } from '@tabler/icons-react';
 import { MdOutlineLineStyle } from 'react-icons/md';
 import { TbReportSearch } from 'react-icons/tb';
 import { useSelector } from 'react-redux';
-import { deleteData, fetchData } from '../../api/api';
-import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
-import { ReactComponent as FertilizerBag } from '../../assets/svg/fertilizer.svg';
-import DeleteModel from '../../layout/confimation.modal';
+import { deleteData, fetchData } from '../../../api/api';
+import DeleteModel from '../../../layout/confimation.modal';
 import {
   getLandColors,
   initialNotification,
   paginationInfoValue,
-} from '../../utils/common/constant.objects';
+} from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
   isEmpty,
   organizeDropDownData,
   removeEmptyValueFilters,
-} from '../../utils/common/function';
+} from '../../../utils/common/function';
+import { ReactComponent as FarmIcon } from '../../../assets/svg/farm-boundary.svg';
 import {
   SearchFilter,
   initialMapModalInfo,
@@ -444,6 +443,22 @@ const LandView = () => {
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
+          const rowData = info?.row?.original;
+          const additionalMenuItems = [
+            {
+              label: 'Beds',
+              icon: <MdOutlineLineStyle />,
+              onClick: () => navigate(`/beds/${id}`),
+            },
+            {
+              label: 'Soil Test',
+              icon: <TbReportSearch />,
+              onClick: () => navigate(`/soil-tests/${id}`),
+            },
+          ];
+          if (!rowData?.isBed) {
+            additionalMenuItems.splice(0, 1);
+          }
           return (
             <TableMenu
               id={id}
@@ -452,24 +467,7 @@ const LandView = () => {
               }
               onEditClick={() => navigate(`/lands/edit/${id}`)}
               onViewClick={() => navigate(`/lands/view/${id}`)}
-              additionalMenuItems={
-                // info?.row?.original?.plantingMethod === '1'
-                // eslint-disable-next-line no-constant-condition
-                true
-                  ? [
-                      {
-                        label: 'Beds',
-                        icon: <MdOutlineLineStyle />,
-                        onClick: () => navigate(`/beds/${id}`),
-                      },
-                      {
-                        label: 'Soil Test',
-                        icon: <TbReportSearch />,
-                        onClick: () => navigate(`/beds/${id}`),
-                      },
-                    ]
-                  : []
-              }
+              additionalMenuItems={additionalMenuItems}
             />
           );
         },

@@ -38,7 +38,7 @@ export const cropAdminRoutes = [
         path: 'edit/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Farm - Edit" />
+            <DocumentTitle title="Crop - Edit" />
             <CropForm type="Update" apiEndPoint="crop" pageLabel="Crops" />
           </PrivateRoute>
         ),
@@ -47,7 +47,7 @@ export const cropAdminRoutes = [
         path: 'view/:id',
         element: (
           <PrivateRoute>
-            <DocumentTitle title="Farm - View" />
+            <DocumentTitle title="Crop - View" />
             <CropForm type="View" apiEndPoint="crop" pageLabel="Crops" />
           </PrivateRoute>
         ),

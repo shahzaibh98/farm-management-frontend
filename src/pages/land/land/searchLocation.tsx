@@ -17,29 +17,29 @@ import {
 } from 'react';
 import { SlActionUndo } from 'react-icons/sl';
 import { useNavigate } from 'react-router-dom';
-import { Button, SearchForm, Text } from '../../concave.agri/components';
+import { Button, SearchForm, Text } from '../../../concave.agri/components';
 import {
   darkenColors,
   getLandColors,
-} from '../../utils/common/constant.objects';
+} from '../../../utils/common/constant.objects';
 import {
   calculateCenterPointAndZoom,
   getCenterPoint,
   getReferenceName,
   isEmpty,
-} from '../../utils/common/function';
-import AnimalEnclosures from '../../assets/images/Animal Enclosures.png';
-import BufferZone from '../../assets/images/Buffer Zones.png';
-import Buildings from '../../assets/images/Buildings.png';
-import FarmBoundaries from '../../assets/images/Farm Boundaries.png';
-import Fields from '../../assets/images/Fields.png';
-import GreenHouse from '../../assets/images/Greenhouse.png';
-import GreenRoom from '../../assets/images/Grow Room.png';
-import IrrigationZones from '../../assets/images/Irrigation Zones.png';
-import MapPin from '../../assets/images/map-pin.png';
-import Other from '../../assets/images/Other.png';
-import Paddock from '../../assets/images/Paddock.png';
-import Pasture from '../../assets/images/Pasture.png';
+} from '../../../utils/common/function';
+import AnimalEnclosures from '../../../assets/images/Animal Enclosures.png';
+import BufferZone from '../../../assets/images/Buffer Zones.png';
+import Buildings from '../../../assets/images/Buildings.png';
+import FarmBoundaries from '../../../assets/images/Farm Boundaries.png';
+import Fields from '../../../assets/images/Fields.png';
+import GreenHouse from '../../../assets/images/Greenhouse.png';
+import GreenRoom from '../../../assets/images/Grow Room.png';
+import IrrigationZones from '../../../assets/images/Irrigation Zones.png';
+import MapPin from '../../../assets/images/map-pin.png';
+import Other from '../../../assets/images/Other.png';
+import Paddock from '../../../assets/images/Paddock.png';
+import Pasture from '../../../assets/images/Pasture.png';
 
 import { LandType } from '@agri/shared-types';
 
