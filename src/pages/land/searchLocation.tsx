@@ -25,8 +25,23 @@ import {
 import {
   calculateCenterPointAndZoom,
   getCenterPoint,
+  getReferenceName,
   isEmpty,
 } from '../../utils/common/function';
+import AnimalEnclosures from '../../assets/images/Animal Enclosures.png';
+import BufferZone from '../../assets/images/Buffer Zones.png';
+import Buildings from '../../assets/images/Buildings.png';
+import FarmBoundaries from '../../assets/images/Farm Boundaries.png';
+import Fields from '../../assets/images/Fields.png';
+import GreenHouse from '../../assets/images/Greenhouse.png';
+import GreenRoom from '../../assets/images/Grow Room.png';
+import IrrigationZones from '../../assets/images/Irrigation Zones.png';
+import MapPin from '../../assets/images/map-pin.png';
+import Other from '../../assets/images/Other.png';
+import Paddock from '../../assets/images/Paddock.png';
+import Pasture from '../../assets/images/Pasture.png';
+
+import { LandType } from '@agri/shared-types';
 
 interface Location {
   lat: number;
@@ -34,6 +49,7 @@ interface Location {
 }
 
 interface LocationSearchProps {
+  type?: string;
   isMultiple?: boolean;
   onLocationSelect: (location: any) => void;
   onClose: () => void;
@@ -42,6 +58,7 @@ interface LocationSearchProps {
 }
 
 const LocationSearch = ({
+  type,
   isMultiple = false,
   onClose,
   onLocationSelect,
@@ -318,36 +335,113 @@ const LocationSearch = ({
               {data?.map((landData: any, index: Key | null | undefined) => (
                 <>
                   <Marker
-                    onClick={() => navigate(`/lands/edit/${landData?.landId}`)}
+                    onClick={() => {
+                      if (type !== 'Add')
+                        navigate(`/lands/edit/${landData?.landId}`);
+                    }}
                     position={getCenterPoint(landData?.coordinates)}
                     label={{
                       text: zoomLevel > 12 ? `${landData?.name}` : '', // Only show label if zoomed in beyond a certain threshold
                       color:
                         zoomLevel > 12
                           ? darkenColors(
-                              getLandColors(landData?.type ?? ''),
+                              getLandColors(
+                                getReferenceName(
+                                  'locationType',
+                                  landData?.locationTypeId
+                                ) ?? ''
+                              ),
                               0.2
                             )
                           : 'transparent', // Adjust color only if label is shown
                       fontSize: '18px',
                     }}
                     icon={{
-                      url: require(
-                        `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
-                      ),
+                      url:
+                        getReferenceName(
+                          'locationType',
+                          landData?.locationTypeId
+                        ) === LandType.Animal_Enclosures
+                          ? AnimalEnclosures
+                          : getReferenceName(
+                                'locationType',
+                                landData?.locationTypeId
+                              ) === LandType.Buffer_Zones
+                            ? BufferZone
+                            : getReferenceName(
+                                  'locationType',
+                                  landData?.locationTypeId
+                                ) === LandType.Buildings
+                              ? Buildings
+                              : getReferenceName(
+                                    'locationType',
+                                    landData?.locationTypeId
+                                  ) === LandType.Farm_Boundaries
+                                ? FarmBoundaries
+                                : getReferenceName(
+                                      'locationType',
+                                      landData?.locationTypeId
+                                    ) === LandType.Fields
+                                  ? Fields
+                                  : getReferenceName(
+                                        'locationType',
+                                        landData?.locationTypeId
+                                      ) === LandType.Green_House
+                                    ? GreenHouse
+                                    : getReferenceName(
+                                          'locationType',
+                                          landData?.locationTypeId
+                                        ) === LandType.Grow_Room
+                                      ? GreenRoom
+                                      : getReferenceName(
+                                            'locationType',
+                                            landData?.locationTypeId
+                                          ) === LandType.Irrigation_Zones
+                                        ? IrrigationZones
+                                        : getReferenceName(
+                                              'locationType',
+                                              landData?.locationTypeId
+                                            ) === LandType.Other
+                                          ? Other
+                                          : getReferenceName(
+                                                'locationType',
+                                                landData?.locationTypeId
+                                              ) === LandType.Paddock
+                                            ? Paddock
+                                            : getReferenceName(
+                                                  'locationType',
+                                                  landData?.locationTypeId
+                                                ) === LandType.Pasture
+                                              ? Pasture
+                                              : MapPin,
                       scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
                       fillColor: darkenColors(
-                        getLandColors(landData?.type ?? ''),
+                        getLandColors(
+                          getReferenceName(
+                            'locationType',
+                            landData?.locationTypeId
+                          ) ?? ''
+                        ),
                         0.2
                       ), // Darken fill color
                       fillOpacity: 1, // Full opacity for fill
                       strokeWeight: 1, // Stroke weight
                       strokeColor: darkenColors(
-                        getLandColors(landData?.type ?? ''),
+                        getLandColors(
+                          getReferenceName(
+                            'locationType',
+                            landData?.locationTypeId
+                          ) ?? ''
+                        ),
                         0.2
                       ), // Darken stroke color
                     }}
                   ></Marker>
+                  {/* <GroundOverlay
+                    bounds={calculateOverlayBounds(landData?.coordinates)}
+                    url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAETe8_bHwPe8gNRU7EfRXvlMWWsjA2ehWlLkzcTb5bA&s"
+                    options={{ opacity: 0.95 }} // Adjust opacity as needed
+                  /> */}
                   <Polygon
                     key={index}
                     paths={landData?.coordinates}
@@ -361,9 +455,21 @@ const LocationSearch = ({
                     onUnmount={onUnmount}
                     options={{
                       geodesic: true,
-                      fillColor: getLandColors(landData?.type) ?? '#000000',
+                      fillColor:
+                        getLandColors(
+                          getReferenceName(
+                            'locationType',
+                            landData?.locationTypeId
+                          )
+                        ) ?? '#000000',
                       fillOpacity: 0.15,
-                      strokeColor: getLandColors(landData?.type) ?? '#000000',
+                      strokeColor:
+                        getLandColors(
+                          getReferenceName(
+                            'locationType',
+                            landData?.locationTypeId
+                          )
+                        ) ?? '#000000',
                       strokeOpacity: 0.8,
                       strokeWeight: 4,
                     }}
@@ -381,30 +487,102 @@ const LocationSearch = ({
                   text: zoomLevel > 12 ? `${data?.name}` : '',
                   color:
                     zoomLevel > 12
-                      ? darkenColors(getLandColors(data?.type ?? ''), 0.2)
+                      ? darkenColors(
+                          getLandColors(
+                            getReferenceName(
+                              'locationType',
+                              data?.locationTypeId
+                            ) ?? ''
+                          ),
+                          0.2
+                        )
                       : 'transparent', // Adjust color only if label is shown,
                   fontSize: '18px',
                 }}
                 icon={{
-                  url: require(
-                    `../../assets/images/${data?.type ? data?.type : 'map-pin'}.png`
-                  ), // Specify the relative path to the icon image file
+                  url:
+                    getReferenceName('locationType', data?.locationTypeId) ===
+                    LandType.Animal_Enclosures
+                      ? AnimalEnclosures
+                      : getReferenceName(
+                            'locationType',
+                            data?.locationTypeId
+                          ) === LandType.Buffer_Zones
+                        ? BufferZone
+                        : getReferenceName(
+                              'locationType',
+                              data?.locationTypeId
+                            ) === LandType.Buildings
+                          ? Buildings
+                          : getReferenceName(
+                                'locationType',
+                                data?.locationTypeId
+                              ) === LandType.Farm_Boundaries
+                            ? FarmBoundaries
+                            : getReferenceName(
+                                  'locationType',
+                                  data?.locationTypeId
+                                ) === LandType?.Fields
+                              ? Fields
+                              : getReferenceName(
+                                    'locationType',
+                                    data?.locationTypeId
+                                  ) === LandType.Green_House
+                                ? GreenHouse
+                                : getReferenceName(
+                                      'locationType',
+                                      data?.locationTypeId
+                                    ) === LandType.Grow_Room
+                                  ? GreenRoom
+                                  : getReferenceName(
+                                        'locationType',
+                                        data?.locationTypeId
+                                      ) === LandType.Irrigation_Zones
+                                    ? IrrigationZones
+                                    : getReferenceName(
+                                          'locationType',
+                                          data?.locationTypeId
+                                        ) === LandType.Other
+                                      ? Other
+                                      : getReferenceName(
+                                            'locationType',
+                                            data?.locationTypeId
+                                          ) === LandType.Paddock
+                                        ? Paddock
+                                        : getReferenceName(
+                                              'locationType',
+                                              data?.locationTypeId
+                                            ) === LandType.Pasture
+                                          ? Pasture
+                                          : MapPin,
                   scaledSize: new window.google.maps.Size(40, 40), // Size of the icon
-                  fillColor: darkenColors(getLandColors(data?.type ?? ''), 0.2), // Darken fill color
+                  fillColor: darkenColors(
+                    getLandColors(
+                      getReferenceName('locationType', data?.locationTypeId) ??
+                        'map-pin'
+                    ),
+                    0.2
+                  ), // Darken fill color
                   fillOpacity: 1, // Full opacity for fill
                   strokeWeight: 1, // Stroke weight
                   strokeColor: darkenColors(
-                    getLandColors(data?.type ?? ''),
+                    getLandColors(
+                      getReferenceName('locationType', data?.locationTypeId) ??
+                        ''
+                    ),
                     0.2
                   ), // Darken stroke color
                 }}
               />
+
               <Polygon
                 paths={polygonCoords}
                 // Make the Polygon editable / draggable
                 editable={!isReadOnly}
                 draggable={!isReadOnly}
-                onClick={() => navigate(`/lands/edit/${data?.landId}`)}
+                onClick={() => {
+                  if (type !== 'Add') navigate(`/lands/edit/${data?.landId}`);
+                }}
                 // Event used when manipulating and adding points
                 onMouseUp={onEdit}
                 // Event used when dragging the whole Polygon
@@ -413,9 +591,15 @@ const LocationSearch = ({
                 onUnmount={onUnmount}
                 options={{
                   geodesic: true,
-                  fillColor: getLandColors(data?.type) ?? '#000000',
+                  fillColor:
+                    getLandColors(
+                      getReferenceName('locationType', data?.locationTypeId)
+                    ) ?? '#000000',
                   fillOpacity: 0.15,
-                  strokeColor: getLandColors(data?.type) ?? '#000000',
+                  strokeColor:
+                    getLandColors(
+                      getReferenceName('locationType', data?.locationTypeId)
+                    ) ?? '#000000',
                   strokeOpacity: 0.8,
                   strokeWeight: 4,
                 }}

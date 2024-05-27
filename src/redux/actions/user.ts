@@ -22,13 +22,9 @@ export const refreshAccessToken = (accessToken: any) => ({
 });
 
 export const refreshAccessTokenAction =
-  () =>
-  async (
-    dispatch: (arg0: { type: string; payload: any }) => void,
-    getState: () => { (): any; new (): any; userInfo: { refreshToken: any } }
-  ) => {
+  () => async (dispatch: (arg0: { type: string; payload: any }) => void) => {
     try {
-      const refreshToken = sessionStorage.getItem('refreshToken') || null;
+      const refreshToken = sessionStorage.getItem('refreshToken') ?? null;
 
       if (refreshToken) {
         const response: any = await axios.post(

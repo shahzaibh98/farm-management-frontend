@@ -94,3 +94,6 @@ export const landColors = [
   { color: '#A67D5F', value: 'Paddock' }, // Dark Color
   { color: '#404040', value: 'Other' }, // Dark Color
 ];
+
+export const systemAdminId = 0;
+export const farmAdminId = 1;

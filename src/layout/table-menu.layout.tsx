@@ -40,9 +40,9 @@ const TableMenu = ({
   onDeleteClick = id => {},
 }: TableMenuProps) => {
   return (
-    <div className="relative">
+    <div className="flex relative overflow-visible">
       <Menu
-        position="left-start"
+        position="top-start"
         shadow="md"
         trigger="hover"
         openDelay={100}
@@ -50,6 +50,7 @@ const TableMenu = ({
         withinPortal={false}
         offset={8} // Adjust the offset as needed to align the dropdown properly
         transitionProps={{ transition: 'rotate-right', duration: 150 }}
+        floatingStrategy="fixed"
       >
         <Menu.Target>
           <CgOptions />

@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 
 // Importing custom API function
-import { postData } from '../../api/api';
+import { fetchData, postData } from '../../api/api';
 
 // Importing custom components and Redux actions
 import { Notification, Text } from '../../concave.agri/components';
@@ -22,6 +22,12 @@ import { setUserInfo } from '../../redux/actions/user';
 import axios from 'axios';
 import { requestForToken } from '../../firebase/firebase.config';
 import { AuthData, LoginPageProps } from '../../types/login.type';
+import {
+  fetchAllData,
+  setCropData,
+  setLocationData,
+  setReferenceData,
+} from '../../redux/actions/reference';
 
 // Initial notification state
 const initialNotification = {
@@ -85,6 +91,7 @@ export function LoginPage() {
             setOpenModal(true);
           } else {
             dispatch(setUserInfo(res));
+            fetchAllData(dispatch);
           }
         })
         .catch(error => {
@@ -140,6 +147,7 @@ export function LoginPage() {
       })
       .then(() => {
         dispatch(setUserInfo(userDetails));
+        fetchAllData(dispatch);
       })
       .catch(error => {
         setNotification({

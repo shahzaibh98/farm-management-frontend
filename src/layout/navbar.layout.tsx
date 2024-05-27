@@ -17,7 +17,6 @@ import { Text } from '../concave.agri/components';
 import { clearUserInfo } from '../redux/actions/user';
 
 // Utility function imports
-import { systemRoles } from '../utils/common/constant.objects';
 import { extractFirstWord } from '../utils/common/function';
 
 import { getNavBarAgainstRole } from './role-based.navbar';
@@ -34,21 +33,25 @@ function Navbar({ onClick }: { onClick: () => void }) {
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
 
-  // Navigation data with links and icons
-  const isSuperAdmin =
-    useSelector((state: any) => state?.userInfo?.userInfo)?.roleId ===
-    systemRoles[0].id;
-
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
 
-  const data = getNavBarAgainstRole();
+  const currentUserRole = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole?.roleId
+      : currentRole?.currentCompanyRole?.roleId;
+
+  const data = getNavBarAgainstRole(currentUserRole);
 
   // Create links for navigation using the data array
   const links = data?.map(item => (
     <Link
       // Apply Tailwind CSS classes for styling
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
-        item.link === `/${currentUrl}`
+        item.activeLinks?.find((e: string) => e === `/${currentUrl}`)
           ? 'bg-secondaryColors-100 text-darkColors-100'
           : 'text-lightColors-100'
       }`}
@@ -65,7 +68,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
 
   return (
     <div
-      className={`flex flex-col h-full`}
+      className={'flex flex-col h-full'}
       // Set the text and background colors based on the theme
       style={{
         color: theme.colors.lightColors[6],

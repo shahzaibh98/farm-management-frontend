@@ -1,12 +1,9 @@
-import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
-import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
-// Importing custom components from the 'concave.agri' project
-import { Paper, Select, Table, Text } from '../../concave.agri/components';
 import { SearchButton } from '../../concave.agri/components/searchbar';
 import ResetButton from '../../concave.agri/components/searchbar/resetButton';
-import { useNavigate } from 'react-router-dom';
 
 // Importing a custom hook to get the screen size
 import useScreenSize from '../../hooks/useScreenSize';
@@ -17,44 +14,54 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { MdDisabledVisible } from 'react-icons/md';
-import { VscVmActive } from 'react-icons/vsc';
-import { deleteData, fetchData, putData } from '../../api/api';
-import { Notification } from '../../concave.agri/components';
-import { User } from '../../types/view-farm-admin.type';
+import { useSelector } from 'react-redux';
+import { deleteData, fetchData } from '../../api/api';
 import {
-  initialModalInfo,
+  Notification,
+  Paper,
+  Select,
+  Table,
+  Text,
+} from '../../concave.agri/components';
+import {
   initialNotification,
   paginationInfoValue,
-  systemRoles,
 } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
-import { buildFilters, initialSearchValues } from './initial.values';
-import { useSelector } from 'react-redux';
+import { initialSearchValues } from './initial.values';
 
-const ManageCrops = () => {
+const ManageCrops = ({
+  pageLabel,
+  apiEndPoint,
+  routeName,
+}: {
+  pageLabel: string;
+  apiEndPoint: string;
+  routeName: string;
+}) => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
-      searchParams.get('searchValue') || initialSearchValues.searchValue;
-    const status = searchParams.get('status') || initialSearchValues.status;
+      searchParams.get('searchValue') ?? initialSearchValues.searchValue;
+    const category =
+      searchParams.get('category') ?? initialSearchValues.category;
 
     // Update state with extracted values
     return {
       searchValue,
-      status,
+      category,
     };
   };
 
   const initialPaginationFromQueryParams = () => {
     const rowPerPage =
-      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+      searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
 
     const currentPage = Number(
-      searchParams.get('currentPage') ||
+      searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
     return { ...paginationInfoValue, rowPerPage, currentPage };
@@ -95,22 +102,16 @@ const ManageCrops = () => {
   const [notification, setNotification] = useState(initialNotification);
 
   // State for table data
-  const [tableData, setTableData] = useState<User[]>([]);
+  const [tableData, setTableData] = useState([]);
 
   // State for reset button
   const [resetTable, setResetTable] = useState(false);
-
-  const [modalInfo, setModalInfo] = useState(initialModalInfo);
 
   /* /////////////////////////////////////////////////
                       functions
   /////////////////////////////////////////////////// */
 
   const navigate = useNavigate();
-
-  const handleAddFarmAdmin = () => {
-    navigate(roleId === '0' ? '/admin-crops/add' : '/manage-users/add');
-  };
 
   const setValuesById = (valuesById: any) =>
     setSearchValues(prevFormValues => ({
@@ -121,44 +122,49 @@ const ManageCrops = () => {
   const handleSetParams = () => {
     const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(searchValues).forEach(([key, value]) => {
-      if (key === 'dateRange') {
-        if (value[0]) {
-          newParams.set('dateRangeStart', value[0]?.toString());
-        }
-        if (value[1]) {
-          newParams.set('dateRangeEnd', value[1]?.toString());
-        }
-      } else if (value) {
+      if (value) {
         newParams.set(key, value);
       }
     });
-    newParams ? setSearchParams(newParams) : initialSearchValues;
+    newParams && setSearchParams(newParams);
   };
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
-    const filters = removeEmptyValueFilters(buildFilters(searchValues));
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'name',
+        operator: 'like',
+        value: searchValues.searchValue,
+      },
+      {
+        field: 'category',
+        operator: 'eq',
+        value: searchValues?.category ?? '',
+      },
+    ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
     fetchData(
-      `users?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+      `${apiEndPoint}?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&orderBy={"ref_farm_crop.name": "ASC"}`
     )
       .then((response: any) => {
         setTableData(response.data);
-        const getPages = extractPageInfo(response.pages);
+        const getPages = extractPageInfo(response?.pages);
         setPaginationInfo({
           ...paginationInfo,
-          totalRecords: response.total,
+          totalRecords: response?.total,
           totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
   };
+
   const handleNotificationClose = () => setNotification(initialNotification);
 
   const handleSearchButtonClick = () => {
@@ -211,9 +217,9 @@ const ManageCrops = () => {
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
     const rowPerPage =
-      searchParams.get('rowPerPage') || paginationInfoValue.rowPerPage;
+      searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
     const currentPage = Number(
-      searchParams.get('currentPage') ||
+      searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
     if (rowPerPage !== '5') newParams.set('rowPerPage', rowPerPage);
@@ -225,7 +231,7 @@ const ManageCrops = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`users/${id}`)
+    deleteData(`${apiEndPoint}/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
@@ -237,40 +243,7 @@ const ManageCrops = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.log(error))
-      .finally(() => setIsLoading(false));
-  };
-
-  const handleChangeStatus = (id: string | number) => {
-    setIsLoading(true);
-    const findUserStatus = tableData?.find(
-      user => user?.userId === id
-    )?.isActive;
-
-    const farm = tableData?.find(user => user?.userId === id)?.farm;
-
-    putData(
-      roleId === '0' ? `farm/${farm?.farmId}` : `users/${id}`,
-      roleId === '0'
-        ? {
-            isActive: !farm?.isActive,
-          }
-        : {
-            isActive: findUserStatus === 'true' ? 'false' : 'true',
-          }
-    )
-      .then(() => {
-        setNotification({
-          isSuccess: true,
-          message: 'Status has been changed successfully',
-          title: 'Successfully',
-          isEnable: true,
-        });
-        setTimeout(() => {
-          setResetTable(!resetTable);
-        });
-      })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   };
 
@@ -285,143 +258,98 @@ const ManageCrops = () => {
 
   // Function to set values based on identifiers
 
-  const commonColumns = [
-    {
-      header: 'CROP TYPE ',
-      accessorKey: 'cropType',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
-      cell: (info: { getValue: () => any }) => (
-        <div className="flex items-center justify-center">
-          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
-        </div>
-      ),
-    },
-    {
-      header: 'CATEGORY',
-      accessorKey: 'Category',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
-      cell: (info: { getValue: () => any }) => (
-        <div className="flex items-center justify-center">
-          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
-        </div>
-      ),
-    },
-
-    {
-      header: 'PLANTING SPACE',
-      accessorKey: 'plantingSpace',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
-      cell: (info: { getValue: () => any }) => (
-        <div className="flex items-center justify-center">
-          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
-        </div>
-      ),
-    },
-    {
-      header: 'ROW SPACEING',
-      accessorKey: 'rowSpacing',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
-      cell: (info: { getValue: () => any }) => (
-        <div className="flex items-center justify-center">
-          <p className="text-sm lg:text-base text-center">{info.getValue()}</p>
-        </div>
-      ),
-    },
-
-    {
-      header: '',
-      accessorKey: 'userId',
-      size: 55,
-      minSize: 55,
-      maxSize: 55,
-      cell: (info: any) => {
-        const isActive = info?.row?.original?.isActive;
-        const id = info?.row?.original?.userId;
-        const farm = info?.row?.original?.farm;
-        return (
-          <TableMenu
-            id={id}
-            onDeleteClick={handleDeleteById}
-            onViewClick={id =>
-              navigate(
-                `/manage-${roleId === '0' ? 'farm' : 'users'}/view/${id}`
-              )
-            }
-            onEditClick={() =>
-              navigate(
-                `/manage-${roleId === '0' ? 'farm' : 'users'}/edit/${id}`
-              )
-            }
-            // additionalMenuItems={[
-            //   {
-            //     label:
-            //       isActive === 'true' && farm?.isActive ? 'Block' : 'Active',
-            //     icon:
-            //       isActive === 'true' && farm?.isActive ? (
-            //         <MdDisabledVisible />
-            //       ) : (
-            //         <VscVmActive />
-            //       ),
-            //     onClick: () => handleChangeStatus(id),
-            //   },
-            // ]}
-          />
-        );
-      },
-    },
-  ];
-
   const columns = useMemo(() => {
-    if (roleId === '0') {
-      return [
-        {
-          header: 'CROP NAME',
-          accessorKey: 'farm',
-          size: 50,
-          minSize: 50,
-          maxSize: 500,
-          cell: (info: { getValue: () => any }) => (
-            <div className="flex items-center justify-center">
+    return [
+      {
+        header: <div className="flex text-start ml-2">CROP NAME</div>,
+        accessorKey: 'image',
+        size: 50,
+        minSize: 50,
+        maxSize: 500,
+        cell: (info: any) => {
+          const cropInfo = info?.row?.original;
+          return (
+            <div className="flex ml-2">
               <p className="text-sm lg:text-base text-center">
-                {info.getValue()?.farmTitle}
+                <div className="flex items-center">
+                  <img
+                    src={cropInfo.image}
+                    alt="Crop_Image"
+                    className="rounded-full w-7 h-7 mr-3"
+                    loading="lazy"
+                  />
+                  <p> {cropInfo.name}</p>
+                </div>
               </p>
             </div>
-          ),
+          );
         },
-        ...commonColumns,
-      ];
-    } else {
-      return [
-        ...commonColumns.slice(0, 1), // Add the first common column
-        {
-          header: 'ROLE',
-          accessorKey: 'roleId',
-          size: 50,
-          minSize: 50,
-          maxSize: 500,
-          cell: (info: { getValue: () => any }) => (
-            <div className="flex items-center justify-center">
-              <p className="text-sm lg:text-base text-center">
-                {systemRoles[info.getValue()].name}
-              </p>
-            </div>
-          ),
+      },
+      {
+        header: 'CATEGORY',
+        accessorKey: 'category',
+        size: 50,
+        minSize: 50,
+        maxSize: 500,
+        cell: (info: { getValue: () => any }) => (
+          <div className="flex items-center justify-center">
+            <p className="text-sm lg:text-base text-center">
+              {info.getValue()}
+            </p>
+          </div>
+        ),
+      },
+      {
+        header: 'SEASON',
+        accessorKey: 'cropType',
+        size: 50,
+        minSize: 50,
+        maxSize: 500,
+        cell: (info: { getValue: () => any }) => (
+          <div className="flex items-center justify-center">
+            <p className="text-sm lg:text-base text-center">
+              {info.getValue()}
+            </p>
+          </div>
+        ),
+      },
+      {
+        header: 'START METHOD',
+        accessorKey: 'startMethod',
+        size: 50,
+        minSize: 50,
+        maxSize: 500,
+        cell: (info: { getValue: () => any }) => (
+          <div className="flex items-center justify-center">
+            <p className="text-sm lg:text-base text-center">
+              {info.getValue()}
+            </p>
+          </div>
+        ),
+      },
+      {
+        header: '',
+        accessorKey: 'userId',
+        size: 55,
+        minSize: 55,
+        maxSize: 55,
+        cell: (info: any) => {
+          const id = info?.row?.original?.refFarmCropId;
+          return (
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onViewClick={id => navigate(`/${routeName}/view/${id}`)}
+              onEditClick={() => navigate(`/${routeName}/edit/${id}`)}
+            />
+          );
         },
-        ...commonColumns.slice(1), // Add the remaining common columns
-      ];
-    }
-  }, [userInfo?.roleId, resetTable, tableData]);
+      },
+    ];
+  }, [resetTable, tableData]);
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -433,11 +361,11 @@ const ManageCrops = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText={roleId === '0' ? 'Crops' : 'User'}
-        breadcrumbsText={`Manage ${roleId === '0' ? 'Crops' : 'User'}`}
+        headerText={pageLabel}
+        breadcrumbsText={`Manage ${pageLabel}`}
         isAddOrUpdateButton
-        buttonContent={`Add ${roleId === '0' ? 'Crops' : 'User'}`}
-        onButtonClick={handleAddFarmAdmin} // Call handleAddFarmAdmin function when button is clicked
+        buttonContent={`Add ${pageLabel}`}
+        onButtonClick={() => navigate(`/${routeName}/add`)} // Call handleAddFarmAdmin function when button is clicked
       />
 
       <Paper
@@ -459,9 +387,17 @@ const ManageCrops = () => {
             <Grid.Col span={{ base: 12, md: 2, lg: 2 }}>
               <Select
                 placeholder="Category"
-                data={['Fruit', 'Vegetable']}
-                value={searchValues.status ?? ''}
-                onChange={value => setValuesById({ status: value })}
+                data={[
+                  'All',
+                  'Browses',
+                  'Important crops',
+                  'Fruits and vegetables',
+                  'Fodder',
+                  'Oily crops commodities',
+                  'Pulses',
+                ]}
+                value={searchValues.category ?? ''}
+                onChange={value => setValuesById({ category: value })}
               />
             </Grid.Col>
             {isSmallScreen && (

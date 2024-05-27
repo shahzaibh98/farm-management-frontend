@@ -16,7 +16,6 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop" />
-            <CropView />
           </PrivateRoute>
         ),
       },
@@ -25,7 +24,6 @@ export const cropRoutes = [
         element: (
           <PrivateRoute>
             <DocumentTitle title="Crop - Add" />
-            <ManageCrop />
           </PrivateRoute>
         ),
       },

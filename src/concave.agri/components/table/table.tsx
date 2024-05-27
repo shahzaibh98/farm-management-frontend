@@ -9,17 +9,16 @@ import { RiArrowDropDownLine } from 'react-icons/ri';
 import { Skeleton, useMantineTheme } from '@mantine/core';
 
 // Table-related imports
-import { TableProps } from '../../../types/table.type';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { TableProps } from '../../../types/table.type';
 
 // Component imports
 import { Select } from '../dropdown';
 import { TextInput } from '../inputField';
-import { Loader } from '../loader';
 import { Text } from '../text';
 
 const Table = ({
@@ -44,7 +43,7 @@ const Table = ({
   });
 
   return (
-    <section className="min-h-[370px] flex justify-between flex-col mt-4 relative max-w-full overflow-x-scroll overflow-y-hidden">
+    <section className="min-h-[370px] flex justify-between flex-col mt-4 relative max-w-full overflow-x-auto md:overflow-x-visible sm:overflow-x-visible">
       <table
         className="w-full"
         style={{
@@ -147,7 +146,7 @@ const Table = ({
                       <td
                         key={cell.id}
                         style={{ width: cell.column.getSize() }}
-                        className={`p-2`}
+                        className={'p-2'}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

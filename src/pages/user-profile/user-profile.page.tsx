@@ -114,7 +114,7 @@ const UserProfile = () => {
   };
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {/* Render notification if enabled */}
       {notification.isEnable && (
         <Notification

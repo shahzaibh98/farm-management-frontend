@@ -11,37 +11,67 @@ import {
   MdGrass,
 } from 'react-icons/md';
 import { GiPlantRoots } from 'react-icons/gi';
+import { MdOutlineAdminPanelSettings, MdGrass } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
-import store from '../redux';
 import { TfiMapAlt } from 'react-icons/tfi';
 
-export function getNavBarAgainstRole() {
-  const currentRole = store.getState()?.userInfo?.userInfo?.roleId;
-
+export function getNavBarAgainstRole(currentRole: string | number) {
   const commonNavBar = [
-    { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+    {
+      link: '/dashboard',
+      label: 'Dashboard',
+      icon: IconDashboard,
+      activeLinks: ['/dashboard'],
+    },
   ];
 
-  const clientCommonNavBar = [
-    { link: '/task', label: 'Task', icon: IconListDetails },
-    { link: '/lands', label: 'Farm Locations', icon: TfiMapAlt },
-    { link: '/crop', label: 'Crop', icon: IconCarrot },
-    { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
-    { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
-    { link: '/financial', label: 'Financial', icon: IconReceipt2 },
+  const farmCommonNavBar = [
+    {
+      link: '/task',
+      label: 'Task',
+      icon: IconListDetails,
+      activeLinks: ['/task'],
+    },
+    {
+      link: '/lands',
+      label: 'Farm Locations',
+      icon: TfiMapAlt,
+      activeLinks: ['/lands', '/beds'],
+    },
+    { link: '/crop', label: 'Crop', icon: IconCarrot, activeLinks: ['/crop'] },
+    {
+      link: '/livestock',
+      label: 'LiveStock',
+      icon: IconPiPawPrint,
+      activeLinks: ['/livestock'],
+    },
+    {
+      link: '/inventory',
+      label: 'Inventory',
+      icon: IconBuildingWarehouse,
+      activeLinks: ['/inventory'],
+    },
+    {
+      link: '/financial',
+      label: 'Financial',
+      icon: IconReceipt2,
+      activeLinks: ['/financial'],
+    },
   ];
 
-  const roleNavBarMapping: any = {
+  const roleNavBarMappingForFarm: any = {
     0: [
       {
         link: '/manage-farm',
         label: 'Manage Farm',
         icon: MdOutlineAdminPanelSettings,
+        activeLinks: ['/manage-farm'],
       },
       {
-        link: '/admin-crops',
+        link: '/crops',
         label: 'Crops',
         icon: MdGrass,
+        activeLinks: ['/crops'],
       },
       {
         link: '/admin-crops-planning',
@@ -50,19 +80,24 @@ export function getNavBarAgainstRole() {
       },
     ],
     1: [
-      ...clientCommonNavBar,
-      { link: '/manage-users', label: 'Manage Users', icon: PiUsers },
+      ...farmCommonNavBar,
+      {
+        link: '/manage-users',
+        label: 'Manage Users',
+        icon: PiUsers,
+        activeLinks: ['/manage-users'],
+      },
     ],
-    2: clientCommonNavBar,
-    3: clientCommonNavBar,
-    4: clientCommonNavBar,
-    5: clientCommonNavBar,
-    6: clientCommonNavBar,
-    7: clientCommonNavBar,
-    8: clientCommonNavBar,
+    2: farmCommonNavBar,
+    3: farmCommonNavBar,
+    4: farmCommonNavBar,
+    5: farmCommonNavBar,
+    6: farmCommonNavBar,
+    7: farmCommonNavBar,
+    8: farmCommonNavBar,
   };
 
-  const roleBasedNavbar = roleNavBarMapping[currentRole] || [];
+  const roleBasedNavbar = roleNavBarMappingForFarm[Number(currentRole)] || [];
 
   return [...commonNavBar, ...roleBasedNavbar];
 }

@@ -1,13 +1,9 @@
 export interface SearchFilter {
   searchValue: string;
-  locationTypeId: string;
-  status: string;
 }
 
 export const initialSearchValues: SearchFilter = {
   searchValue: '',
-  locationTypeId: 'All',
-  status: 'All',
 };
 
 interface MapModalInfo {

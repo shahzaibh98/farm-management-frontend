@@ -2,6 +2,7 @@ import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import ManageLand from '../../pages/land/land.foam';
+import BedsView from '../../pages/land/beds/view.beds';
 import LandView from '../../pages/land/view.land';
 import PrivateRoute from '../private/private.routes';
 
@@ -29,6 +30,42 @@ export const landRoutes = [
           </PrivateRoute>
         ),
       },
+      {
+        path: 'view/:id',
+        element: (
+          <PrivateRoute>
+            <DocumentTitle title="Land - View" />
+            <ManageLand type="View" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'edit/:id',
+        element: (
+          <PrivateRoute>
+            <DocumentTitle title="Land - Edit" />
+            <ManageLand type="Update" />
+          </PrivateRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: 'beds',
+    element: <AppShell />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        path: ':id',
+        element: (
+          <PrivateRoute>
+            <DocumentTitle title="Land" />
+            <BedsView />
+          </PrivateRoute>
+        ),
+      },
+
       {
         path: 'view/:id',
         element: (
