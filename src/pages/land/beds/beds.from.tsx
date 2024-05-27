@@ -1,49 +1,35 @@
+import { AreaUnitEn } from '@agri/shared-types';
+import { Grid, Title, rem, useMantineTheme } from '@mantine/core';
+import { IconMap } from '@tabler/icons-react';
+import { useFormik } from 'formik';
+import { ReactNode, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import { fetchData, postData, putData } from '../../../api/api';
 import {
   Button,
-  Grid,
-  Paper,
-  Select,
-  Title,
-  rem,
-  useMantineTheme,
-} from '@mantine/core';
-import { useFormik } from 'formik';
-import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
-import { useSelector } from 'react-redux';
-import * as Yup from 'yup';
-import { fetchData, postData, putData } from '../../api/api';
-import {
   GlassCard,
   Modal,
   Notification,
   NumberInput,
+  Paper,
+  Select,
+  Text,
   TextInput,
-} from '../../concave.agri/components';
-import GenericHeader from '../../layout/header.layout';
-import { inputStyle } from '../../theme/common.style';
-
-// Importing custom components from the 'concave.agri' project
-import { AreaUnitEn } from '@agri/shared-types';
-import { IconMap } from '@tabler/icons-react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Text } from '../../concave.agri/components';
-import { initialNotification } from '../../utils/common/constant.objects';
+} from '../../../concave.agri/components';
+import GenericHeader from '../../../layout/header.layout';
+import { inputStyle } from '../../../theme/common.style';
+import { initialNotification } from '../../../utils/common/constant.objects';
 import {
   numberInputValue,
   organizeDropDownData,
-} from '../../utils/common/function';
-import {
-  getDistricts,
-  getDivisions,
-  getTehsils,
-  handleDistrict,
-  handleDivision,
-  handleTehsil,
-} from '../../utils/common/location.Helper';
-import { initialMapModalInfo } from './initial.values';
-import LocationSearch from './searchLocation';
+} from '../../../utils/common/function';
 
-const ManageLand = ({ type = 'Add' }) => {
+import { initialMapModalInfo } from '../initial.values';
+import LocationSearch from '../searchLocation';
+
+const ManageBed = ({ type = 'Add' }) => {
   const theme = useMantineTheme();
   const { id } = useParams(); // Getting the ID from URL params
 
@@ -77,41 +63,6 @@ const ManageLand = ({ type = 'Add' }) => {
         .catch((err: any) => console.error(err));
   }, [id]);
 
-  const updateFormikValues = (values: {
-    [x: string]: any;
-    provinceId?: any;
-    divisionId?: any;
-    districtId?: any;
-    tehsilId?: any;
-  }) => {
-    Object.keys(values).forEach(key => {
-      formik.setFieldValue(key, values[key]);
-    });
-  };
-
-  const handleProvinceChange = (value: string) =>
-    updateFormikValues({
-      provinceId: value,
-      divisionId: '',
-      districtId: '',
-      tehsilId: '',
-    });
-
-  const handleDivisionChange = (value: string) => {
-    const data = handleDivision(locationData, value);
-    if (data) updateFormikValues(data);
-  };
-
-  const handleDistrictChange = (value: string) => {
-    const data = handleDistrict(locationData, value);
-    if (data) updateFormikValues(data);
-  };
-
-  const handleTehsilChange = (value: string) => {
-    const data = handleTehsil(locationData, value);
-    if (data) updateFormikValues(data);
-  };
-
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
 
@@ -132,12 +83,12 @@ const ManageLand = ({ type = 'Add' }) => {
             districtId: '',
             tehsilId: '',
 
-            // plantingMethodId: '',
+            plantingMethodId: '',
 
-            // // For Beds
-            // noOfBeds: '',
-            // width: '',
-            // length: '',
+            // For Beds
+            noOfBeds: '',
+            width: '',
+            length: '',
 
             coordinates: [],
             markLocation: null,
@@ -301,192 +252,7 @@ const ManageLand = ({ type = 'Add' }) => {
               />
             </Grid.Col>
           </Grid>
-          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Location
-          </Title>
 
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="province"
-                label="Province"
-                name="provinceOrState"
-                searchable
-                placeholder="Enter your province..."
-                value={formik.values?.provinceId ?? ''}
-                data={[
-                  { label: 'None', value: '' },
-                  ...(locationData && locationData.provinces
-                    ? locationData.provinces.map(
-                        (e: { name: any; provinceId: any }) => ({
-                          label: e.name || '',
-                          value: e.provinceId || '',
-                        })
-                      )
-                    : []),
-                ]}
-                onChange={(e: string | null) =>
-                  type !== 'View' && handleProvinceChange(e ?? '')
-                }
-                styles={inputStyle}
-                error={
-                  formik.errors.provinceId &&
-                  (formik.touched.provinceId || formik.submitCount > 0)
-                    ? (formik.errors.provinceId as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="division"
-                label="Division"
-                name="division"
-                searchable
-                placeholder="Enter your division..."
-                value={formik.values?.divisionId ?? ''}
-                data={getDivisions(formik.values?.provinceId, locationData)}
-                onChange={e => {
-                  type !== 'View' && handleDivisionChange(e ?? '');
-                }}
-                styles={inputStyle}
-                error={
-                  formik.errors.divisionId &&
-                  (formik.touched.divisionId || formik.submitCount > 0)
-                    ? (formik.errors.divisionId as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="district"
-                label="District"
-                name="district"
-                searchable
-                placeholder="Enter your district..."
-                value={formik.values?.districtId ?? ''}
-                data={getDistricts(formik.values?.divisionId, locationData)}
-                onChange={e => type !== 'View' && handleDistrictChange(e ?? '')}
-                styles={inputStyle}
-                error={
-                  formik.errors?.districtId &&
-                  (formik.touched?.districtId || formik.submitCount > 0)
-                    ? (formik.errors?.districtId as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="tehsil"
-                label="Tehsil"
-                name="=tehsil"
-                searchable
-                placeholder="Enter your tehsil..."
-                value={formik.values?.tehsilId ?? ''}
-                data={getTehsils(formik.values?.districtId, locationData)}
-                onChange={e => type !== 'View' && handleTehsilChange(e ?? '')}
-                styles={inputStyle}
-                error={
-                  formik.errors.tehsilId &&
-                  (formik.touched.tehsilId || formik.submitCount > 0)
-                    ? (formik.errors.tehsilId as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                id="postalAddress"
-                label="Address"
-                name="postalAddress"
-                placeholder="Enter your address..."
-                value={formik.values?.postalAddress ?? ''}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('postalAddress', e)
-                }
-                styles={inputStyle}
-                error={
-                  formik.errors.postalAddress &&
-                  (formik.touched.postalAddress || formik.submitCount > 0)
-                    ? formik.errors.postalAddress
-                    : null
-                }
-              />
-            </Grid.Col>
-          </Grid>
-          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Addition Info
-          </Title>
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="Ownership"
-                label="Ownership"
-                placeholder="Select Ownership..."
-                data={organizeDropDownData(referenceData?.ownership)}
-                value={formik?.values?.ownershipId ?? ''}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('ownershipId', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="soilType"
-                label="Soil Type"
-                placeholder="Select Soil Type..."
-                data={organizeDropDownData(referenceData?.soilType)}
-                value={formik.values?.soilTypeId}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('soilTypeId', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                id="irrigationMethod"
-                label="Irrigation Method"
-                placeholder="Select Method..."
-                data={organizeDropDownData(referenceData?.irrigationMethod)}
-                value={formik.values?.irrigationMethodId}
-                onChange={value =>
-                  type !== 'View' &&
-                  formik.setFieldValue('irrigationMethodId', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <NumberInput
-                id="estimatedCost"
-                label="Estimate Cost"
-                name="estimatedCost"
-                prefix="Rs."
-                min={0}
-                placeholder="Enter your Estimate Cost..."
-                value={numberInputValue(formik.values?.estimatedCost)}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('estimatedCost', e)
-                }
-                styles={inputStyle}
-                error={
-                  formik.errors.estimatedCost &&
-                  (formik.touched.estimatedCost || formik.submitCount > 0)
-                    ? formik.errors.estimatedCost
-                    : null
-                }
-              />
-            </Grid.Col>
-          </Grid>
           {/* <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
             Planting Method
           </Title>
@@ -685,4 +451,4 @@ const ManageLand = ({ type = 'Add' }) => {
   );
 };
 
-export default ManageLand;
+export default ManageBed;

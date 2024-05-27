@@ -445,45 +445,32 @@ const LandView = () => {
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
           return (
-            <div className="flex relative overflow-visible">
-              <TableMenu
-                id={id}
-                onDeleteClick={id =>
-                  setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
-                }
-                onEditClick={() => navigate(`/lands/edit/${id}`)}
-                onViewClick={() => navigate(`/lands/view/${id}`)}
-                additionalMenuItems={
-                  // info?.row?.original?.plantingMethod === '1'
-                  // eslint-disable-next-line no-constant-condition
-                  true
-                    ? [
-                        {
-                          label: 'Beds',
-                          icon: <MdOutlineLineStyle />,
-                          onClick: () => navigate(`/beds/${id}`),
-                        },
-                        {
-                          label: 'Soil Test',
-                          icon: <TbReportSearch />,
-                          onClick: () => navigate(`/beds/${id}`),
-                        },
-                        {
-                          label: 'Fertilizers',
-                          icon: (
-                            <FertilizerBag
-                              height={14}
-                              width={14}
-                              className="cursor-pointer"
-                            />
-                          ),
-                          onClick: () => navigate(`/beds/${id}`),
-                        },
-                      ]
-                    : []
-                }
-              />
-            </div>
+            <TableMenu
+              id={id}
+              onDeleteClick={id =>
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
+              }
+              onEditClick={() => navigate(`/lands/edit/${id}`)}
+              onViewClick={() => navigate(`/lands/view/${id}`)}
+              additionalMenuItems={
+                // info?.row?.original?.plantingMethod === '1'
+                // eslint-disable-next-line no-constant-condition
+                true
+                  ? [
+                      {
+                        label: 'Beds',
+                        icon: <MdOutlineLineStyle />,
+                        onClick: () => navigate(`/beds/${id}`),
+                      },
+                      {
+                        label: 'Soil Test',
+                        icon: <TbReportSearch />,
+                        onClick: () => navigate(`/beds/${id}`),
+                      },
+                    ]
+                  : []
+              }
+            />
           );
         },
       },

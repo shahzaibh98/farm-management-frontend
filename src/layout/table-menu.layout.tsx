@@ -40,68 +40,72 @@ const TableMenu = ({
   onDeleteClick = id => {},
 }: TableMenuProps) => {
   return (
-    <Menu
-      position="top-start"
-      shadow="md"
-      trigger="hover"
-      openDelay={100}
-      closeDelay={400}
-      withinPortal={false}
-      offset={8} // Adjust the offset as needed to align the dropdown properly
-      transitionProps={{ transition: 'rotate-right', duration: 150 }}
-      floatingStrategy="fixed"
-    >
-      <Menu.Target>
-        <CgOptions />
-      </Menu.Target>
+    <div className="flex relative overflow-visible">
+      <Menu
+        position="top-start"
+        shadow="md"
+        trigger="hover"
+        openDelay={100}
+        closeDelay={400}
+        withinPortal={false}
+        offset={8} // Adjust the offset as needed to align the dropdown properly
+        transitionProps={{ transition: 'rotate-right', duration: 150 }}
+        floatingStrategy="fixed"
+      >
+        <Menu.Target>
+          <CgOptions />
+        </Menu.Target>
 
-      <Menu.Dropdown>
-        {isEdit && (
-          <Menu.Item
-            leftSection={<CiEdit style={{ width: rem(14), height: rem(14) }} />}
-            onClick={() => onEditClick(id)}
-          >
-            Edit
-          </Menu.Item>
-        )}
-        {isView && (
-          <Menu.Item
-            leftSection={
-              <VscOpenPreview style={{ width: rem(14), height: rem(14) }} />
-            }
-            onClick={() => onViewClick(id)}
-          >
-            View
-          </Menu.Item>
-        )}
-
-        {additionalMenuItems?.map(
-          (item: MenuItem, index: Key | null | undefined) => (
+        <Menu.Dropdown>
+          {isEdit && (
             <Menu.Item
-              key={index}
-              leftSection={item.icon ?? null}
-              onClick={() => item.onClick(id)}
+              leftSection={
+                <CiEdit style={{ width: rem(14), height: rem(14) }} />
+              }
+              onClick={() => onEditClick(id)}
             >
-              {item.label}
+              Edit
             </Menu.Item>
-          )
-        )}
+          )}
+          {isView && (
+            <Menu.Item
+              leftSection={
+                <VscOpenPreview style={{ width: rem(14), height: rem(14) }} />
+              }
+              onClick={() => onViewClick(id)}
+            >
+              View
+            </Menu.Item>
+          )}
 
-        {(isEdit || isView) && isDelete && <Menu.Divider />}
+          {additionalMenuItems?.map(
+            (item: MenuItem, index: Key | null | undefined) => (
+              <Menu.Item
+                key={index}
+                leftSection={item.icon ?? null}
+                onClick={() => item.onClick(id)}
+              >
+                {item.label}
+              </Menu.Item>
+            )
+          )}
 
-        {isDelete && (
-          <Menu.Item
-            color="red"
-            leftSection={
-              <IconTrash style={{ width: rem(14), height: rem(14) }} />
-            }
-            onClick={() => onDeleteClick(id)}
-          >
-            Delete
-          </Menu.Item>
-        )}
-      </Menu.Dropdown>
-    </Menu>
+          {(isEdit || isView) && isDelete && <Menu.Divider />}
+
+          {isDelete && (
+            <Menu.Item
+              color="red"
+              leftSection={
+                <IconTrash style={{ width: rem(14), height: rem(14) }} />
+              }
+              onClick={() => onDeleteClick(id)}
+            >
+              Delete
+            </Menu.Item>
+          )}
+        </Menu.Dropdown>
+      </Menu>
+    </div>
   );
 };
 
