@@ -1,6 +1,7 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+
 // Importing custom components from the 'concave.agri' project
 import {
   Notification,
@@ -8,58 +9,54 @@ import {
   Select,
   Table,
   Text,
-} from '../../../concave.agri/components';
-import { SearchButton } from '../../../concave.agri/components/searchbar';
-import ResetButton from '../../../concave.agri/components/searchbar/resetButton';
+} from '../../concave.agri/components';
+import { SearchButton } from '../../concave.agri/components/searchbar';
+import ResetButton from '../../concave.agri/components/searchbar/resetButton';
 
 // Importing a custom hook to get the screen size
-import useScreenSize from '../../../hooks/useScreenSize';
+import useScreenSize from '../../hooks/useScreenSize';
 
 // Importing custom components and layouts
-import { TableMenu } from '../../../layout';
-import GenericHeader from '../../../layout/header.layout';
-import SearchComponent from '../../../layout/searchBar.layout';
+import { TableMenu } from '../../layout';
+import GenericHeader from '../../layout/header.layout';
+import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
-import { AreaUnitEn } from '@agri/shared-types';
-import { IconBorderCorners } from '@tabler/icons-react';
-import { MdOutlineLineStyle } from 'react-icons/md';
-import { TbReportSearch } from 'react-icons/tb';
+import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { useSelector } from 'react-redux';
-import { deleteData, fetchData } from '../../../api/api';
-import { ReactComponent as FarmIcon } from '../../../assets/svg/farm-boundary.svg';
-import DeleteModel from '../../../layout/confimation.modal';
+import { deleteData, fetchData } from '../../api/api';
+import { ReactComponent as FarmIcon } from '../../assets/svg/farm-boundary.svg';
 import {
   getLandColors,
   initialNotification,
   paginationInfoValue,
-} from '../../../utils/common/constant.objects';
+} from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
   isEmpty,
-  organizeDropDownData,
   removeEmptyValueFilters,
-} from '../../../utils/common/function';
+} from '../../utils/common/function';
+
+import DeleteModel from '../../layout/confimation.modal';
+import { IconBorderCorners } from '@tabler/icons-react';
 import {
   SearchFilter,
   initialMapModalInfo,
   initialSearchValues,
 } from './initial.values';
-import LocationSearch from './searchLocation';
 
-const LandView = () => {
+const CropView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') ?? initialSearchValues.searchValue;
-    const locationTypeId =
-      searchParams.get('locationTypeId') ?? initialSearchValues.locationTypeId;
+    const type = searchParams.get('type') ?? initialSearchValues.type;
     const status = searchParams.get('status') ?? initialSearchValues.status;
 
     // Update state with extracted values
     return {
       searchValue,
-      locationTypeId,
+      type,
       status,
     };
   };
@@ -115,10 +112,8 @@ const LandView = () => {
 
   const navigate = useNavigate();
 
-  const { referenceData } = useSelector((state: any) => state?.referenceData);
-
   const handleAddFarmAdmin = () => {
-    navigate('/lands/add');
+    navigate('/crop/add');
   };
 
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
@@ -128,16 +123,6 @@ const LandView = () => {
     id: '',
     resourceName: '',
   });
-
-  const { isSystemAdmin, currentRole } = useSelector(
-    (state: any) => state?.userInfo
-  );
-
-  const currentUser = isSystemAdmin
-    ? 0
-    : currentRole?.roleMode === 'farms'
-      ? currentRole?.currentFarmRole
-      : currentRole?.currentCompanyRole;
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -164,7 +149,7 @@ const LandView = () => {
       .then((response: any) => {
         setAllLocationData(response?.data);
       })
-      .catch((error: any) => console.error(error))
+      .catch((error: any) => console.log(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -220,14 +205,19 @@ const LandView = () => {
         value: searchValues.searchValue,
       },
       {
-        field: 'locationTypeId',
+        field: 'status',
         operator: 'eq',
-        value: searchValues?.locationTypeId,
+        value: searchValues?.status,
+      },
+      {
+        field: 'type',
+        operator: 'eq',
+        value: searchValues?.type,
       },
       {
         field: 'farmId',
         operator: 'eq',
-        value: currentUser?.farmId,
+        value: userInfo?.farmId?.toString(),
       },
     ]);
 
@@ -245,7 +235,7 @@ const LandView = () => {
           totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch((error: any) => console.error(error))
+      .catch((error: any) => console.log(error))
       .finally(() => {
         setIsLoading(false);
       });
@@ -328,7 +318,7 @@ const LandView = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.error(error))
+      .catch(error => console.log(error))
       .finally(() => setIsLoading(false));
   };
 
@@ -340,8 +330,8 @@ const LandView = () => {
   const columns = useMemo(
     () => [
       {
-        header: <div className="flex text-start ml-2">NAME</div>,
-        accessorKey: 'name',
+        header: <div className="flex text-start ml-2">PLANTING METHOD</div>,
+        accessorKey: 'Planting Method',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
@@ -354,28 +344,25 @@ const LandView = () => {
         ),
       },
       {
-        header: <div className="flex text-start">TYPE</div>,
-        accessorKey: 'locationTypeId',
+        header: <div className="flex text-start">ROW SPACING</div>,
+        accessorKey: 'row spacing',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
         cell: (info: any) => {
           const rowData = info?.row?.original;
-          console.log('Roe Date', rowData?.locationType?.name);
           return (
             <div className="flex flex-row">
-              <IconBorderCorners
-                color={getLandColors(rowData?.locationType?.name ?? '')}
-              />
+              <IconBorderCorners color={getLandColors(rowData?.type ?? '')} />
               <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.locationType?.name}
+                {rowData?.type}
               </p>
             </div>
           );
         },
       },
       {
-        header: <div className="flex text-start">AREA</div>,
+        header: <div className="flex text-start">SEED COMPANY</div>,
         accessorKey: 'area',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -392,7 +379,7 @@ const LandView = () => {
         },
       },
       {
-        header: <div className="flex text-start">SOIL TYPE</div>,
+        header: <div className="flex text-start">ACTUAL YEILD</div>,
         accessorKey: 'soilType',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
@@ -401,13 +388,26 @@ const LandView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {info.getValue()?.name ?? ''}
+                {info.getValue()}
               </p>
             </div>
           );
         },
       },
-
+      {
+        header: 'PLANTING STATUS',
+        accessorKey: 'status',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 200, //enforced during column resizing
+        cell: (info: { getValue: () => any }) => (
+          <div className="flex items-center justify-center">
+            <p className="text-sm lg:text-base text-center">
+              {info.getValue()}
+            </p>
+          </div>
+        ),
+      },
       {
         header: 'BOUNDARIES',
         accessorKey: 'coordinates',
@@ -443,22 +443,6 @@ const LandView = () => {
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
-          const rowData = info?.row?.original;
-          const additionalMenuItems = [
-            {
-              label: 'Beds',
-              icon: <MdOutlineLineStyle />,
-              onClick: () => navigate(`/beds/${id}`),
-            },
-            {
-              label: 'Soil Test',
-              icon: <TbReportSearch />,
-              onClick: () => navigate(`/soil-tests/${id}`),
-            },
-          ];
-          if (!rowData?.isBed) {
-            additionalMenuItems.splice(0, 1);
-          }
           return (
             <TableMenu
               id={id}
@@ -467,7 +451,6 @@ const LandView = () => {
               }
               onEditClick={() => navigate(`/lands/edit/${id}`)}
               onViewClick={() => navigate(`/lands/view/${id}`)}
-              additionalMenuItems={additionalMenuItems}
             />
           );
         },
@@ -477,7 +460,7 @@ const LandView = () => {
   );
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={`w-full h-screen relative bg-darkColors-700`}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -489,12 +472,12 @@ const LandView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Farm Location"
-        breadcrumbsText="Manage Farm Location"
+        headerText="Crops"
+        breadcrumbsText="Manage Crop"
         isAddOrUpdateButton
-        buttonContent="Add Location"
+        buttonContent="Add Crop"
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
-        secondButtonContent="View All Farms"
+        secondButtonContent="View All Crops"
         isSecondButton={allLocationData && allLocationData?.length > 0}
         onSecondButtonClick={handleViewAllLocation}
       />
@@ -518,12 +501,21 @@ const LandView = () => {
                 placeholder="Location Type"
                 data={[
                   { label: 'All', value: 'All' },
-                  ...organizeDropDownData(referenceData?.locationType),
+                  ...Object.values(LandType),
                 ]}
-                value={searchValues?.locationTypeId ?? ''}
-                onChange={value =>
-                  value && setValuesById({ locationTypeId: value })
-                }
+                value={searchValues.type ?? ''}
+                onChange={value => value && setValuesById({ type: value })}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Location Status"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...Object.values(LandStatus),
+                ]}
+                value={searchValues.status ?? ''}
+                onChange={value => value && setValuesById({ status: value })}
               />
             </Grid.Col>
             {isSmallScreen && (
@@ -542,7 +534,7 @@ const LandView = () => {
             paginationInfo={paginationInfo}
             handlePagination={handlePagination}
           />
-          <Modal
+          {/* <Modal
             styles={{
               title: {
                 fontSize: '24px',
@@ -564,7 +556,7 @@ const LandView = () => {
               data={mapModalDetails?.data}
               isMultiple={mapModalDetails?.isMultiple}
             />
-          </Modal>
+          </Modal> */}
         </div>
       </Paper>
 
@@ -585,4 +577,4 @@ const LandView = () => {
     </main>
   );
 };
-export default LandView;
+export default CropView;
