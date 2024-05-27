@@ -1,20 +1,10 @@
-import {
-  Button,
-  Grid,
-  Paper,
-  Popover,
-  Select,
-  Title,
-  rem,
-  useMantineTheme,
-} from '@mantine/core';
+import { Grid, Paper, Select, Title, useMantineTheme } from '@mantine/core';
 import { useFormik } from 'formik';
 import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { fetchData, postData, putData } from '../../api/api';
 import {
-  Modal,
   Notification,
   NumberInput,
   TextInput,
@@ -23,20 +13,13 @@ import GenericHeader from '../../layout/header.layout';
 import { inputStyle } from '../../theme/common.style';
 
 // Importing custom components from the 'concave.agri' project
-import {
-  AreaUnitEn,
-  IRRIGATIONMETHOD,
-  LandStatus,
-  LandType,
-  SoilType,
-} from '@agri/shared-types';
-import { IconMap } from '@tabler/icons-react';
+import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
+import { DateTimePicker } from '@mantine/dates';
+import { Country, State } from 'country-state-city';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Text } from '../../concave.agri/components';
 import { initialNotification } from '../../utils/common/constant.objects';
-import { initialMapModalInfo } from '../crops/initial.values';
-import { Country, State, City } from 'country-state-city';
-import { DatePicker, DateTimePicker } from '@mantine/dates';
+import { initialMapModalInfo } from './initial.values';
 
 const ManageCrop = ({ type = 'Add' }) => {
   const theme = useMantineTheme();

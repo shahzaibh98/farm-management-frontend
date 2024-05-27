@@ -5,13 +5,8 @@ import {
   IconListDetails,
   IconReceipt2,
 } from '@tabler/icons-react';
-import {
-  MdOutlineAdminPanelSettings,
-  MdOutlineLandslide,
-  MdGrass,
-} from 'react-icons/md';
 import { GiPlantRoots } from 'react-icons/gi';
-import { MdOutlineAdminPanelSettings, MdGrass } from 'react-icons/md';
+import { MdGrass, MdOutlineAdminPanelSettings } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
 import { TfiMapAlt } from 'react-icons/tfi';
 
@@ -36,9 +31,14 @@ export function getNavBarAgainstRole(currentRole: string | number) {
       link: '/lands',
       label: 'Farm Locations',
       icon: TfiMapAlt,
-      activeLinks: ['/lands', '/beds'],
+      activeLinks: ['/lands', '/beds', '/soil-tests'],
     },
-    { link: '/crop', label: 'Crop', icon: IconCarrot, activeLinks: ['/crop'] },
+    {
+      link: '/planting',
+      label: 'Planting',
+      icon: MdGrass,
+      activeLinks: ['/planting'],
+    },
     {
       link: '/livestock',
       label: 'LiveStock',
@@ -70,7 +70,7 @@ export function getNavBarAgainstRole(currentRole: string | number) {
       {
         link: '/crops',
         label: 'Crops',
-        icon: MdGrass,
+        icon: IconCarrot,
         activeLinks: ['/crops'],
       },
       {

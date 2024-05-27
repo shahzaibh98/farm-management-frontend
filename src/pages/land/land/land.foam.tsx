@@ -11,27 +11,25 @@ import { useFormik } from 'formik';
 import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
-import { fetchData, postData, putData } from '../../api/api';
+import { fetchData, postData, putData } from '../../../api/api';
 import {
-  GlassCard,
   Modal,
   Notification,
   NumberInput,
   TextInput,
-} from '../../concave.agri/components';
-import GenericHeader from '../../layout/header.layout';
-import { inputStyle } from '../../theme/common.style';
+} from '../../../concave.agri/components';
+import GenericHeader from '../../../layout/header.layout';
+import { inputStyle } from '../../../theme/common.style';
 
 // Importing custom components from the 'concave.agri' project
-import { AreaUnitEn } from '@agri/shared-types';
 import { IconMap } from '@tabler/icons-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Text } from '../../concave.agri/components';
-import { initialNotification } from '../../utils/common/constant.objects';
+import { Text } from '../../../concave.agri/components';
+import { initialNotification } from '../../../utils/common/constant.objects';
 import {
   numberInputValue,
   organizeDropDownData,
-} from '../../utils/common/function';
+} from '../../../utils/common/function';
 import {
   getDistricts,
   getDivisions,
@@ -39,7 +37,7 @@ import {
   handleDistrict,
   handleDivision,
   handleTehsil,
-} from '../../utils/common/location.Helper';
+} from '../../../utils/common/location.Helper';
 import { initialMapModalInfo } from './initial.values';
 import LocationSearch from './searchLocation';
 
@@ -670,7 +668,7 @@ const ManageLand = ({ type = 'Add' }) => {
                   'area',
                   isNaN(object?.totalArea) ? 0 : object?.totalArea
                 );
-                formik.setFieldValue('areaUnit', AreaUnitEn.ACRES);
+                formik.setFieldValue('areaUnit', '1');
                 setMapModalDetails(initialMapModalInfo);
               }}
               onClose={() => setMapModalDetails(initialMapModalInfo)}

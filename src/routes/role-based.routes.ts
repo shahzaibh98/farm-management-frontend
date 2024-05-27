@@ -11,8 +11,8 @@ import {
   taskRoutes,
 } from './route';
 import { cropAdminRoutes } from './route/cropAdmin.routes';
-import { cropAdminPlanningRoutes } from './route/cropAdminPlanning.routes';
 import { landRoutes } from './route/land.routes';
+import { cropAdminPlanningRoutes } from './route/cropAdminPlanning.routes';
 
 export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];

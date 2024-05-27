@@ -1,16 +1,19 @@
-import { Center, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
-
+import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 // Importing custom components from the 'concave.agri' project
 import {
   Notification,
   Paper,
+  Select,
   Table,
   Text,
 } from '../../../concave.agri/components';
+import { SearchButton } from '../../../concave.agri/components/searchbar';
+import ResetButton from '../../../concave.agri/components/searchbar/resetButton';
 
 // Importing a custom hook to get the screen size
+import useScreenSize from '../../../hooks/useScreenSize';
 
 // Importing custom components and layouts
 import { TableMenu } from '../../../layout';
@@ -18,36 +21,46 @@ import GenericHeader from '../../../layout/header.layout';
 import SearchComponent from '../../../layout/searchBar.layout';
 
 // Importing types and constants
+import { AreaUnitEn } from '@agri/shared-types';
+import { IconBorderCorners } from '@tabler/icons-react';
+import { MdOutlineLineStyle } from 'react-icons/md';
+import { TbReportSearch } from 'react-icons/tb';
 import { useSelector } from 'react-redux';
 import { deleteData, fetchData } from '../../../api/api';
+import { ReactComponent as FarmIcon } from '../../../assets/svg/farm-boundary.svg';
 import DeleteModel from '../../../layout/confimation.modal';
 import {
+  getLandColors,
   initialNotification,
   paginationInfoValue,
 } from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
-  getReferenceName,
   isEmpty,
+  organizeDropDownData,
   removeEmptyValueFilters,
 } from '../../../utils/common/function';
-import { ReactComponent as FarmIcon } from '../../../assets/svg/farm-boundary.svg';
 import {
   SearchFilter,
   initialMapModalInfo,
   initialSearchValues,
 } from './initial.values';
-import LocationSearch from '../land/searchLocation';
+import LocationSearch from './searchLocation';
 
-const BedsView = () => {
+const LandView = () => {
   const initializeStateFromQueryParams = () => {
     // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') ?? initialSearchValues.searchValue;
+    const locationTypeId =
+      searchParams.get('locationTypeId') ?? initialSearchValues.locationTypeId;
+    const status = searchParams.get('status') ?? initialSearchValues.status;
 
     // Update state with extracted values
     return {
       searchValue,
+      locationTypeId,
+      status,
     };
   };
 
@@ -67,7 +80,7 @@ const BedsView = () => {
   /////////////////////////////////////////////////// */
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
-  const { id } = useParams(); // Getting the ID from URL params
+  const { isSmallScreen } = useScreenSize();
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
 
   /* /////////////////////////////////////////////////
@@ -102,6 +115,12 @@ const BedsView = () => {
 
   const navigate = useNavigate();
 
+  const { referenceData } = useSelector((state: any) => state?.referenceData);
+
+  const handleAddFarmAdmin = () => {
+    navigate('/lands/add');
+  };
+
   const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
 
   const [deleteInfo, setDeleteInfo] = useState({
@@ -109,6 +128,16 @@ const BedsView = () => {
     id: '',
     resourceName: '',
   });
+
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -125,17 +154,11 @@ const BedsView = () => {
         operator: 'eq',
         value: userInfo?.farmId?.toString(),
       },
-      {
-        field: 'landId',
-        operator: 'eq',
-        value: id,
-      },
-      { field: 'isBed', operator: 'eq', value: true },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    const fetchUrl = `bed?filter=${filterObject}`;
+    const fetchUrl = `land?filter=${filterObject}`;
 
     fetchData(fetchUrl)
       .then((response: any) => {
@@ -173,7 +196,14 @@ const BedsView = () => {
   const handleSetParams = () => {
     const newParams = new URLSearchParams(searchParams.toString());
     Object.entries(searchValues).forEach(([key, value]) => {
-      if (value) {
+      if (key === 'dateRange') {
+        if (value[0]) {
+          newParams.set('dateRangeStart', value[0].toISOString());
+        }
+        if (value[1]) {
+          newParams.set('dateRangeEnd', value[1].toISOString());
+        }
+      } else if (value) {
         newParams.set(key, value);
       }
     });
@@ -190,16 +220,20 @@ const BedsView = () => {
         value: searchValues.searchValue,
       },
       {
-        field: 'landId',
+        field: 'locationTypeId',
         operator: 'eq',
-        value: id,
+        value: searchValues?.locationTypeId,
       },
-      { field: 'isBed', operator: 'eq', value: true },
+      {
+        field: 'farmId',
+        operator: 'eq',
+        value: currentUser?.farmId,
+      },
     ]);
 
     const filterObject = JSON.stringify({ filter: filters });
 
-    const fetchUrl = `bed?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`;
+    const fetchUrl = `land?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`;
 
     fetchData(fetchUrl)
       .then((response: any) => {
@@ -282,11 +316,11 @@ const BedsView = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`bed/${id}`)
+    deleteData(`land/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
-          message: 'Bed is deleted successfully',
+          message: 'Land is deleted successfully',
           title: 'Successfully',
           isEnable: true,
         });
@@ -320,35 +354,21 @@ const BedsView = () => {
         ),
       },
       {
-        header: <div className="flex text-start">LENGTH</div>,
-        accessorKey: 'length',
+        header: <div className="flex text-start">TYPE</div>,
+        accessorKey: 'locationTypeId',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
         cell: (info: any) => {
           const rowData = info?.row?.original;
+          console.log('Roe Date', rowData?.locationType?.name);
           return (
             <div className="flex flex-row">
+              <IconBorderCorners
+                color={getLandColors(rowData?.locationType?.name ?? '')}
+              />
               <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.length}
-              </p>
-            </div>
-          );
-        },
-      },
-      {
-        header: <div className="flex text-start">WIDTH</div>,
-        accessorKey: 'width',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
-        cell: (info: any) => {
-          const rowData = info?.row?.original;
-
-          return (
-            <div className="flex flex-row">
-              <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.width}
+                {rowData?.locationType?.name}
               </p>
             </div>
           );
@@ -365,12 +385,29 @@ const BedsView = () => {
           return (
             <div className="flex">
               <p className="text-sm lg:text-base text-center">
-                {`${Number(rowInfo?.area) > 0.01 ? Number(rowInfo?.area).toFixed(2) + ' ' + getReferenceName('areaUnit', rowInfo?.areaUnitId) : Number(rowInfo?.area) === 0 ? '' : 'Less than 0.01'} `}
+                {`${Number(rowInfo?.convertedArea) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.convertedArea).toFixed(2)}  ${AreaUnitEn.ACRES}`}
               </p>
             </div>
           );
         },
       },
+      {
+        header: <div className="flex text-start">SOIL TYPE</div>,
+        accessorKey: 'soilType',
+        size: 50, //starting column size
+        minSize: 50, //enforced during column resizing
+        maxSize: 200, //enforced during column resizing
+        cell: (info: { getValue: () => any }) => {
+          return (
+            <div className="flex">
+              <p className="text-sm lg:text-base text-center">
+                {info.getValue()?.name ?? ''}
+              </p>
+            </div>
+          );
+        },
+      },
+
       {
         header: 'BOUNDARIES',
         accessorKey: 'coordinates',
@@ -400,20 +437,37 @@ const BedsView = () => {
       },
       {
         header: '',
-        accessorKey: 'bedId',
+        accessorKey: 'landId',
         size: 55, //starting column size
         minSize: 55, //enforced during column resizing
         maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
-          const id = info?.row?.original?.bedId;
+          const id = info?.row?.original?.landId;
+          const rowData = info?.row?.original;
+          const additionalMenuItems = [
+            {
+              label: 'Beds',
+              icon: <MdOutlineLineStyle />,
+              onClick: () => navigate(`/beds/${id}`),
+            },
+            {
+              label: 'Soil Test',
+              icon: <TbReportSearch />,
+              onClick: () => navigate(`/soil-tests/${id}`),
+            },
+          ];
+          if (!rowData?.isBed) {
+            additionalMenuItems.splice(0, 1);
+          }
           return (
             <TableMenu
               id={id}
               onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
               }
-              onEditClick={() => navigate(`/beds/edit/${id}`)}
-              onViewClick={() => navigate(`/beds/view/${id}`)}
+              onEditClick={() => navigate(`/lands/edit/${id}`)}
+              onViewClick={() => navigate(`/lands/view/${id}`)}
+              additionalMenuItems={additionalMenuItems}
             />
           );
         },
@@ -435,10 +489,12 @@ const BedsView = () => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Beds"
-        breadcrumbsText="Manage Beds"
-        isAddOrUpdateButton={false}
-        secondButtonContent="View All Beds"
+        headerText="Farm Location"
+        breadcrumbsText="Manage Farm Location"
+        isAddOrUpdateButton
+        buttonContent="Add Location"
+        onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
+        secondButtonContent="View All Farms"
         isSecondButton={allLocationData && allLocationData?.length > 0}
         onSecondButtonClick={handleViewAllLocation}
       />
@@ -456,6 +512,29 @@ const BedsView = () => {
             handleSearchButtonClick={handleSearchButtonClick}
             handleResetButtonClick={handleResetButtonClick}
           />
+          <Grid className="mt-2">
+            <Grid.Col span={{ base: 12, md: 6, lg: 2.5 }}>
+              <Select
+                placeholder="Location Type"
+                data={[
+                  { label: 'All', value: 'All' },
+                  ...organizeDropDownData(referenceData?.locationType),
+                ]}
+                value={searchValues?.locationTypeId ?? ''}
+                onChange={value =>
+                  value && setValuesById({ locationTypeId: value })
+                }
+              />
+            </Grid.Col>
+            {isSmallScreen && (
+              <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+                <div className="flex flex-row justify-between">
+                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <ResetButton onResetButtonClick={handleResetButtonClick} />
+                </div>
+              </Grid.Col>
+            )}
+          </Grid>
           <Table
             isLoading={isLoading}
             data={tableData}
@@ -506,4 +585,4 @@ const BedsView = () => {
     </main>
   );
 };
-export default BedsView;
+export default LandView;
