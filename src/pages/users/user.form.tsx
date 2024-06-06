@@ -43,9 +43,8 @@ const UserForm = ({ type = 'Add' }) => {
 
   useEffect(() => {
     if (id)
-      fetchData(`users/farm-user/${id}`)
+      fetchData(`farm-user/${id}`)
         .then((data: any) => {
-          console.log('data', data);
           setUserData(data);
         })
         .catch(err => console.error(err));
@@ -202,7 +201,7 @@ const UserForm = ({ type = 'Add' }) => {
 
         Promise.all([
           putData(`/farm/${userData?.farm?.farmId}`, farmObject),
-          putData(`/users/farm-user/${userData?.farmUserId}`, farmUserObject),
+          putData(`/farm-user/${userData?.farmUserId}`, farmUserObject),
           putData(`/users/${userData?.userId}`, {
             ...rest,
             isActive: isActive === 'true',
@@ -252,7 +251,9 @@ const UserForm = ({ type = 'Add' }) => {
       )}
       <GenericHeader
         headerText={roleId === '0' ? 'Farms' : 'Users'}
-        breadcrumbsText={`${type} ${roleId === '0' ? 'Farms' : 'Users'} to System`} // Call handleAddFarmAdmin function when button is clicked
+        breadcrumbs={[
+          { title: `Manage ${roleId === '0' ? 'Farm' : 'User'}`, href: '' },
+        ]}
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} ${roleId === '0' ? 'Farm' : 'User'}`}

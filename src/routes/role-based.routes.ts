@@ -1,40 +1,40 @@
 import {
-  cropRoutes,
+  cropsRoutes,
   dashboardRoutes,
   farmAdminRoutes,
   financialRoutes,
   inventoryRoutes,
   livestockRoutes,
   manageUsersRoutes,
+  plantingRoutes,
   profileRoutes,
   publicRoutes,
   taskRoutes,
 } from './route';
-import { cropAdminRoutes } from './route/cropAdmin.routes';
+
 import { landRoutes } from './route/land.routes';
-import { cropAdminPlanningRoutes } from './route/cropAdminPlanning.routes';
 
 export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];
 
   const roleRoutesMapping: any = {
-    0: [...farmAdminRoutes, ...cropAdminRoutes, ...cropAdminPlanningRoutes],
+    0: [...farmAdminRoutes, ...cropsRoutes],
     1: [
       ...taskRoutes,
-      ...cropRoutes,
+      ...plantingRoutes,
       ...landRoutes,
       ...livestockRoutes,
       ...financialRoutes,
       ...inventoryRoutes,
       ...manageUsersRoutes,
     ],
-    2: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    3: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    4: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    5: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    6: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    7: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
-    8: [...taskRoutes, ...cropRoutes, ...livestockRoutes],
+    2: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    3: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    4: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    5: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    6: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    7: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
+    8: [...taskRoutes, ...plantingRoutes, ...livestockRoutes],
   };
 
   const currentRoutes = roleRoutesMapping[currentRole?.toString()] || [];

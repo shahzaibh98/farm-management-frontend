@@ -37,12 +37,14 @@ import {
   extractPageInfo,
   formatTimestamp,
   getDateRange,
+  handleSetParams,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
 import MyCalendar from '../calendar/calendar';
 import { initialSearchValues } from './initial.values';
 import { TaskForm } from './task.form';
 import { TaskStatus } from '@agri/shared-types';
+import { handlePaginationValue } from '../../utils/common/pagination.Helper';
 
 const TaskView = () => {
   const initializeStateFromQueryParams = () => {
@@ -140,8 +142,11 @@ const TaskView = () => {
   const handleAddTask = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
-    initializeStateFromQueryParams();
-    initialPaginationFromQueryParams();
+    const initialQueryParam = initializeStateFromQueryParams();
+    const initialPagination = initialPaginationFromQueryParams();
+    setSearchValues(initialQueryParam);
+    setPaginationInfo(initialPagination);
+    setResetTable(!resetTable);
   }, [searchParams]);
 
   const { isSystemAdmin, currentRole } = useSelector(
@@ -156,7 +161,7 @@ const TaskView = () => {
 
   useEffect(() => {
     fetchData(
-      `users/farm-users?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
+      `farm-user?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
     )
       .then((response: any) => {
         console.log('Response', response);
@@ -195,23 +200,6 @@ const TaskView = () => {
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
     }));
-  };
-
-  const handleSetParams = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (key === 'dateRange') {
-        if (value[0]) {
-          newParams.set('dateRangeStart', value[0].toISOString());
-        }
-        if (value[1]) {
-          newParams.set('dateRangeEnd', value[1].toISOString());
-        }
-      } else if (value) {
-        newParams.set(key, value);
-      }
-    });
-    setSearchParams(newParams);
   };
 
   const handleFetchDataByFilter = () => {
@@ -287,52 +275,25 @@ const TaskView = () => {
   };
 
   const handleSearchButtonClick = () => {
-    handleSetParams();
+    handleSetParams(
+      searchParams,
+      searchValues,
+      initialSearchValues,
+      setSearchParams
+    );
     handleFetchDataByFilter();
   };
 
   const handleNotificationClose = () => setNotification(initialNotification);
-  const handlePagination = (actionType: string, value?: any) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    const currentPage = paginationInfo.currentPage;
-
-    if (actionType === 'next') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage + 1).toString());
-    } else if (actionType === 'previous') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto' && value !== currentPage) {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: value,
-      }));
-      value < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', value);
-    } else if (actionType === 'rowPerPage') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        rowPerPage: value,
-      }));
-      if (value === '10' || value === '50' || value === '100') {
-        newParams.set('rowPerPage', value);
-      } else {
-        newParams.delete('rowPerPage');
-      }
-    }
-    setSearchParams(newParams);
-  };
+  const handlePagination = (actionType: string, value?: any) =>
+    handlePaginationValue(
+      actionType,
+      value,
+      searchParams,
+      paginationInfo,
+      setPaginationInfo,
+      setSearchParams
+    );
 
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
@@ -370,12 +331,20 @@ const TaskView = () => {
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [
-    resetTable,
-    paginationInfo?.currentPage,
-    paginationInfo?.rowPerPage,
-    activeTab,
-  ]);
+  }, [resetTable, activeTab]);
+
+  useEffect(() => {
+    const newSearchValues = initializeStateFromQueryParams();
+    const newPaginationInfo = initialPaginationFromQueryParams();
+
+    if (JSON.stringify(newSearchValues) !== JSON.stringify(searchValues)) {
+      setSearchValues(newSearchValues);
+    }
+
+    if (JSON.stringify(newPaginationInfo) !== JSON.stringify(paginationInfo)) {
+      setPaginationInfo(newPaginationInfo);
+    }
+  }, [searchParams]);
 
   const columns = useMemo(
     () => [
@@ -511,7 +480,7 @@ const TaskView = () => {
           placeholder="Search by title..."
           searchValue={searchValues.searchValue}
           setValuesById={setValuesById}
-          handleSearchButtonClick={handleSearchButtonClick}
+          handleSearchButtonClick={() => handlePagination('goto', 1)}
           handleResetButtonClick={handleResetButtonClick}
         />
         <Grid className="mt-2">
@@ -600,7 +569,7 @@ const TaskView = () => {
       )}
       <GenericHeader
         headerText="Task"
-        breadcrumbsText="Manage Task"
+        breadcrumbs={[{ title: 'Manage Task', href: '' }]}
         isAddOrUpdateButton
         buttonContent="Add Task"
         onButtonClick={handleAddTask} // Call handleAddTask function when button is clicked

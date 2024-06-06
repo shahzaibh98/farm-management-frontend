@@ -1,5 +1,4 @@
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import store from '../../redux';
 
 export function extractFirstWord(url: string): string | null {
@@ -39,6 +38,7 @@ export function removeEmptyValueFilters(filters: any[]) {
   return filters.filter(
     filter =>
       filter.value !== undefined &&
+      filter.value !== null &&
       filter.value !== '' &&
       filter.value !== 'All'
   );
@@ -132,6 +132,9 @@ export function extractPageInfo(
 }
 
 export function formatTimestamp(timestamp: string | number | Date) {
+  if (!timestamp) {
+    return '';
+  }
   const date = new Date(timestamp);
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const months = [
@@ -283,3 +286,94 @@ export const getReferenceName = (objectKey: string, findingValue: string) => {
     )?.name ?? ''
   );
 };
+
+export function capitalizeFirstLetter(inputString: string) {
+  if (!inputString) return inputString; // Handle empty string or null input
+  return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+}
+
+export function capitalizeEveryWord(
+  sentence: string | undefined | null
+): string {
+  if (!sentence) return '';
+
+  return sentence
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+export const handleSetParams = (
+  searchParams: URLSearchParams,
+  searchValues: { [key: string]: any },
+  initialSearchValues: { [key: string]: any },
+  setSearchParams: (params: URLSearchParams) => void
+) => {
+  // Check if searchParams is defined and is an instance of URLSearchParams
+  if (!(searchParams instanceof URLSearchParams)) {
+    console.error(
+      'searchParams is not defined or not a URLSearchParams instance'
+    );
+    return;
+  }
+
+  // Check if searchValues is defined and is an object
+  if (typeof searchValues !== 'object' || searchValues === null) {
+    console.error('searchValues is not defined or not an object');
+    return;
+  }
+
+  // Clone the current searchParams
+  const newParams = new URLSearchParams(searchParams.toString());
+
+  Object.entries(searchValues).forEach(([key, value]) => {
+    if (key === 'dateRange' && Array.isArray(value)) {
+      const [start, end] = value;
+      if (start) {
+        newParams.set('dateRangeStart', start.toISOString());
+      } else {
+        newParams.delete('dateRangeStart');
+      }
+      if (end) {
+        newParams.set('dateRangeEnd', end.toISOString());
+      } else {
+        newParams.delete('dateRangeEnd');
+      }
+    } else if (value !== null && value !== undefined && value !== '') {
+      // Check if the value differs from the initial value in searchParams
+      if (value !== initialSearchValues[key]) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key); // Remove the parameter if it matches the initial value
+      }
+    }
+  });
+
+  // Ensure newParams has any valid changes before setting
+  if (newParams.toString() !== searchParams.toString()) {
+    setSearchParams(newParams);
+  }
+};
+
+function getSafeValue(value: number | null | undefined) {
+  return value !== null && value !== undefined && !isNaN(value) ? value : 0;
+}
+
+export function calculateTotalCost(avgUnit: any, avgCost: any) {
+  const unit = getSafeValue(avgUnit);
+  const cost = getSafeValue(avgCost);
+
+  return unit * cost === 0 ? undefined : unit * cost;
+}
+
+export function cleanObject(obj: any) {
+  // Iterate over the properties of the object
+  for (const key in obj) {
+    // Check if the property value is null, undefined, or an empty string
+    if (obj[key] === null || obj[key] === undefined || obj[key] === '') {
+      // If true, delete the property from the object
+      delete obj[key];
+    }
+  }
+  return obj;
+}

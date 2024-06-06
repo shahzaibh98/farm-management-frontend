@@ -1,4 +1,4 @@
-import store from '../../redux';
+import store from '../../../redux';
 
 export const initialSearchValues = {
   searchValue: '',
@@ -57,8 +57,6 @@ export const buildFilters = (searchValues: {
   }
   return filters;
 };
-
-import { LandStatus, LandType } from '@agri/shared-types';
 
 export interface SearchFilter {
   searchValue: string;

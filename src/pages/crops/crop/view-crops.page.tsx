@@ -2,36 +2,39 @@ import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI c
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
-import { SearchButton } from '../../concave.agri/components/searchbar';
-import ResetButton from '../../concave.agri/components/searchbar/resetButton';
+import { SearchButton } from '../../../concave.agri/components/searchbar';
+import ResetButton from '../../../concave.agri/components/searchbar/resetButton';
 
 // Importing a custom hook to get the screen size
-import useScreenSize from '../../hooks/useScreenSize';
+import useScreenSize from '../../../hooks/useScreenSize';
 
 // Importing custom components and layouts
-import { TableMenu } from '../../layout';
-import GenericHeader from '../../layout/header.layout';
-import SearchComponent from '../../layout/searchBar.layout';
+import { TableMenu } from '../../../layout';
+import GenericHeader from '../../../layout/header.layout';
+import SearchComponent from '../../../layout/searchBar.layout';
 
 // Importing types and constants
 import { useSelector } from 'react-redux';
-import { deleteData, fetchData } from '../../api/api';
+import { deleteData, fetchData } from '../../../api/api';
 import {
   Notification,
   Paper,
   Select,
   Table,
   Text,
-} from '../../concave.agri/components';
+} from '../../../concave.agri/components';
 import {
   initialNotification,
   paginationInfoValue,
-} from '../../utils/common/constant.objects';
+} from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
+  handleSetParams,
   removeEmptyValueFilters,
-} from '../../utils/common/function';
+} from '../../../utils/common/function';
 import { initialSearchValues } from './initial.values';
+import { MdOutlineLineStyle } from 'react-icons/md';
+import { handlePaginationValue } from '../../../utils/common/pagination.Helper';
 
 const ManageCrops = ({
   pageLabel,
@@ -43,13 +46,11 @@ const ManageCrops = ({
   routeName: string;
 }) => {
   const initializeStateFromQueryParams = () => {
-    // Extract values from searchParams
     const searchValue =
       searchParams.get('searchValue') ?? initialSearchValues.searchValue;
     const category =
       searchParams.get('category') ?? initialSearchValues.category;
 
-    // Update state with extracted values
     return {
       searchValue,
       category,
@@ -59,7 +60,6 @@ const ManageCrops = ({
   const initialPaginationFromQueryParams = () => {
     const rowPerPage =
       searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
-
     const currentPage = Number(
       searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
@@ -87,17 +87,12 @@ const ManageCrops = ({
 
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
-
-  // State for pagination information
   const [paginationInfo, setPaginationInfo] = useState(
     initialPaginationFromQueryParams()
   );
-
-  // State for search values
   const [searchValues, setSearchValues] = useState(
     initializeStateFromQueryParams()
   );
-
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
 
@@ -114,20 +109,10 @@ const ManageCrops = ({
   const navigate = useNavigate();
 
   const setValuesById = (valuesById: any) =>
-    setSearchValues(prevFormValues => ({
+    setSearchValues((prevFormValues: any) => ({
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
     }));
-
-  const handleSetParams = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (value) {
-        newParams.set(key, value);
-      }
-    });
-    newParams && setSearchParams(newParams);
-  };
 
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
@@ -168,51 +153,24 @@ const ManageCrops = ({
   const handleNotificationClose = () => setNotification(initialNotification);
 
   const handleSearchButtonClick = () => {
-    handleSetParams();
+    handleSetParams(
+      searchParams,
+      searchValues,
+      initialSearchValues,
+      setSearchParams
+    );
     handleFetchDataByFilter();
   };
 
-  const handlePagination = (actionType: string, value?: any) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    const currentPage = paginationInfo.currentPage;
-
-    if (actionType === 'next') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage + 1).toString());
-    } else if (actionType === 'previous') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto' && value !== currentPage) {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: value,
-      }));
-      value < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', value);
-    } else if (actionType === 'rowPerPage') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        rowPerPage: value,
-      }));
-      if (value === '10' || value === '50' || value === '100') {
-        newParams.set('rowPerPage', value);
-      } else {
-        newParams.delete('rowPerPage');
-      }
-    }
-    setSearchParams(newParams);
-  };
+  const handlePagination = (actionType: string, value?: any) =>
+    handlePaginationValue(
+      actionType,
+      value,
+      searchParams,
+      paginationInfo,
+      setPaginationInfo,
+      setSearchParams
+    );
 
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
@@ -247,6 +205,10 @@ const ManageCrops = ({
       .finally(() => setIsLoading(false));
   };
 
+  const handleViewClick = (id: string) => navigate(`/${routeName}/view/${id}`);
+
+  const handleEditClick = (id: string) => navigate(`/${routeName}/edit/${id}`);
+
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
@@ -256,12 +218,27 @@ const ManageCrops = ({
     handleSearchButtonClick();
   }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
 
+  // Effect to update state when searchParams change
+  useEffect(() => {
+    const newSearchValues = initializeStateFromQueryParams();
+
+    const newPaginationInfo = initialPaginationFromQueryParams();
+
+    if (JSON.stringify(newSearchValues) !== JSON.stringify(searchValues)) {
+      setSearchValues(newSearchValues);
+    }
+
+    if (JSON.stringify(newPaginationInfo) !== JSON.stringify(paginationInfo)) {
+      setPaginationInfo(newPaginationInfo);
+    }
+  }, [searchParams]);
+
   // Function to set values based on identifiers
 
   const columns = useMemo(() => {
     return [
       {
-        header: <div className="flex text-start ml-2">CROP NAME</div>,
+        header: <div className="flex text-start ml-2 font-sans">Crop Name</div>,
         accessorKey: 'image',
         size: 50,
         minSize: 50,
@@ -270,7 +247,10 @@ const ManageCrops = ({
           const cropInfo = info?.row?.original;
           return (
             <div className="flex ml-2">
-              <p className="text-sm lg:text-base text-center">
+              <p
+                className="text-sm lg:text-base text-center"
+                onClick={() => handleViewClick(cropInfo.refFarmCropId)}
+              >
                 <div className="flex items-center">
                   <img
                     src={cropInfo.image}
@@ -339,8 +319,15 @@ const ManageCrops = ({
             <TableMenu
               id={id}
               onDeleteClick={handleDeleteById}
-              onViewClick={id => navigate(`/${routeName}/view/${id}`)}
-              onEditClick={() => navigate(`/${routeName}/edit/${id}`)}
+              onViewClick={handleViewClick}
+              onEditClick={handleEditClick}
+              additionalMenuItems={[
+                {
+                  label: 'Crop Plan',
+                  icon: <MdOutlineLineStyle />,
+                  onClick: () => navigate(`/crops/${id}/planning`),
+                },
+              ]}
             />
           );
         },
@@ -362,7 +349,7 @@ const ManageCrops = ({
       )}
       <GenericHeader
         headerText={pageLabel}
-        breadcrumbsText={`Manage ${pageLabel}`}
+        breadcrumbs={[{ title: `Manage ${pageLabel}`, href: '' }]}
         isAddOrUpdateButton
         buttonContent={`Add ${pageLabel}`}
         onButtonClick={() => navigate(`/${routeName}/add`)} // Call handleAddFarmAdmin function when button is clicked
@@ -379,7 +366,9 @@ const ManageCrops = ({
             placeholder="Search by name..."
             searchValue={searchValues.searchValue}
             setValuesById={setValuesById}
-            handleSearchButtonClick={handleSearchButtonClick}
+            handleSearchButtonClick={() => {
+              handlePagination('goto', 1);
+            }}
             handleResetButtonClick={handleResetButtonClick}
           />
 
@@ -403,7 +392,11 @@ const ManageCrops = ({
             {isSmallScreen && (
               <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
                 <div className="flex flex-row justify-between">
-                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <SearchButton
+                    onSearchButtonClick={() => {
+                      handlePagination('goto', 1);
+                    }}
+                  />
                   <ResetButton onResetButtonClick={handleResetButtonClick} />
                 </div>
               </Grid.Col>

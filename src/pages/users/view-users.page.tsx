@@ -35,10 +35,11 @@ import {
 } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
+  handleSetParams,
   removeEmptyValueFilters,
 } from '../../utils/common/function';
 import { buildFilters, initialSearchValues } from './initial.values';
-import { isActive } from '@tiptap/react';
+import { handlePaginationValue } from '../../utils/common/pagination.Helper';
 
 const ManageUser = () => {
   const initializeStateFromQueryParams = () => {
@@ -53,7 +54,6 @@ const ManageUser = () => {
       status,
     };
   };
-
   const initialPaginationFromQueryParams = () => {
     const rowPerPage =
       searchParams.get('rowPerPage') ?? paginationInfoValue.rowPerPage;
@@ -62,6 +62,7 @@ const ManageUser = () => {
       searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
+
     return { ...paginationInfoValue, rowPerPage, currentPage };
   };
 
@@ -101,7 +102,6 @@ const ManageUser = () => {
   const [searchValues, setSearchValues] = useState(
     initializeStateFromQueryParams()
   );
-
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
 
@@ -127,16 +127,6 @@ const ManageUser = () => {
       ...valuesById, // Merge the new values with the existing state
     }));
 
-  const handleSetParams = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (value) {
-        newParams.set(key, value);
-      }
-    });
-    newParams && setSearchParams(newParams);
-  };
-
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
 
@@ -145,7 +135,7 @@ const ManageUser = () => {
     const filterObject = JSON.stringify({ filter: filters });
 
     fetchData(
-      `users${'/farm-users'}?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
+      `farm-user?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
     )
       .then((response: any) => {
         setTableData(response.data);
@@ -164,7 +154,12 @@ const ManageUser = () => {
   const handleNotificationClose = () => setNotification(initialNotification);
 
   const handleSearchButtonClick = () => {
-    handleSetParams();
+    handleSetParams(
+      searchParams,
+      searchValues,
+      initialSearchValues,
+      setSearchParams
+    );
     handleFetchDataByFilter();
   };
 
@@ -179,47 +174,15 @@ const ManageUser = () => {
     }
   };
 
-  const handlePagination = (actionType: string, value?: any) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    const currentPage = paginationInfo.currentPage;
-
-    if (actionType === 'next') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage + 1).toString());
-    } else if (actionType === 'previous') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto' && value !== currentPage) {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: value,
-      }));
-      value < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', value);
-    } else if (actionType === 'rowPerPage') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        rowPerPage: value,
-      }));
-      if (value === '10' || value === '50' || value === '100') {
-        newParams.set('rowPerPage', value);
-      } else {
-        newParams.delete('rowPerPage');
-      }
-    }
-    setSearchParams(newParams);
-  };
+  const handlePagination = (actionType: string, value?: any) =>
+    handlePaginationValue(
+      actionType,
+      value,
+      searchParams,
+      paginationInfo,
+      setPaginationInfo,
+      setSearchParams
+    );
 
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
@@ -275,6 +238,11 @@ const ManageUser = () => {
       .finally(() => setIsLoading(false));
   };
 
+  const handleEditClick = (id: string) =>
+    navigate(`/manage-${roleId === '0' ? 'farm' : 'users'}/edit/${id}`);
+  const handleViewClick = (id: string) =>
+    navigate(`/manage-${roleId === '0' ? 'farm' : 'users'}/view/${id}`);
+
   /* /////////////////////////////////////////////////
                       useEffect
   /////////////////////////////////////////////////// */
@@ -283,6 +251,19 @@ const ManageUser = () => {
   useEffect(() => {
     handleSearchButtonClick();
   }, [resetTable, paginationInfo?.currentPage, paginationInfo?.rowPerPage]);
+
+  useEffect(() => {
+    const newSearchValues = initializeStateFromQueryParams();
+    const newPaginationInfo = initialPaginationFromQueryParams();
+
+    if (JSON.stringify(newSearchValues) !== JSON.stringify(searchValues)) {
+      setSearchValues(newSearchValues);
+    }
+
+    if (JSON.stringify(newPaginationInfo) !== JSON.stringify(paginationInfo)) {
+      setPaginationInfo(newPaginationInfo);
+    }
+  }, [searchParams]);
 
   // Function to set values based on identifiers
 
@@ -295,7 +276,10 @@ const ManageUser = () => {
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
-          <div className="flex items-center justify-center">
+          <div
+            className="flex ml-2"
+            onClick={() => handleViewClick(rowObject?.farmUserId)}
+          >
             <p className="text-sm lg:text-base text-center">
               {rowObject?.systemUser?.name}
             </p>
@@ -374,16 +358,8 @@ const ManageUser = () => {
           <TableMenu
             id={id}
             onDeleteClick={handleDeleteById}
-            onViewClick={id =>
-              navigate(
-                `/manage-${roleId === '0' ? 'farm' : 'users'}/view/${id}`
-              )
-            }
-            onEditClick={() =>
-              navigate(
-                `/manage-${roleId === '0' ? 'farm' : 'users'}/edit/${id}`
-              )
-            }
+            onViewClick={handleViewClick}
+            onEditClick={handleEditClick}
             additionalMenuItems={[
               {
                 label:
@@ -476,7 +452,9 @@ const ManageUser = () => {
       )}
       <GenericHeader
         headerText={roleId === '0' ? 'Farm' : 'User'}
-        breadcrumbsText={`Manage ${roleId === '0' ? 'Farm' : 'User'}`}
+        breadcrumbs={[
+          { title: `Manage ${roleId === '0' ? 'Farm' : 'User'}`, href: '' },
+        ]}
         isAddOrUpdateButton
         buttonContent={`Add ${roleId === '0' ? 'Farm' : 'User'}`}
         onButtonClick={handleAddFarmAdmin} // Call handleAddFarmAdmin function when button is clicked
@@ -493,7 +471,7 @@ const ManageUser = () => {
             placeholder="Search by email address..."
             searchValue={searchValues.searchValue}
             setValuesById={setValuesById}
-            handleSearchButtonClick={handleSearchButtonClick}
+            handleSearchButtonClick={() => handlePagination('goto', 1)}
             handleResetButtonClick={handleResetButtonClick}
           />
           <Grid className="mt-2">

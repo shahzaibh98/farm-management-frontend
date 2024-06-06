@@ -282,7 +282,7 @@ const Table = ({
                 Pages{' '}
               </Text>
               <Text size="lg" c={theme.colors.darkColors[0]} weight={600}>
-                <strong>{totalRecords === 0 ? 0 : currentPage}</strong>
+                <strong>{currentPage}</strong>
               </Text>
               <Text size="lg" c={theme.colors.darkColors[0]}>
                 {' '}

@@ -2,7 +2,7 @@ export interface SearchFilter {
   searchValue: string;
 }
 
-export const initialSearchValues: SearchFilter = {
+export const initialSearchValues: any = {
   searchValue: '',
 };
 

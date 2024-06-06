@@ -1,10 +1,9 @@
 export interface SearchFilter {
   searchValue: string;
-  type: string;
-  status: string;
+  category: string;
 }
 
-export const initialSearchValues = {
+export const initialSearchValues: any = {
   searchValue: '',
   category: 'All',
 };

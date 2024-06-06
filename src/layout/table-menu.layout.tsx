@@ -1,13 +1,6 @@
 import { Menu, rem } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
-import {
-  JSXElementConstructor,
-  Key,
-  MouseEventHandler,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-} from 'react';
+import { Key } from 'react';
 import { CgOptions } from 'react-icons/cg';
 import { CiEdit } from 'react-icons/ci';
 import { VscOpenPreview } from 'react-icons/vsc';

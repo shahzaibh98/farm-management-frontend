@@ -4,7 +4,7 @@ export interface SearchFilter {
   status: string;
 }
 
-export const initialSearchValues: SearchFilter = {
+export const initialSearchValues: any = {
   searchValue: '',
   locationTypeId: 'All',
   status: 'All',

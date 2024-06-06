@@ -1,4 +1,5 @@
 import { NumberInput as MantineNumberInput } from '@mantine/core';
+import { capitalizeEveryWord } from '../../../utils/common/function';
 
 // Define the props interface with optional properties
 interface NumberInputProps {
@@ -19,8 +20,8 @@ const NumberInput = ({
 }: NumberInputProps) => {
   return (
     <MantineNumberInput
-      label={label}
-      placeholder={placeholder}
+      label={capitalizeEveryWord(label)}
+      placeholder={capitalizeEveryWord(placeholder)}
       value={value}
       onChange={onChange}
       {...rest}

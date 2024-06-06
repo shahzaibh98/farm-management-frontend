@@ -103,6 +103,7 @@ module.exports = {
         lightestGrey2: "rgb(240, 240, 240)",
         lightestGrey3: "rgb(245, 245, 245)"
       },
+      'white': { 100: '#FFFFFF' },
       'black': {
         100: 'rgba(0, 0, 0, 0.5)'
       },

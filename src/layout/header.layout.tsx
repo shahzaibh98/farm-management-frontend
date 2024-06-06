@@ -1,9 +1,13 @@
 // Import necessary components and hooks from Mantine and other libraries
-import { useMantineTheme } from '@mantine/core';
+import { Anchor, Breadcrumbs, useMantineTheme } from '@mantine/core';
 import { IoChevronBackOutline } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button, Text } from '../concave.agri/components';
-import { IconBrandTwitter } from '@tabler/icons-react';
+
+interface IBreadCrumbs {
+  title: string;
+  href: string;
+}
 
 // Define the Props interface for the component
 interface Props {
@@ -12,7 +16,7 @@ interface Props {
   secondButtonContent?: string;
   onSecondButtonClick?: () => void;
   headerText: string;
-  breadcrumbsText: string;
+  breadcrumbs: IBreadCrumbs[];
   isAddOrUpdateButton?: boolean;
   isAddOrUpdateButtonLoading?: boolean;
   buttonContent?: string;
@@ -27,7 +31,7 @@ const GenericHeader: React.FC<Props> = ({
   secondButtonContent = '',
   onSecondButtonClick = () => {},
   headerText,
-  breadcrumbsText,
+  breadcrumbs,
   isAddOrUpdateButton = false,
   buttonContent = 'Add',
   onButtonClick = () => {},
@@ -36,6 +40,27 @@ const GenericHeader: React.FC<Props> = ({
   const navigate = useNavigate();
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
+
+  const items = breadcrumbs.map((item, index) => (
+    <div key={index} onClick={() => item.href !== '' && navigate(item.href)}>
+      <Text
+        key={index}
+        className={`"text-skin-caption ${item.href !== '' ? 'hover:underline hover:underline-offset-4 hover:cursor-pointer' : ''}`}
+        tt="capitalize"
+        fs="italic"
+        style={theme => ({
+          color: theme.colors.darkColors[3],
+          lineHeight: theme.other.lineHeights.sm,
+          fontSize: theme.fontSizes.sm,
+          [`@media (max-width: ${theme.breakpoints.md}px)`]: {
+            fontSize: theme.fontSizes.xs,
+          },
+        })}
+      >
+        {item.title}
+      </Text>
+    </div>
+  ));
 
   // Render the component's layout
   return (
@@ -56,21 +81,7 @@ const GenericHeader: React.FC<Props> = ({
         {/* Header text and breadcrumbs */}
         <div className="ml-4">
           <p className="font-mono text-2xl font-semibold">{headerText}</p>
-          <Text
-            className="text-skin-caption"
-            tt="capitalize"
-            fs="italic"
-            style={theme => ({
-              color: theme.colors.darkColors[3],
-              lineHeight: theme.other.lineHeights.sm,
-              fontSize: theme.fontSizes.sm,
-              [`@media (max-width: ${theme.breakpoints.md}px)`]: {
-                fontSize: theme.fontSizes.xs,
-              },
-            })}
-          >
-            {breadcrumbsText}
-          </Text>
+          <Breadcrumbs>{items}</Breadcrumbs>
         </div>
       </div>
       {/* Right section with add or update button */}

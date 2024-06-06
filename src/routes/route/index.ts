@@ -1,23 +1,26 @@
-import { livestockRoutes } from './livestock.routes';
-import { taskRoutes } from './task.routes';
-import { cropRoutes } from './crop.routes';
-import { publicRoutes } from './public.routes';
-import { financialRoutes } from './finanical.routes';
+import { cropsRoutes, plantingRoutes } from './crops.routes';
 import { dashboardRoutes } from './dashboard.routes';
+import { financialRoutes } from './finanical.routes';
 import { inventoryRoutes } from './inventory.routes';
-import { profileRoutes } from './profile.routes';
-import { farmAdminRoutes } from './farmAdmin.routes';
-import { manageUsersRoutes } from './users.route';
-
-export {
-  publicRoutes,
-  dashboardRoutes,
-  livestockRoutes,
-  taskRoutes,
-  cropRoutes,
-  financialRoutes,
-  inventoryRoutes,
-  profileRoutes,
+import { livestockRoutes } from './livestock.routes';
+import { publicRoutes } from './public.routes';
+import { taskRoutes } from './task.routes';
+import {
   farmAdminRoutes,
   manageUsersRoutes,
+  profileRoutes,
+} from './users.route';
+
+export {
+  cropsRoutes,
+  dashboardRoutes,
+  farmAdminRoutes,
+  financialRoutes,
+  inventoryRoutes,
+  livestockRoutes,
+  manageUsersRoutes,
+  plantingRoutes,
+  profileRoutes,
+  publicRoutes,
+  taskRoutes,
 };

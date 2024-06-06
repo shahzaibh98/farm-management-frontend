@@ -1,4 +1,5 @@
 import { Select as MantineSelect } from '@mantine/core';
+import { capitalizeEveryWord } from '../../../utils/common/function';
 
 interface SelectProps {
   label?: string;
@@ -27,9 +28,9 @@ const Select = ({
 }: SelectProps) => {
   return (
     <MantineSelect
-      label={label}
+      label={capitalizeEveryWord(label)}
       description={description}
-      placeholder={placeholder}
+      placeholder={capitalizeEveryWord(placeholder)}
       data={data}
       value={value}
       onChange={(value, _option) => onChange(value)}

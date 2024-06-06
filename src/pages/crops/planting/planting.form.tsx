@@ -3,29 +3,34 @@ import { useFormik } from 'formik';
 import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import * as Yup from 'yup';
-import { fetchData, postData, putData } from '../../api/api';
+import { fetchData, postData, putData } from '../../../api/api';
 import {
   Notification,
   NumberInput,
   TextInput,
-} from '../../concave.agri/components';
-import GenericHeader from '../../layout/header.layout';
-import { inputStyle } from '../../theme/common.style';
+} from '../../../concave.agri/components';
+import GenericHeader from '../../../layout/header.layout';
+import { inputStyle } from '../../../theme/common.style';
 
 // Importing custom components from the 'concave.agri' project
 import { AreaUnitEn, LandStatus, LandType } from '@agri/shared-types';
 import { DateTimePicker } from '@mantine/dates';
 import { Country, State } from 'country-state-city';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Text } from '../../concave.agri/components';
-import { initialNotification } from '../../utils/common/constant.objects';
-import { initialMapModalInfo } from './initial.values';
+import { Text } from '../../../concave.agri/components';
+import { initialNotification } from '../../../utils/common/constant.objects';
 
-const ManageCrop = ({ type = 'Add' }) => {
+const ManagePlanting = ({
+  type = 'Add',
+  pageLabel,
+  apiEndPoint,
+}: {
+  type?: string;
+  pageLabel: string;
+  apiEndPoint: string;
+}) => {
   const theme = useMantineTheme();
   const { id } = useParams(); // Getting the ID from URL params
-
-  const [mapModalDetails, setMapModalDetails] = useState(initialMapModalInfo);
 
   const navigate = useNavigate();
   const [landData, setLandData] = useState<any>();
@@ -42,7 +47,7 @@ const ManageCrop = ({ type = 'Add' }) => {
 
   useEffect(() => {
     if (id)
-      fetchData(`land/${id}`)
+      fetchData(`${apiEndPoint}/${id}`)
         .then((data: any) => {
           setLandData(data);
           const getCountry = Country.getAllCountries()?.find(
@@ -107,7 +112,7 @@ const ManageCrop = ({ type = 'Add' }) => {
     onSubmit: values => {
       setIsLoading(true);
       if (type !== 'Update')
-        postData('/land', {
+        postData(`/${apiEndPoint}`, {
           ...values,
           estimatedCost: values.estimatedCost.toString(),
         }) // Send form data to the server
@@ -115,7 +120,7 @@ const ManageCrop = ({ type = 'Add' }) => {
             // Handle successful form submission
             setNotification({
               isSuccess: true,
-              message: 'Land created successfully',
+              message: `${pageLabel} created successfully`,
               title: 'Successfully',
               isEnable: true,
             });
@@ -137,7 +142,7 @@ const ManageCrop = ({ type = 'Add' }) => {
           });
       else {
         Promise.all([
-          putData(`/land/${id}`, {
+          putData(`/${apiEndPoint}/${id}`, {
             ...values,
             estimatedCost: values.estimatedCost.toString(),
           }),
@@ -185,11 +190,11 @@ const ManageCrop = ({ type = 'Add' }) => {
         </Notification>
       )}
       <GenericHeader
-        headerText="Crop"
-        breadcrumbsText="Manage Crop"
+        headerText={pageLabel}
+        breadcrumbs={[{ title: `Manage ${pageLabel}`, href: '' }]}
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
-        buttonContent={`${type} Crop`}
+        buttonContent={`${type} ${pageLabel}`}
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
       <Paper
@@ -243,14 +248,15 @@ const ManageCrop = ({ type = 'Add' }) => {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <label>Planting Date and Time</label>
               <DateTimePicker
+                label="Planting Date and Time"
                 placeholder="Planting start date and time"
                 withAsterisk
                 value={
                   formik?.values?.startDateTime &&
                   new Date(formik?.values?.startDateTime)
                 }
+                styles={inputStyle}
                 onChange={value => formik.setFieldValue('startDateTime', value)}
                 error={
                   !!(
@@ -335,10 +341,11 @@ const ManageCrop = ({ type = 'Add' }) => {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <label>Expected Harvesting Date and Time</label>
               <DateTimePicker
                 placeholder="expected start date and time"
+                label="expected end date and time"
                 withAsterisk
+                styles={inputStyle}
                 value={
                   formik?.values?.startDateTime &&
                   new Date(formik?.values?.startDateTime)
@@ -352,10 +359,11 @@ const ManageCrop = ({ type = 'Add' }) => {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <label>Actual Harvesting Date and Time</label>
               <DateTimePicker
+                label="Actual harvesting date and time"
                 placeholder="actual start date and time"
                 withAsterisk
+                styles={inputStyle}
                 value={
                   formik?.values?.startDateTime &&
                   new Date(formik?.values?.startDateTime)
@@ -447,7 +455,7 @@ const ManageCrop = ({ type = 'Add' }) => {
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <NumberInput
                 id="estimatedCost"
-                label="Iot Number"
+                label="Lot Number"
                 name="estimatedCost"
                 placeholder="Enter your iot number..."
                 value={formik.values?.estimatedCost ?? ''}
@@ -566,4 +574,4 @@ const ManageCrop = ({ type = 'Add' }) => {
   );
 };
 
-export default ManageCrop;
+export default ManagePlanting;

@@ -71,12 +71,7 @@ export function getNavBarAgainstRole(currentRole: string | number) {
         link: '/crops',
         label: 'Crops',
         icon: IconCarrot,
-        activeLinks: ['/crops'],
-      },
-      {
-        link: '/admin-crops-planning',
-        label: 'Crops Planning',
-        icon: GiPlantRoots,
+        activeLinks: ['/crops', '/planning'],
       },
     ],
     1: [

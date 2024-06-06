@@ -130,7 +130,7 @@ const UserProfile = () => {
 
       <GenericHeader
         headerText="Profile"
-        breadcrumbsText="My Profile"
+        breadcrumbs={[{ title: 'My Profile', href: '' }]}
         isAddOrUpdateButton
         buttonContent="Update Profile"
         onButtonClick={formik.handleSubmit}

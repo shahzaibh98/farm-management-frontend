@@ -7,21 +7,21 @@ import {
   SET_USER_INFO,
 } from '../constants/user';
 
-// Initialize userInfo from sessionStorage
-const userInfoString = sessionStorage.getItem('userInfo');
+// Initialize userInfo from localStorage
+const userInfoString = localStorage.getItem('userInfo');
 const userInfo = userInfoString ? JSON.parse(userInfoString) : null;
 
-const currentRoleString = sessionStorage.getItem('currentRole');
+const currentRoleString = localStorage.getItem('currentRole');
 const currentRole = currentRoleString ? JSON.parse(currentRoleString) : null;
 
 const initialState = {
   userInfo: userInfo,
   isAuthenticated: !!userInfo,
-  token: sessionStorage.getItem('token'),
-  refreshToken: sessionStorage.getItem('refreshToken'),
-  isSystemAdmin: sessionStorage.getItem('isSystemAdmin') === 'true',
+  token: localStorage.getItem('token'),
+  refreshToken: localStorage.getItem('refreshToken'),
+  isSystemAdmin: localStorage.getItem('isSystemAdmin') === 'true',
   currentRole:
-    sessionStorage.getItem('isSystemAdmin') === 'true' ? null : currentRole,
+    localStorage.getItem('isSystemAdmin') === 'true' ? null : currentRole,
 };
 
 const userInfoReducer = (state = initialState, action: any) => {
@@ -29,13 +29,13 @@ const userInfoReducer = (state = initialState, action: any) => {
     case SET_USER_INFO:
       if (action.payload) {
         const { userInfo, token, refreshToken } = action.payload;
-        sessionStorage.setItem('token', token);
-        sessionStorage.setItem('refreshToken', refreshToken);
-        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+        localStorage.setItem('token', token);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
         if (!action.payload.userInfo.isSystemAdmin) {
           {
-            sessionStorage.setItem(
+            localStorage.setItem(
               'currentRole',
               JSON.stringify({
                 currentFarmRole: userInfo.roles?.farms[0],
@@ -45,10 +45,10 @@ const userInfoReducer = (state = initialState, action: any) => {
                   : 'companies',
               })
             );
-            sessionStorage.setItem('isSystemAdmin', 'false');
+            localStorage.setItem('isSystemAdmin', 'false');
           }
         } else {
-          sessionStorage.setItem('isSystemAdmin', 'true');
+          localStorage.setItem('isSystemAdmin', 'true');
         }
 
         return action.payload.userInfo.isSystemAdmin
@@ -75,7 +75,7 @@ const userInfoReducer = (state = initialState, action: any) => {
               },
             };
       } else {
-        sessionStorage.clear();
+        localStorage.clear();
         return {
           ...state,
           userInfo: null,
@@ -87,7 +87,7 @@ const userInfoReducer = (state = initialState, action: any) => {
         };
       }
     case CLEAR_USER_INFO:
-      sessionStorage.clear();
+      localStorage.clear();
       return {
         ...state,
         userInfo: null,
@@ -99,7 +99,7 @@ const userInfoReducer = (state = initialState, action: any) => {
       };
 
     case REFRESH_ACCESS_TOKEN:
-      sessionStorage.setItem('token', action.payload.token);
+      localStorage.setItem('token', action.payload.token);
       return {
         ...state,
         token: action.payload.token,
@@ -107,7 +107,7 @@ const userInfoReducer = (state = initialState, action: any) => {
 
     // case SWITCH_ACCOUNT_ROLE:
     //   if (action.payload.roleMode === 'farms') {
-    //     sessionStorage.setItem(
+    //     localStorage.setItem(
     //       'currentFarmRole',
     //       action.payload.currentFarmRole
     //     );
@@ -117,7 +117,7 @@ const userInfoReducer = (state = initialState, action: any) => {
     //       roleMode: 'farms',
     //     };
     //   } else if (action.payload.roleMode === 'companies') {
-    //     sessionStorage.setItem(
+    //     localStorage.setItem(
     //       'currentCompanyRole',
     //       action.payload.currentCompanyRole
     //     );

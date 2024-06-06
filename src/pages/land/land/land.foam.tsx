@@ -240,7 +240,7 @@ const ManageLand = ({ type = 'Add' }) => {
       )}
       <GenericHeader
         headerText="Farm Location"
-        breadcrumbsText="Manage Farm Location"
+        breadcrumbs={[{ title: 'Manage Farm Location', href: '' }]}
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} Location`}

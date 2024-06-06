@@ -4,13 +4,13 @@ import {
   SET_REFERENCE_DATA,
 } from '../constants/reference';
 
-const locationDataString = sessionStorage.getItem('locationData');
+const locationDataString = localStorage.getItem('locationData');
 const locationData = locationDataString ? JSON.parse(locationDataString) : null;
 
-const cropDataString = sessionStorage.getItem('cropData');
+const cropDataString = localStorage.getItem('cropData');
 const cropData = cropDataString ? JSON.parse(cropDataString) : [];
 
-const referenceDataString = sessionStorage.getItem('referenceData');
+const referenceDataString = localStorage.getItem('referenceData');
 const referenceData = referenceDataString
   ? JSON.parse(referenceDataString)
   : null;
@@ -24,7 +24,7 @@ const initialState = {
 const referenceReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case SET_Location_Data:
-      sessionStorage.setItem(
+      localStorage.setItem(
         'locationData',
         JSON.stringify(action.payload.locationData)
       );
@@ -34,17 +34,14 @@ const referenceReducer = (state = initialState, action: any) => {
       };
 
     case SET_CROP_DATA:
-      sessionStorage.setItem(
-        'cropData',
-        JSON.stringify(action.payload.cropData)
-      );
+      localStorage.setItem('cropData', JSON.stringify(action.payload.cropData));
       return {
         ...state,
         cropData: action.payload.cropData,
       };
 
     case SET_REFERENCE_DATA:
-      sessionStorage.setItem(
+      localStorage.setItem(
         'referenceData',
         JSON.stringify(action.payload.referenceData)
       );

@@ -1,21 +1,36 @@
-import { Grid, Paper, Select, Title, useMantineTheme } from '@mantine/core';
+import {
+  Grid,
+  Group,
+  Paper,
+  Select,
+  Title,
+  rem,
+  useMantineTheme,
+} from '@mantine/core';
+import { DateTimePicker } from '@mantine/dates';
+import { Dropzone, FileRejection } from '@mantine/dropzone';
+import { IconFileDescription, IconUpload, IconX } from '@tabler/icons-react';
 import { useFormik } from 'formik';
-import { ReactNode, useEffect, useState } from 'react'; // Importing React hooks
+import { ReactNode, useEffect, useRef, useState } from 'react'; // Importing React hooks
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { fetchData, postData, putData } from '../../../api/api';
 import {
   Notification,
+  NumberInput,
   Text,
   TextInput,
 } from '../../../concave.agri/components';
-import { FileDropzone } from '../../../concave.agri/components/dropzone';
 import GenericHeader from '../../../layout/header.layout';
 import { inputStyle } from '../../../theme/common.style';
 import { initialNotification } from '../../../utils/common/constant.objects';
+import {
+  capitalizeFirstLetter,
+  organizeDropDownData,
+} from '../../../utils/common/function';
 
-const CropForm = ({
+const SoilTestForm = ({
   type = 'Add',
   pageLabel,
   apiEndPoint,
@@ -27,21 +42,76 @@ const CropForm = ({
   const theme = useMantineTheme();
   const { id } = useParams(); // Getting the ID from URL params
 
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleDrop = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setFile(acceptedFiles[0]);
+    }
+  };
+
+  const handleReject = (rejectedFiles: FileRejection[]) => {
+    setFile(null);
+  };
+
+  const renderPreview = () => {
+    if (!file) return null;
+
+    const fileType = file.type.split('/')[0];
+    if (fileType === 'image') {
+      return (
+        <img
+          src={URL.createObjectURL(file)}
+          alt="preview"
+          style={{ width: '100%', height: 'auto', marginTop: 16 }}
+        />
+      );
+    } else if (fileType === 'application' && file.type === 'application/pdf') {
+      return (
+        <object
+          data={URL.createObjectURL(file)}
+          type="application/pdf"
+          style={{ width: '100%', height: '500px', marginTop: 16 }}
+        >
+          <embed src={URL.createObjectURL(file)} type="application/pdf" />
+        </object>
+      );
+    } else {
+      return (
+        <div style={{ marginTop: 16 }}>
+          <Text size="sm">File: {file.name}</Text>
+          <Text size="sm">Type: {file.type}</Text>
+        </div>
+      );
+    }
+  };
+
   const navigate = useNavigate();
   const [cropData, setCropData] = useState<any>();
 
-  const { roleId, ...userInfo } = useSelector(
-    (state: any) => state?.userInfo?.userInfo
-  );
+  const { referenceData } = useSelector((state: any) => state?.referenceData);
 
   const [isLoading, setIsLoading] = useState(false);
+  const soilNutrientContentFields = [
+    'nitrogen',
+    'phosphorus',
+    'potassium',
+    'sulfur',
+    'zinc',
+    'iron',
+    'manganese',
+    'copper',
+    'boron',
+    'calcium',
+    'magnesium',
+  ];
 
   useEffect(() => {
-    if (id)
+    if (id && (type === 'Update' || type === 'View'))
       fetchData(`${apiEndPoint}/${id}`)
         .then((data: any) => setCropData(data))
         .catch(err => console.error(err));
-  }, [id]);
+  }, [apiEndPoint, id, type]);
 
   // State for notification
   const [notification, setNotification] = useState(initialNotification);
@@ -52,20 +122,31 @@ const CropForm = ({
       type === 'Update' || type === 'View'
         ? cropData
         : {
-            name: '',
-            category: '',
-            image: '',
-            noOfPlantings: '',
-            cropType: '',
-            startMethod: '',
-            plantSpacing: '',
-            rowSpacing: '',
-            farmId: userInfo?.farmId,
+            laboratoryName: '',
+            testSampleDate: null,
+            testReportDate: null,
+            soilTypeId: '',
+            soilColor: '',
+            pH: '',
+            eC: '',
+            nitrogen: 0,
+            phosphorus: 0,
+            potassium: 0,
+            sulfur: 0,
+            zinc: 0,
+            iron: 0,
+            manganese: 0,
+            copper: 0,
+            boron: 0,
+            calcium: 0,
+            magnesium: 0,
+            landId: id,
           },
     validationSchema: Yup.object().shape({
-      name: Yup.string().required('Crop name is required'),
-      category: Yup.string().required('Category is required'),
-      // image: Yup.string().required('Image is required'),
+      testReportDate: Yup.date().required('Test Report Date is required'),
+      soilTypeId: Yup.string().required('Soil Type is required'),
+      pH: Yup.number().min(0).required('pH is required'),
+      eC: Yup.number().min(0).required('EC is required'),
     }),
     onSubmit: values => {
       setIsLoading(true);
@@ -74,7 +155,7 @@ const CropForm = ({
           .then(() => {
             setNotification({
               isSuccess: true,
-              message: 'Farm created successfully',
+              message: `${pageLabel} created successfully`,
               title: 'Successfully',
               isEnable: true,
             });
@@ -124,9 +205,7 @@ const CropForm = ({
   });
 
   const handleNotificationClose = () => setNotification(initialNotification);
-  {
-    console.log('Image URL', formik.values?.image);
-  }
+
   return (
     <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
@@ -141,7 +220,11 @@ const CropForm = ({
       )}
       <GenericHeader
         headerText={pageLabel}
-        breadcrumbsText={`${type} ${pageLabel} ${type === 'View' ? 'from' : 'to'} System`} // Call handleAddFarmAdmin function when button is clicked
+        breadcrumbs={[
+          // { title: 'Lands', href: '/lands' },
+          // { title: 'Soil Test', href: '/soil-tests' },
+          { title: `${type} ${pageLabel}`, href: '' },
+        ]}
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} ${pageLabel}`}
@@ -155,182 +238,259 @@ const CropForm = ({
       >
         <form>
           <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Crop Information
+            Laboratory Information
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
-                id="cropName"
-                label="Crop Name"
-                name="cropName"
-                placeholder="Enter your crop name..."
-                value={formik.values?.name ?? ''}
+                id="labName"
+                label="Name"
+                name="Name"
+                placeholder="Enter your laboratory name..."
+                value={formik.values?.laboratoryName ?? ''}
                 onChange={e =>
-                  type !== 'View' && formik.setFieldValue('name', e)
+                  type !== 'View' && formik.setFieldValue('laboratoryName', e)
                 }
                 styles={inputStyle}
                 error={
-                  (formik.touched.name || formik.submitCount > 0) &&
-                  formik.errors.name
-                    ? formik.errors.name
-                    : null
-                }
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                label="Crop Category"
-                id="status"
-                placeholder="Select Category"
-                data={[
-                  'Important crops',
-                  'Fruits and vegetables',
-                  'Fodder',
-                  'Oily crops commodities',
-                  'Pulses',
-                  'Browses',
-                ]}
-                value={formik.values?.category}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('category', value)
-                }
-                styles={inputStyle}
-                error={
-                  (formik.touched.category || formik.submitCount > 0) &&
-                  formik.errors.category
-                    ? (formik.errors.category as ReactNode)
+                  (formik.touched.laboratoryName || formik.submitCount > 0) &&
+                  formik.errors.laboratoryName
+                    ? formik.errors.laboratoryName
                     : null
                 }
               />
             </Grid.Col>
           </Grid>
+          <Title order={2} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Date Information
+          </Title>
           <Grid gutter="md">
-            <Grid.Col span={{ base: 6 }}>
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  fontSize: '12px',
-                  color: 'rgb(75 85 99)',
-                }}
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <DateTimePicker
+                id="reportDate"
+                label="Report Date"
+                placeholder="Select Report Date"
+                styles={inputStyle}
+                value={
+                  formik.values?.testReportDate &&
+                  new Date(formik?.values?.testReportDate)
+                }
+                onChange={value =>
+                  formik.setFieldValue('testReportDate', value)
+                }
+                error={
+                  (formik.touched.testReportDate || formik.submitCount > 0) &&
+                  formik.errors.testReportDate
+                    ? (formik.errors.testReportDate as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <DateTimePicker
+                id="sampleDate"
+                label="Sample Date"
+                placeholder="Select Sample Date"
+                styles={inputStyle}
+                value={
+                  formik.values?.testSampleDate &&
+                  new Date(formik?.values?.testSampleDate)
+                }
+                onChange={value =>
+                  formik.setFieldValue('testSampleDate', value)
+                }
+                error={
+                  (formik.touched.testSampleDate || formik.submitCount > 0) &&
+                  formik.errors.testSampleDate
+                    ? (formik.errors.testSampleDate as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+          </Grid>
+
+          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Soil Sample Identification
+          </Title>
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <Select
+                id="soilType"
+                label="Soil Type"
+                placeholder="Select Soil Type..."
+                data={organizeDropDownData(referenceData?.soilType)}
+                value={formik.values?.soilTypeId}
+                onChange={value =>
+                  type !== 'View' && formik.setFieldValue('soilTypeId', value)
+                }
+                styles={inputStyle}
+                error={
+                  (formik.touched.soilTypeId || formik.submitCount > 0) &&
+                  formik.errors.soilTypeId
+                    ? (formik.errors.soilTypeId as ReactNode)
+                    : null
+                }
+              />
+            </Grid.Col>
+
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <TextInput
+                label="Soil Color"
+                id="soilColor"
+                name="soilColor"
+                placeholder="Enter color of the Soil"
+                value={formik.values?.soilColor}
+                onChange={e =>
+                  type !== 'View' && formik.setFieldValue('soilColor', e)
+                }
+                styles={inputStyle}
+                error={
+                  (formik.touched.soilColor || formik.submitCount > 0) &&
+                  formik.errors.soilColor
+                    ? formik.errors.soilColor
+                    : null
+                }
+              />
+            </Grid.Col>
+          </Grid>
+          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Soil Chemical Properties
+          </Title>
+          <Grid gutter="md">
+            {['pH', 'eC'].map(item => (
+              <Grid.Col span={{ base: 12, md: 6, lg: 4 }} key={item}>
+                <NumberInput
+                  id={item}
+                  label={capitalizeFirstLetter(item)}
+                  name={item}
+                  placeholder={`Enter value of ${capitalizeFirstLetter(item)}...`}
+                  value={
+                    formik?.values &&
+                    formik.values[item] !== undefined &&
+                    formik?.values[item] !== 0
+                      ? formik?.values[item]
+                      : '' ?? ''
+                  }
+                  min={0}
+                  max={100}
+                  decimalScale={2}
+                  hideControls
+                  suffix="%"
+                  onChange={e =>
+                    type !== 'View' && formik.setFieldValue(item, e)
+                  }
+                  styles={inputStyle}
+                  error={
+                    formik.errors[item] &&
+                    (formik.touched[item] || formik.submitCount > 0)
+                      ? formik.errors[item]
+                      : null
+                  }
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
+          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Soil Nutrient Content
+          </Title>
+          <Grid gutter="md">
+            {soilNutrientContentFields?.map(item => (
+              <Grid.Col span={{ base: 6, md: 6, lg: 4 }} key={item}>
+                <NumberInput
+                  id={item}
+                  label={capitalizeFirstLetter(item)}
+                  name={item}
+                  min={0}
+                  max={100}
+                  decimalScale={2}
+                  suffix="%"
+                  hideControls
+                  placeholder={`Enter value of ${capitalizeFirstLetter(item)}...`}
+                  value={
+                    formik?.values &&
+                    formik.values[item] !== undefined &&
+                    formik.values[item] !== 0
+                      ? formik.values[item]
+                      : '' ?? ''
+                  }
+                  onChange={e =>
+                    type !== 'View' && formik.setFieldValue(item, e)
+                  }
+                  styles={inputStyle}
+                  error={
+                    formik.errors[item] &&
+                    (formik.touched[item] || formik.submitCount > 0)
+                      ? formik.errors[item]
+                      : null
+                  }
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
+          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
+            Attachment
+          </Title>
+          <Grid gutter="md">
+            <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+              <Dropzone
+                onDrop={handleDrop}
+                onReject={handleReject}
+                maxSize={5 * 1024 ** 2}
               >
-                {'Crop'} Image
-              </Text>
+                {file ? (
+                  <div style={{ width: '100%', textAlign: 'center' }}>
+                    {renderPreview()}
+                  </div>
+                ) : (
+                  <Group
+                    justify="center"
+                    gap="xl"
+                    mih={220}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <Dropzone.Accept>
+                      <IconUpload
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: 'var(--mantine-color-blue-6)',
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Accept>
+                    <Dropzone.Reject>
+                      <IconX
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: 'var(--mantine-color-red-6)',
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Reject>
+                    <Dropzone.Idle>
+                      <IconFileDescription
+                        style={{
+                          width: rem(52),
+                          height: rem(52),
+                          color: 'var(--mantine-color-dimmed)',
+                        }}
+                        stroke={1.5}
+                      />
+                    </Dropzone.Idle>
 
-              <FileDropzone imageURL={formik?.values?.image} />
-            </Grid.Col>
-          </Grid>
-
-          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Season & Methods
-          </Title>
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                label="Crop Season"
-                id="status"
-                placeholder="Select Crop Season"
-                data={['All Season', 'Rabi', 'Kharif']}
-                value={formik.values?.cropType}
-                onChange={value =>
-                  type !== 'View' && formik.setFieldValue('cropType', value)
-                }
-                styles={inputStyle}
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <Select
-                label="Start Method"
-                id="startMethod"
-                name="startMethod"
-                placeholder="Enter start method"
-                data={[
-                  'Bulbs',
-                  'Container',
-                  'Direct sow',
-                  'Grafting',
-                  'Grown in Trays',
-                  'Root Stock',
-                  'Start in Trays',
-                  'Transplant',
-                  'Transplant in Ground',
-                  'Other',
-                ]}
-                value={formik.values?.startMethod}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('startMethod', e)
-                }
-                styles={inputStyle}
-                error={
-                  (formik.touched.startMethod || formik.submitCount > 0) &&
-                  formik.errors.startMethod
-                    ? (formik.errors.startMethod as ReactNode)
-                    : null
-                }
-              />
-            </Grid.Col>
-          </Grid>
-          <Title order={3} c={theme.colors.darkColors[2]} mt={25} mb={15}>
-            Planting Details
-          </Title>
-          <Grid gutter="md">
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                label="No Of Plantings"
-                id="noOfPlantings"
-                name="noOfPlantings"
-                placeholder="Enter no of plantings"
-                value={formik.values?.noOfPlantings}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('noOfPlantings', e)
-                }
-                styles={inputStyle}
-                error={
-                  (formik.touched.noOfPlantings || formik.submitCount > 0) &&
-                  formik.errors.noOfPlantings
-                    ? formik.errors.noOfPlantings
-                    : null
-                }
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                label="Row Spacing"
-                id="rowSpacing"
-                name="rowSpacing"
-                placeholder="Enter row Spacing..."
-                value={formik.values?.rowSpacing}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('rowSpacing', e)
-                }
-                styles={inputStyle}
-                error={
-                  (formik.touched.rowSpacing || formik.submitCount > 0) &&
-                  formik.errors.rowSpacing
-                    ? formik.errors.rowSpacing
-                    : null
-                }
-              />
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                label="Plant Spacing"
-                id="plantingSpacing"
-                name="plantingSpacing"
-                placeholder="Enter plant spacing..."
-                value={formik.values?.plantSpacing}
-                onChange={e =>
-                  type !== 'View' && formik.setFieldValue('plantSpacing', e)
-                }
-                styles={inputStyle}
-                error={
-                  (formik.touched.plantSpacing || formik.submitCount > 0) &&
-                  formik.errors.plantSpacing
-                    ? formik.errors.plantSpacing
-                    : null
-                }
-              />
+                    <div>
+                      <Text size="xl" inline>
+                        Drag attachments here or click to select files
+                      </Text>
+                      <Text size="sm" c="dimmed" inline mt={7}>
+                        Attach file for soil test, but file should not exceed 5
+                        MB
+                      </Text>
+                    </div>
+                  </Group>
+                )}
+              </Dropzone>
             </Grid.Col>
           </Grid>
         </form>
@@ -339,4 +499,4 @@ const CropForm = ({
   );
 };
 
-export default CropForm;
+export default SoilTestForm;

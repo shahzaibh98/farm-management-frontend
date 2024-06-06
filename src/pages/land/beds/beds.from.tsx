@@ -175,7 +175,7 @@ const ManageBed = ({
       )}
       <GenericHeader
         headerText={pageLabel}
-        breadcrumbsText={`Manage Farm ${pageLabel}`}
+        breadcrumbs={[{ title: `Manage Farm ${pageLabel}`, href: '' }]}
         isAddOrUpdateButton={type !== 'View'}
         isAddOrUpdateButtonLoading={isLoading}
         buttonContent={`${type} ${pageLabel}`}

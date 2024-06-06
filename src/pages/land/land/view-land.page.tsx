@@ -36,6 +36,7 @@ import {
 } from '../../../utils/common/constant.objects';
 import {
   extractPageInfo,
+  handleSetParams,
   isEmpty,
   organizeDropDownData,
   removeEmptyValueFilters,
@@ -46,6 +47,7 @@ import {
   initialSearchValues,
 } from './initial.values';
 import LocationSearch from './searchLocation';
+import { handlePaginationValue } from '../../../utils/common/pagination.Helper';
 
 const LandView = () => {
   const initializeStateFromQueryParams = () => {
@@ -72,6 +74,7 @@ const LandView = () => {
       searchParams.get('currentPage') ??
         paginationInfoValue.currentPage?.toString()
     );
+
     return { ...paginationInfoValue, rowPerPage, currentPage };
   };
 
@@ -95,7 +98,7 @@ const LandView = () => {
   );
 
   // State for search values
-  const [searchValues, setSearchValues] = useState<SearchFilter>(
+  const [searchValues, setSearchValues] = useState(
     initializeStateFromQueryParams()
   );
 
@@ -181,33 +184,24 @@ const LandView = () => {
   };
 
   useEffect(() => {
-    initializeStateFromQueryParams();
-    initialPaginationFromQueryParams();
+    const newSearchValues = initializeStateFromQueryParams();
+    const newPaginationInfo = initialPaginationFromQueryParams();
+
+    if (JSON.stringify(newSearchValues) !== JSON.stringify(searchValues)) {
+      setSearchValues(newSearchValues);
+    }
+
+    if (JSON.stringify(newPaginationInfo) !== JSON.stringify(paginationInfo)) {
+      setPaginationInfo(newPaginationInfo);
+    }
   }, [searchParams]);
 
   // Function to set values based on identifiers
   const setValuesById = (valuesById: Partial<SearchFilter>) => {
-    setSearchValues(prevFormValues => ({
+    setSearchValues((prevFormValues: any) => ({
       ...prevFormValues,
       ...valuesById, // Merge the new values with the existing state
     }));
-  };
-
-  const handleSetParams = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (key === 'dateRange') {
-        if (value[0]) {
-          newParams.set('dateRangeStart', value[0].toISOString());
-        }
-        if (value[1]) {
-          newParams.set('dateRangeEnd', value[1].toISOString());
-        }
-      } else if (value) {
-        newParams.set(key, value);
-      }
-    });
-    setSearchParams(newParams);
   };
 
   const handleFetchDataByFilter = () => {
@@ -252,52 +246,26 @@ const LandView = () => {
   };
 
   const handleSearchButtonClick = () => {
-    handleSetParams();
+    handleSetParams(
+      searchParams,
+      searchValues,
+      initialSearchValues,
+      setSearchParams
+    );
     handleFetchDataByFilter();
   };
 
   const handleNotificationClose = () => setNotification(initialNotification);
-  const handlePagination = (actionType: string, value?: any) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    const currentPage = paginationInfo.currentPage;
 
-    if (actionType === 'next') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage + 1).toString());
-    } else if (actionType === 'previous') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto' && value !== currentPage) {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: value,
-      }));
-      value < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', value);
-    } else if (actionType === 'rowPerPage') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        rowPerPage: value,
-      }));
-      if (value === '10' || value === '50' || value === '100') {
-        newParams.set('rowPerPage', value);
-      } else {
-        newParams.delete('rowPerPage');
-      }
-    }
-    setSearchParams(newParams);
-  };
+  const handlePagination = (actionType: string, value?: any) =>
+    handlePaginationValue(
+      actionType,
+      value,
+      searchParams,
+      paginationInfo,
+      setPaginationInfo,
+      setSearchParams
+    );
 
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
@@ -332,6 +300,9 @@ const LandView = () => {
       .finally(() => setIsLoading(false));
   };
 
+  const handleEditClick = (id: string) => navigate(`/lands/edit/${id}`);
+  const handleViewClick = (id: string) => navigate(`/lands/view/${id}`);
+
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
@@ -345,13 +316,16 @@ const LandView = () => {
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 200, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex ml-2">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
+        cell: (info: any) => {
+          const id = info?.row?.original?.landId;
+          return (
+            <div className="flex ml-2" onClick={() => handleViewClick(id)}>
+              <p className="text-sm lg:text-base text-center">
+                {info.getValue()}
+              </p>
+            </div>
+          );
+        },
       },
       {
         header: <div className="flex text-start">TYPE</div>,
@@ -361,7 +335,6 @@ const LandView = () => {
         maxSize: 500, //enforced during column resizing
         cell: (info: any) => {
           const rowData = info?.row?.original;
-          console.log('Roe Date', rowData?.locationType?.name);
           return (
             <div className="flex flex-row">
               <IconBorderCorners
@@ -448,12 +421,12 @@ const LandView = () => {
             {
               label: 'Beds',
               icon: <MdOutlineLineStyle />,
-              onClick: () => navigate(`/beds/${id}`),
+              onClick: () => navigate(`/lands/${id}/beds`),
             },
             {
               label: 'Soil Test',
               icon: <TbReportSearch />,
-              onClick: () => navigate(`/soil-tests/${id}`),
+              onClick: () => navigate(`/lands/${id}/soil-tests`),
             },
           ];
           if (!rowData?.isBed) {
@@ -465,8 +438,8 @@ const LandView = () => {
               onDeleteClick={id =>
                 setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
               }
-              onEditClick={() => navigate(`/lands/edit/${id}`)}
-              onViewClick={() => navigate(`/lands/view/${id}`)}
+              onEditClick={handleEditClick}
+              onViewClick={handleViewClick}
               additionalMenuItems={additionalMenuItems}
             />
           );
@@ -490,11 +463,11 @@ const LandView = () => {
       )}
       <GenericHeader
         headerText="Farm Location"
-        breadcrumbsText="Manage Farm Location"
+        breadcrumbs={[{ title: 'Manage Farm Location', href: '' }]}
         isAddOrUpdateButton
         buttonContent="Add Location"
         onButtonClick={handleAddFarmAdmin} // Call handleAddTask function when button is clicked
-        secondButtonContent="View All Farms"
+        secondButtonContent="My Farm"
         isSecondButton={allLocationData && allLocationData?.length > 0}
         onSecondButtonClick={handleViewAllLocation}
       />
@@ -509,7 +482,7 @@ const LandView = () => {
             placeholder="Search by name..."
             searchValue={searchValues.searchValue}
             setValuesById={setValuesById}
-            handleSearchButtonClick={handleSearchButtonClick}
+            handleSearchButtonClick={() => handlePagination('goto', 1)}
             handleResetButtonClick={handleResetButtonClick}
           />
           <Grid className="mt-2">
@@ -529,7 +502,9 @@ const LandView = () => {
             {isSmallScreen && (
               <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
                 <div className="flex flex-row justify-between">
-                  <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                  <SearchButton
+                    onSearchButtonClick={() => handlePagination('goto', 1)}
+                  />
                   <ResetButton onResetButtonClick={handleResetButtonClick} />
                 </div>
               </Grid.Col>
