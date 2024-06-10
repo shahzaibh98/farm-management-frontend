@@ -3,9 +3,11 @@ export const inputStyle = {
     fontWeight: 'bold',
     fontSize: '12px',
     color: 'rgb(75 85 99)',
+    marginBottom: '4px',
   },
   input: {
     backgroundColor: '#F9FAFB',
+    radius: '8px',
   },
 };
 
@@ -36,6 +38,7 @@ export const textAreaStyle = {
     fontWeight: 'bold',
     fontSize: '12px',
     color: 'rgb(75 85 99)',
+    marginBottom: '4px',
   },
   input: {
     backgroundColor: '#F9FAFB',

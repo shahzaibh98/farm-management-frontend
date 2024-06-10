@@ -29,6 +29,7 @@ import {
   capitalizeFirstLetter,
   extractPageInfo,
   handleSetParams,
+  organizeDropDownData,
   removeEmptyValueFilters,
 } from '../../../utils/common/function';
 import {
@@ -85,6 +86,8 @@ const ManageCropsPlanning = () => {
 
   const { isSmallScreen } = useScreenSize();
 
+  const { referenceData } = useSelector((state: any) => state?.referenceData);
+
   /* /////////////////////////////////////////////////
                       State
   /////////////////////////////////////////////////// */
@@ -135,6 +138,7 @@ const ManageCropsPlanning = () => {
         operator: 'eq',
         value: cropId,
       },
+      { field: 'landTypeId', operator: 'eq', value: searchValues.landTypeId },
       {
         field: 'provinceId',
         operator: 'eq',
@@ -215,7 +219,7 @@ const ManageCropsPlanning = () => {
 
   const handleDeleteById = (id: string) => {
     setIsLoading(true);
-    deleteData(`users/${id}`)
+    deleteData(`crop-plan/${id}`)
       .then(() => {
         setNotification({
           isSuccess: true,
@@ -448,7 +452,7 @@ const ManageCropsPlanning = () => {
             <Grid.Col span={{ base: 12, md: 2, lg: 2 }}>
               <Select
                 placeholder="Land Type"
-                data={['Fruit', 'Vegetable']}
+                data={organizeDropDownData(referenceData?.landType)}
                 value={searchValues.landTypeId ?? ''}
                 onChange={value => setValuesById({ landTypeId: value })}
               />

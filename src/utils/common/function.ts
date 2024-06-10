@@ -377,3 +377,18 @@ export function cleanObject(obj: any) {
   }
   return obj;
 }
+
+export function capitalizeFirstLetterSentence(
+  text: string | undefined
+): string {
+  if (!text) return '';
+
+  // Trim the text to remove any leading or trailing whitespace.
+  const trimmedText = text.trim();
+
+  // Capitalize the first letter and make the rest of the letters lowercase.
+  const capitalizedText =
+    trimmedText.charAt(0).toUpperCase() + trimmedText.slice(1).toLowerCase();
+
+  return capitalizedText;
+}
