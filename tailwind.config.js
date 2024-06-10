@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        montserrat: ['Montserrat', 'sans-serif'],
+      },
       textColor: {
         skin: {
           fill: 'var(--color-dark-dark)',
@@ -103,6 +106,7 @@ module.exports = {
         lightestGrey2: "rgb(240, 240, 240)",
         lightestGrey3: "rgb(245, 245, 245)"
       },
+      'white': { 100: '#FFFFFF' },
       'black': {
         100: 'rgba(0, 0, 0, 0.5)'
       },
@@ -164,6 +168,9 @@ module.exports = {
         800: '#1E40AF',
         900: '#1E3A8A',
       },
+      newTheme: {
+        300: '#BE8B45',
+      }
     },
   },
   plugins: [],

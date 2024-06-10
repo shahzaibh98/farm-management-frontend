@@ -1,15 +1,24 @@
 // Import necessary components and hooks from Mantine and other libraries
-import { useMantineTheme } from '@mantine/core';
+import { Anchor, Breadcrumbs, useMantineTheme } from '@mantine/core';
 import { IoChevronBackOutline } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button, Text } from '../concave.agri/components';
+
+interface IBreadCrumbs {
+  title: string;
+  href: string;
+}
 
 // Define the Props interface for the component
 interface Props {
   isBackendButton?: boolean;
+  isSecondButton?: boolean;
+  secondButtonContent?: string;
+  onSecondButtonClick?: () => void;
   headerText: string;
-  breadcrumbsText: string;
+  breadcrumbs: IBreadCrumbs[];
   isAddOrUpdateButton?: boolean;
+  isAddOrUpdateButtonLoading?: boolean;
   buttonContent?: string;
   onButtonClick?: () => void;
 }
@@ -17,8 +26,12 @@ interface Props {
 // Define the GenericHeader functional component
 const GenericHeader: React.FC<Props> = ({
   isBackendButton = true,
+  isAddOrUpdateButtonLoading = false,
+  isSecondButton = false,
+  secondButtonContent = '',
+  onSecondButtonClick = () => {},
   headerText,
-  breadcrumbsText,
+  breadcrumbs,
   isAddOrUpdateButton = false,
   buttonContent = 'Add',
   onButtonClick = () => {},
@@ -27,6 +40,27 @@ const GenericHeader: React.FC<Props> = ({
   const navigate = useNavigate();
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
+
+  const items = breadcrumbs.map((item, index) => (
+    <div key={index} onClick={() => item.href !== '' && navigate(item.href)}>
+      <Text
+        key={index}
+        className={`"text-skin-caption ${item.href !== '' ? 'hover:underline hover:underline-offset-4 hover:cursor-pointer' : ''}`}
+        tt="capitalize"
+        fs="italic"
+        style={theme => ({
+          color: theme.colors.darkColors[3],
+          lineHeight: theme.other.lineHeights.sm,
+          fontSize: theme.fontSizes.sm,
+          [`@media (max-width: ${theme.breakpoints.md}px)`]: {
+            fontSize: theme.fontSizes.xs,
+          },
+        })}
+      >
+        {item.title}
+      </Text>
+    </div>
+  ));
 
   // Render the component's layout
   return (
@@ -47,38 +81,43 @@ const GenericHeader: React.FC<Props> = ({
         {/* Header text and breadcrumbs */}
         <div className="ml-4">
           <p className="font-mono text-2xl font-semibold">{headerText}</p>
-          <Text
-            className="text-skin-caption"
-            tt="capitalize"
-            fs="italic"
-            style={theme => ({
-              color: theme.colors.darkColors[3],
-              lineHeight: theme.other.lineHeights.sm,
-              fontSize: theme.fontSizes.sm,
-              [`@media (max-width: ${theme.breakpoints.md}px)`]: {
-                fontSize: theme.fontSizes.xs,
-              },
-            })}
-          >
-            {breadcrumbsText}
-          </Text>
+          <Breadcrumbs>{items}</Breadcrumbs>
         </div>
       </div>
       {/* Right section with add or update button */}
-      {isAddOrUpdateButton && (
-        <Button
-          variant="outline"
-          autoContrast
-          color={theme.colors.secondaryColors[3]}
-          size="md"
-          onClick={() => onButtonClick()}
-          style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-        >
-          <Text tt="capitalize" fs="italic">
-            {buttonContent}
-          </Text>
-        </Button>
-      )}
+      <div>
+        {isSecondButton && (
+          <Button
+            variant="outline"
+            m={5}
+            autoContrast
+            color={theme.colors.secondaryColors[3]}
+            size="md"
+            onClick={() => onSecondButtonClick()}
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic" p={2}>
+              {secondButtonContent}
+            </Text>
+          </Button>
+        )}
+        {isAddOrUpdateButton && (
+          <Button
+            variant="outline"
+            autoContrast
+            m={5}
+            color={theme.colors.secondaryColors[3]}
+            loading={isAddOrUpdateButtonLoading}
+            size="md"
+            onClick={() => onButtonClick()}
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+          >
+            <Text tt="capitalize" fs="italic" p={2}>
+              {buttonContent}
+            </Text>
+          </Button>
+        )}
+      </div>
     </section>
   );
 };

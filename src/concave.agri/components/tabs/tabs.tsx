@@ -10,6 +10,7 @@ interface TabData {
 
 interface TabsProps {
   tabs: TabData[];
+  onChange?: (value: string) => void;
   tabsProps?: any;
   listProps?: any;
   panelProps?: any;
@@ -18,13 +19,18 @@ interface TabsProps {
 
 const Tabs = ({
   tabs,
+  onChange,
   tabsProps,
   listProps,
   panelProps,
   tabProps,
 }: TabsProps) => {
   return (
-    <MantineTabs {...tabsProps} defaultValue={tabs[0].value}>
+    <MantineTabs
+      {...tabsProps}
+      defaultValue={tabs[0].value}
+      onChange={onChange}
+    >
       <MantineTabs.List {...listProps}>
         {tabs.map(tab => (
           <MantineTabs.Tab

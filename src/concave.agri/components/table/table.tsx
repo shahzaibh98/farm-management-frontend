@@ -6,20 +6,19 @@ import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
 // Mantine core theme hook
-import { useMantineTheme } from '@mantine/core';
+import { Skeleton, useMantineTheme } from '@mantine/core';
 
 // Table-related imports
-import { TableProps } from '../../../types/table.type';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { TableProps } from '../../../types/table.type';
 
 // Component imports
 import { Select } from '../dropdown';
 import { TextInput } from '../inputField';
-import { Loader } from '../loader';
 import { Text } from '../text';
 
 const Table = ({
@@ -44,7 +43,7 @@ const Table = ({
   });
 
   return (
-    <section className="min-h-[370px] flex justify-between flex-col mt-4 relative max-w-full overflow-x-scroll overflow-y-hidden">
+    <section className="min-h-[370px] flex justify-between flex-col mt-4 relative max-w-full overflow-x-auto md:overflow-x-visible sm:overflow-x-visible">
       <table
         className="w-full"
         style={{
@@ -113,13 +112,27 @@ const Table = ({
           }}
           // className="mt-4"
         >
-          {table?.getRowModel()?.rows?.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <tr
+                key={index}
+                className=" border-b border-b-lightColors-lightestGrey1  cursor-default text-body2 lg:h-10 hover:cursor-pointer hover:rounded-3xl"
+              >
+                {/* Render skeleton cells */}
+                {table?.getAllColumns().map(column => (
+                  <td key={column.id}>
+                    <div className="flex items-center justify-center">
+                      <Skeleton height={14} mt={6} width="70%" radius="xl">
+                        Data Table
+                      </Skeleton>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : table?.getRowModel()?.rows?.length === 0 ? (
             <div className="flex items-center justify-center min-h-[80%] bold">
               No data to display...
-            </div>
-          ) : isLoading ? (
-            <div className="flex items-center justify-center">
-              <Loader isLoading={isLoading} />
             </div>
           ) : (
             table?.getRowModel()?.rows?.map(row => {
@@ -133,7 +146,7 @@ const Table = ({
                       <td
                         key={cell.id}
                         style={{ width: cell.column.getSize() }}
-                        className={`p-2`}
+                        className={'p-2'}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

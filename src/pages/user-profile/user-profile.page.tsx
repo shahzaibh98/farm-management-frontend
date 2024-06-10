@@ -3,9 +3,9 @@ import { useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextInput } from '../../concave.agri/components';
 import GenericHeader from '../../layout/header.layout';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, ReactNode, useState } from 'react';
 import * as Yup from 'yup';
-import { postData } from '../../api/api';
+import { postData, putData } from '../../api/api';
 import { setUserInfo } from '../../redux/actions/user';
 import {
   initialNotification,
@@ -14,6 +14,7 @@ import {
 import { Notification, Text } from '../../concave.agri/components';
 import useScreenSize from '../../hooks/useScreenSize';
 import { inputStyle } from '../../theme/common.style';
+import { isPkTelePhoneNumber } from '../../utils/common/function';
 
 const UserProfile = () => {
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
@@ -55,29 +56,46 @@ const UserProfile = () => {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
-      email: userInfo?.email ?? '', // Initial value for email input
-      password: '', // Initial value for password input
-      name: userInfo?.name, // Initial value for name input
-      phoneNo: userInfo?.phoneNo ?? '', // Initial value for phone number
+      email: userInfo?.email ?? '',
+      currentPassword: '',
+      newPassword: '',
+
+      name: userInfo?.name,
+      phoneNo: userInfo?.phoneNo ?? '',
+
       profilePic:
         userInfo?.profilePic ??
         'https://e7.pngegg.com/pngimages/442/477/png-clipart-computer-icons-user-profile-avatar-profile-heroes-profile.png', // Initial value for profile
     },
     // Define validation schema using Yup
     validationSchema: Yup.object({
-      phoneNo: Yup.string().required('Required'),
-      email: Yup.string().email('Invalid email').required('Required'),
-      password: Yup.string().required('Required'),
-      confirmPassword: Yup.string().required('Required'),
-      name: Yup.string().required('Required'),
+      currentPassword: Yup.string()
+        .required('Current password is required')
+        .min(8, 'Password must be at least 8 characters long'),
+      newPassword: Yup.string().min(
+        8,
+        'Password must be at least 8 characters long'
+      ),
+      phoneNo: Yup.string().test(
+        'is-pk-telephone-number',
+        'Invalid phone number. Please enter a valid Pakistani phone number.',
+        value => isPkTelePhoneNumber(value ?? '')
+      ),
     }),
     // Define onSubmit handler for form submission
     onSubmit: (values: any) => {
+      const { profilePic, ...rest } = values;
       // Post data to the server
-      postData('users', values)
+      putData(`users/profile/${userInfo?.userId}`, rest)
         .then(res => {
           // Dispatch setUserInfo action with response data
           dispatch(setUserInfo(res));
+          setNotification({
+            isSuccess: true,
+            message: 'Profile updated successfully',
+            title: 'Successfully updated',
+            isEnable: true,
+          });
         })
         .catch(error => {
           // Set error notification on failure
@@ -96,7 +114,7 @@ const UserProfile = () => {
   };
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {/* Render notification if enabled */}
       {notification.isEnable && (
         <Notification
@@ -112,10 +130,10 @@ const UserProfile = () => {
 
       <GenericHeader
         headerText="Profile"
-        breadcrumbsText="View Profile"
+        breadcrumbs={[{ title: 'My Profile', href: '' }]}
         isAddOrUpdateButton
         buttonContent="Update Profile"
-        onButtonClick={() => console.log('Hit Update User Profile API')}
+        onButtonClick={formik.handleSubmit}
       />
 
       <Paper
@@ -174,22 +192,7 @@ const UserProfile = () => {
                 }
               />
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-              <TextInput
-                label="Email"
-                placeholder="Enter your email"
-                value={formik.values.email}
-                onChange={(value: string) =>
-                  formik.setFieldValue('email', value)
-                }
-                styles={inputStyle}
-                error={
-                  formik.touched.email &&
-                  formik.errors.email &&
-                  formik.errors.email
-                }
-              />
-            </Grid.Col>
+
             <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
               <TextInput
                 label="Phone Number"
@@ -206,6 +209,17 @@ const UserProfile = () => {
                 }
               />
             </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+              <PasswordInput
+                label="New Password"
+                placeholder="Enter your new password"
+                value={formik.values.newPassword}
+                onChange={event =>
+                  formik.setFieldValue('newPassword', event.target.value)
+                }
+                styles={inputStyle}
+              />
+            </Grid.Col>
 
             {!isSmallScreen && (
               <Grid.Col span={{ base: 12, md: 6, lg: 4 }}></Grid.Col>
@@ -214,11 +228,18 @@ const UserProfile = () => {
               <PasswordInput
                 label="Password"
                 placeholder="Enter your current password"
-                value={formik.values.password}
+                value={formik.values.currentPassword}
                 styles={inputStyle}
                 description="For profile upgrading..."
                 onChange={event =>
-                  formik.setFieldValue('password', event.target.value)
+                  formik.setFieldValue('currentPassword', event.target.value)
+                }
+                error={
+                  (formik.errors.currentPassword &&
+                    formik.touched.currentPassword) ||
+                  formik.submitCount > 0
+                    ? (formik.errors.currentPassword as ReactNode)
+                    : null
                 }
               />
             </Grid.Col>

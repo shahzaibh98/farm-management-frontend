@@ -1,7 +1,7 @@
 import { Center, Grid, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { SetStateAction, useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { CiCalendarDate, CiViewTable } from 'react-icons/ci'; // Importing icons from 'react-icons/ci'
-import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
+import { useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
 // Importing custom components from the 'concave.agri' project
 import {
@@ -25,22 +25,26 @@ import GenericHeader from '../../layout/header.layout';
 import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
+import { useSelector } from 'react-redux';
+import { deleteData, fetchData } from '../../api/api';
 import { SearchValuesType } from '../../types/view-task.type';
 import {
   initialModalInfo,
   initialNotification,
   paginationInfoValue,
 } from '../../utils/common/constant.objects';
-import MyCalendar from '../calendar/calendar';
-import { initialSearchValues } from './initial.values';
-import { TaskForm } from './task.form';
 import {
   extractPageInfo,
   formatTimestamp,
-  removeEmptyValues,
+  getDateRange,
+  handleSetParams,
+  removeEmptyValueFilters,
 } from '../../utils/common/function';
-import { deleteData, fetchData } from '../../api/api';
-import { useSelector } from 'react-redux';
+import MyCalendar from '../calendar/calendar';
+import { initialSearchValues } from './initial.values';
+import { TaskForm } from './task.form';
+import { TaskStatus } from '@agri/shared-types';
+import { handlePaginationValue } from '../../utils/common/pagination.Helper';
 
 const TaskView = () => {
   const initializeStateFromQueryParams = () => {
@@ -95,7 +99,9 @@ const TaskView = () => {
   // Initialize the useMantineTheme hook for accessing theme variables
   const theme = useMantineTheme();
   const { isSmallScreen } = useScreenSize();
-  const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const userInfo = useSelector(
+    (state: any) => state?.userInfo?.currentFarmRole
+  );
 
   /* /////////////////////////////////////////////////
                       State
@@ -125,6 +131,9 @@ const TaskView = () => {
 
   // State for table data
   const [tableData, setTableData] = useState([]);
+  const [userList, setUserList] = useState<any[]>([]);
+
+  const [activeTab, setActiveTab] = useState('Table');
 
   /* /////////////////////////////////////////////////
                       useEffect
@@ -133,10 +142,58 @@ const TaskView = () => {
   const handleAddTask = () => setModalInfo({ ...modalInfo, isOpen: true });
 
   useEffect(() => {
-    initializeStateFromQueryParams();
-    initialPaginationFromQueryParams();
+    const initialQueryParam = initializeStateFromQueryParams();
+    const initialPagination = initialPaginationFromQueryParams();
+    setSearchValues(initialQueryParam);
+    setPaginationInfo(initialPagination);
+    setResetTable(!resetTable);
   }, [searchParams]);
 
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
+
+  const currentUser = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole
+      : currentRole?.currentCompanyRole;
+
+  useEffect(() => {
+    fetchData(
+      `farm-user?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
+    )
+      .then((response: any) => {
+        console.log('Response', response);
+        const users = response.data?.map(
+          (user: { systemUser: { name: any; userId: any } }) => {
+            return {
+              label: user.systemUser.name,
+              value: user.systemUser.userId?.toString(),
+            };
+          }
+        );
+        console.log('Users', users);
+        const newArray = [
+          { label: 'Me', value: userInfo.userId?.toString() },
+          { label: 'Others', value: 'Others' },
+          { label: 'All', value: 'All' },
+          ...users.filter(
+            (user: { label: string; value: string }) =>
+              user.value !== userInfo.userId?.toString()
+          ),
+        ];
+        setUserList(newArray);
+      })
+      .catch(() => {
+        const newArray = [
+          { label: 'Me', value: currentUser?.userId?.toString() },
+          { label: 'Others', value: 'Others' },
+          { label: 'All', value: 'All' },
+        ];
+        setUserList(newArray);
+      });
+  }, []);
   // Function to set values based on identifiers
   const setValuesById = (valuesById: Partial<SearchValuesType>) => {
     setSearchValues(prevFormValues => ({
@@ -145,99 +202,98 @@ const TaskView = () => {
     }));
   };
 
-  const handleSetParams = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (key === 'dateRange') {
-        if (value[0]) {
-          newParams.set('dateRangeStart', value[0].toISOString());
-        }
-        if (value[1]) {
-          newParams.set('dateRangeEnd', value[1].toISOString());
-        }
-      } else if (value) {
-        newParams.set(key, value);
-      }
-    });
-    setSearchParams(newParams);
-  };
-
   const handleFetchDataByFilter = () => {
     setIsLoading(true);
-    const filterObject = JSON.stringify(
-      removeEmptyValues({
-        taskTitle: searchValues?.searchValue,
-        assignedTo: searchValues?.assignedTo === 'Me' ? userInfo?.userId : '', // Default value: 'Me'
-        associatedTo: searchValues?.associatedTo,
-        taskStatus: searchValues?.progress, // Default value: 'In Progress'
-      })
-    );
+    const filters = removeEmptyValueFilters([
+      {
+        field: 'taskTitle',
+        operator: 'like',
+        value: searchValues.searchValue,
+      },
+      {
+        field: 'assignedTo',
+        operator: searchValues?.assignedTo === 'Others' ? 'neq' : 'eq',
+        value:
+          searchValues?.assignedTo === 'All'
+            ? ''
+            : (searchValues?.assignedTo === 'Others'
+                ? userInfo?.userId
+                : searchValues?.assignedTo) ?? '', // Default value: 'All' or userInfo?.userId, // Default value: 'Me'
+      },
+      {
+        field: 'associatedTo',
+        operator: 'eq',
+        value: searchValues?.associatedTo ?? '',
+      },
+      {
+        field: 'taskStatus',
+        operator: 'eq',
+        value: searchValues?.progress, // Default value: 'In Progress'
+      },
+      {
+        field: 'startDateTime',
+        operator: 'gte',
+        value:
+          searchValues?.upcomingTask === 'Custom Range'
+            ? searchValues?.dateRange[0]?.toISOString()
+            : getDateRange(searchValues?.upcomingTask ?? '')[0],
+      },
+      {
+        field: 'startDateTime',
+        operator: 'lte',
+        value:
+          searchValues?.upcomingTask === 'Custom Range'
+            ? searchValues?.dateRange[1]?.toISOString()
+            : getDateRange(searchValues?.upcomingTask ?? '')[1],
+      },
+      {
+        field: 'farmId',
+        operator: 'eq',
+        value: userInfo?.farmId?.toString(),
+      },
+    ]);
 
-    fetchData(
-      `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}`
-    )
+    const filterObject = JSON.stringify({ filter: filters });
+
+    const tableFetchUrl = `task?rpp=${paginationInfo.rowPerPage}&page=${paginationInfo.currentPage === 0 ? 1 : paginationInfo.currentPage}&filter=${filterObject}&{"task.startDateTime":"ASC"}`;
+    const calendarFetchUrl = `task?filter=${filterObject}&{"task.startDateTime":"ASC"}`;
+
+    fetchData(activeTab === 'Table' ? tableFetchUrl : calendarFetchUrl)
       .then((response: any) => {
         setTableData(response.data);
         const getPages = extractPageInfo(response.pages);
         setPaginationInfo({
           ...paginationInfo,
           totalRecords: response.total,
-          ...getPages,
+          totalPages: getPages?.totalPages ?? 0,
         });
       })
-      .catch((error: any) => console.log(error))
+      .catch((error: any) => console.error(error))
       .finally(() => {
         setIsLoading(false);
       });
   };
 
   const handleSearchButtonClick = () => {
-    handleSetParams();
+    handleSetParams(
+      searchParams,
+      searchValues,
+      initialSearchValues,
+      setSearchParams
+    );
     handleFetchDataByFilter();
   };
 
   const handleNotificationClose = () => setNotification(initialNotification);
-  const handlePagination = (actionType: string, value?: any) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    const currentPage = paginationInfo.currentPage;
-
-    if (actionType === 'next') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage + 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage + 1).toString());
-    } else if (actionType === 'previous') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: prevState.currentPage - 1,
-      }));
-      currentPage < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', (currentPage - 1).toString());
-    } else if (actionType === 'goto' && value !== currentPage) {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        currentPage: value,
-      }));
-      value < 2
-        ? newParams.delete('currentPage')
-        : newParams.set('currentPage', value);
-    } else if (actionType === 'rowPerPage') {
-      setPaginationInfo(prevState => ({
-        ...prevState,
-        rowPerPage: value,
-      }));
-      if (value === '10' || value === '50' || value === '100') {
-        newParams.set('rowPerPage', value);
-      } else {
-        newParams.delete('rowPerPage');
-      }
-    }
-    setSearchParams(newParams);
-  };
+  const handlePagination = (actionType: string, value?: any) =>
+    handlePaginationValue(
+      actionType,
+      value,
+      searchParams,
+      paginationInfo,
+      setPaginationInfo,
+      setSearchParams
+    );
 
   const handleResetButtonClick = () => {
     const newParams = new URLSearchParams();
@@ -251,6 +307,7 @@ const TaskView = () => {
     if (currentPage > 2) newParams.set('currentPage', currentPage.toString());
     setSearchParams(newParams);
     setSearchValues(initialSearchValues);
+    setResetTable(!resetTable);
   };
 
   const handleDeleteById = (id: string) => {
@@ -267,14 +324,27 @@ const TaskView = () => {
           setResetTable(!resetTable);
         });
       })
-      .catch(error => console.log(error))
+      .catch(error => console.error(error))
       .finally(() => setIsLoading(false));
   };
 
   // Effect for handling search button click
   useEffect(() => {
     handleSearchButtonClick();
-  }, [resetTable]);
+  }, [resetTable, activeTab]);
+
+  useEffect(() => {
+    const newSearchValues = initializeStateFromQueryParams();
+    const newPaginationInfo = initialPaginationFromQueryParams();
+
+    if (JSON.stringify(newSearchValues) !== JSON.stringify(searchValues)) {
+      setSearchValues(newSearchValues);
+    }
+
+    if (JSON.stringify(newPaginationInfo) !== JSON.stringify(paginationInfo)) {
+      setPaginationInfo(newPaginationInfo);
+    }
+  }, [searchParams]);
 
   const columns = useMemo(
     () => [
@@ -294,17 +364,19 @@ const TaskView = () => {
       },
       {
         header: 'ASSIGNED TO',
-        accessorKey: 'assigned_to',
         size: 50, //starting column size
         minSize: 50, //enforced during column resizing
         maxSize: 500, //enforced during column resizing
-        cell: (info: { getValue: () => any }) => (
-          <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
-          </div>
-        ),
+        cell: (info: any) => {
+          const rowData = info?.row?.original;
+          return (
+            <div className="flex items-center justify-center">
+              <p className="text-sm lg:text-base text-center">
+                {rowData?.assigned?.systemUser?.name}
+              </p>
+            </div>
+          );
+        },
       },
       {
         header: 'ASSOCIATED TO',
@@ -355,8 +427,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'DUE DATE',
-        accessorKey: 'endDateTime',
+        header: 'START DATE',
+        accessorKey: 'startDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-sm lg:text-base text-center">
@@ -401,8 +473,90 @@ const TaskView = () => {
     [tableData]
   );
 
+  const searchAndFilter = () => {
+    return (
+      <>
+        <SearchComponent
+          placeholder="Search by title..."
+          searchValue={searchValues.searchValue}
+          setValuesById={setValuesById}
+          handleSearchButtonClick={() => handlePagination('goto', 1)}
+          handleResetButtonClick={handleResetButtonClick}
+        />
+        <Grid className="mt-2">
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Assigned To"
+              data={userList}
+              value={searchValues.assignedTo ?? ''}
+              onChange={value => value && setValuesById({ assignedTo: value })}
+              // allowDeselect={false}
+              searchable
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Associated To"
+              data={[]}
+              value={searchValues.associatedTo ?? ''}
+              onChange={value => setValuesById({ associatedTo: value })}
+            />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Progress"
+              data={['All', ...Object.values(TaskStatus)]}
+              value={searchValues.progress ?? ''}
+              onChange={value => value && setValuesById({ progress: value })}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+            <Select
+              placeholder="Upcoming Task"
+              data={[
+                'All',
+                'Today',
+                'Tomorrow',
+                'This Week',
+                'Next Week',
+                'Next Month',
+                'Custom Range',
+              ]}
+              value={searchValues?.upcomingTask ?? ''}
+              onChange={value => setValuesById({ upcomingTask: value })}
+            />
+          </Grid.Col>
+          {searchValues?.upcomingTask === 'Custom Range' && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <DatePicker
+                type="range"
+                placeholder="Select a date range"
+                value={searchValues.dateRange ?? ''}
+                onChange={value =>
+                  setValuesById({
+                    dateRange: value as [Date | null, Date | null],
+                  })
+                }
+              />
+            </Grid.Col>
+          )}
+
+          {isSmallScreen && (
+            <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
+              <div className="flex flex-row justify-between">
+                <SearchButton onSearchButtonClick={handleSearchButtonClick} />
+                <ResetButton onResetButtonClick={handleResetButtonClick} />
+              </div>
+            </Grid.Col>
+          )}
+        </Grid>
+      </>
+    );
+  };
+
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={'w-full h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -415,7 +569,7 @@ const TaskView = () => {
       )}
       <GenericHeader
         headerText="Task"
-        breadcrumbsText="Manage Task"
+        breadcrumbs={[{ title: 'Manage Task', href: '' }]}
         isAddOrUpdateButton
         buttonContent="Add Task"
         onButtonClick={handleAddTask} // Call handleAddTask function when button is clicked
@@ -427,6 +581,7 @@ const TaskView = () => {
         radius={12}
       >
         <Tabs
+          onChange={value => setActiveTab(value)}
           tabs={[
             {
               value: 'Table',
@@ -434,93 +589,7 @@ const TaskView = () => {
               icon: <CiViewTable size={24} />,
               component: (
                 <div className="mt-4">
-                  <SearchComponent
-                    placeholder="Search by title..."
-                    searchValue={searchValues.searchValue}
-                    setValuesById={setValuesById}
-                    handleSearchButtonClick={handleSearchButtonClick}
-                    handleResetButtonClick={handleResetButtonClick}
-                  />
-                  <Grid className="mt-2">
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Assigned To"
-                        data={[
-                          'Me',
-                          'Farm user 1',
-                          'Farm user 2',
-                          'Farm user 3',
-                        ]}
-                        value={searchValues.assignedTo ?? ''}
-                        onChange={value => setValuesById({ assignedTo: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Associated To"
-                        data={[]}
-                        value={searchValues.associatedTo ?? ''}
-                        clearable
-                        onChange={value =>
-                          setValuesById({ associatedTo: value })
-                        }
-                      />
-                    </Grid.Col>
-
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Progress"
-                        data={['In Progress', 'Pending', 'Completed']}
-                        value={searchValues.progress ?? ''}
-                        onChange={value => setValuesById({ progress: value })}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                      <Select
-                        placeholder="Upcoming Task"
-                        data={[
-                          'All',
-                          'Today',
-                          'Tomorrow',
-                          'This Week',
-                          'Next Week',
-                          'Next Month',
-                          'Custom Range',
-                        ]}
-                        value={searchValues?.upcomingTask ?? ''}
-                        onChange={value =>
-                          setValuesById({ upcomingTask: value })
-                        }
-                      />
-                    </Grid.Col>
-                    {searchValues?.upcomingTask === 'Custom Range' && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <DatePicker
-                          type="range"
-                          placeholder="Select a date range"
-                          value={searchValues.dateRange ?? ''}
-                          onChange={value =>
-                            setValuesById({
-                              dateRange: value as [Date | null, Date | null],
-                            })
-                          }
-                        />
-                      </Grid.Col>
-                    )}
-
-                    {isSmallScreen && (
-                      <Grid.Col span={{ base: 12, md: 6, lg: 2 }}>
-                        <div className="flex flex-row justify-between">
-                          <SearchButton
-                            onSearchButtonClick={handleSearchButtonClick}
-                          />
-                          <ResetButton
-                            onResetButtonClick={handleResetButtonClick}
-                          />
-                        </div>
-                      </Grid.Col>
-                    )}
-                  </Grid>
+                  {searchAndFilter()}
                   <Table
                     isLoading={isLoading}
                     data={tableData}
@@ -537,7 +606,19 @@ const TaskView = () => {
               icon: <CiCalendarDate size={24} />,
               component: (
                 <div className="mt-5">
-                  <MyCalendar />
+                  {searchAndFilter()}
+                  <div className="h-4" />
+                  <MyCalendar
+                    taskList={tableData}
+                    handleClickTask={(object: any) => {
+                      setModalInfo({
+                        isOpen: true,
+                        type: 'Edit',
+                        objectData: object,
+                        isReadOnly: false,
+                      });
+                    }}
+                  />
                 </div>
               ),
             },
@@ -547,7 +628,7 @@ const TaskView = () => {
       <Modal
         opened={modalInfo.isOpen}
         onClose={() => setModalInfo(initialModalInfo)}
-        title="Add Task"
+        title={`${modalInfo.type} Task`}
         size="lg"
         styles={{
           title: {

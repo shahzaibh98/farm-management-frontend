@@ -13,4 +13,5 @@ export interface User {
   roleId: string;
   userId: number;
   isActive: string;
+  farm: any;
 }

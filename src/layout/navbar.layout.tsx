@@ -2,20 +2,9 @@
 import { Code, Group, Tooltip, useMantineTheme } from '@mantine/core';
 
 // Tabler icons imports
-import {
-  IconBuildingWarehouse,
-  IconCarrot,
-  IconDashboard,
-  IconListDetails,
-  IconReceipt2,
-} from '@tabler/icons-react';
 
 // React icon imports
-import {
-  MdOutlineAdminPanelSettings,
-  MdOutlineKeyboardArrowRight,
-} from 'react-icons/md';
-import { PiPawPrint as IconPiPawPrint } from 'react-icons/pi';
+import { MdOutlineKeyboardArrowRight } from 'react-icons/md';
 
 // React library imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,7 +18,8 @@ import { clearUserInfo } from '../redux/actions/user';
 
 // Utility function imports
 import { extractFirstWord } from '../utils/common/function';
-import { systemRoles } from '../utils/common/constant.objects';
+
+import { getNavBarAgainstRole } from './role-based.navbar';
 
 function Navbar({ onClick }: { onClick: () => void }) {
   // Initialize the Redux dispatch hook
@@ -43,37 +33,25 @@ function Navbar({ onClick }: { onClick: () => void }) {
   const url = window.location.href;
   const currentUrl = extractFirstWord(url);
 
-  // Navigation data with links and icons
-  const isSuperAdmin =
-    useSelector((state: any) => state?.userInfo?.userInfo)?.roleId ===
-    systemRoles[0].id;
-
   const userInfo = useSelector((state: any) => state?.userInfo?.userInfo);
+  const { isSystemAdmin, currentRole } = useSelector(
+    (state: any) => state?.userInfo
+  );
 
-  const data = isSuperAdmin
-    ? [
-        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-        {
-          link: '/manage-farm-admin',
-          label: 'Manage Farm Admin',
-          icon: MdOutlineAdminPanelSettings,
-        },
-      ]
-    : [
-        { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
-        { link: '/task', label: 'Task', icon: IconListDetails },
-        { link: '/livestock', label: 'LiveStock', icon: IconPiPawPrint },
-        { link: '/crop', label: 'Crop', icon: IconCarrot },
-        { link: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse },
-        { link: '/financial', label: 'Financial', icon: IconReceipt2 },
-      ];
+  const currentUserRole = isSystemAdmin
+    ? 0
+    : currentRole?.roleMode === 'farms'
+      ? currentRole?.currentFarmRole?.roleId
+      : currentRole?.currentCompanyRole?.roleId;
+
+  const data = getNavBarAgainstRole(currentUserRole);
 
   // Create links for navigation using the data array
-  const links = data.map(item => (
+  const links = data?.map(item => (
     <Link
       // Apply Tailwind CSS classes for styling
       className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
-        item.link === `/${currentUrl}`
+        item.activeLinks?.find((e: string) => e === `/${currentUrl}`)
           ? 'bg-secondaryColors-100 text-darkColors-100'
           : 'text-lightColors-100'
       }`}
@@ -90,7 +68,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
 
   return (
     <div
-      className={`flex flex-col h-full`}
+      className={'flex flex-col h-full'}
       // Set the text and background colors based on the theme
       style={{
         color: theme.colors.lightColors[6],
@@ -134,7 +112,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
             <img
               src={
                 userInfo?.profilePic ??
-                'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
+                'https://res.cloudinary.com/demo/image/twitter/1330457336.jpg'
               }
               className="rounded-md"
             />

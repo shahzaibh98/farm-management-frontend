@@ -11,21 +11,21 @@ import { ErrorBoundary } from './pages/error/index';
 // core styles are required for all packages
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '@mantine/charts/styles.css';
+import '@mantine/dropzone/styles.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 root.render(
-  <React.StrictMode>
-    <MantineProvider defaultColorScheme={'light'} theme={theme}>
-      <ErrorBoundary>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ErrorBoundary>
-    </MantineProvider>
-  </React.StrictMode>
+  <MantineProvider defaultColorScheme={'light'} theme={theme}>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ErrorBoundary>
+  </MantineProvider>
 );
 
 reportWebVitals();

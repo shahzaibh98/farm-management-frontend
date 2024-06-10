@@ -4,14 +4,14 @@ import { Modal as MantineModal, ModalProps } from '@mantine/core';
 interface CustomModalProps
   extends Omit<ModalProps, 'opened' | 'onClose' | 'title'> {
   opened: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   title: string;
   [key: string]: any; // Index signature for additional props
 }
 
 const CustomModal: React.FC<CustomModalProps> = ({
   opened,
-  onClose,
+  onClose = () => {},
   title,
   children,
   ...rest
