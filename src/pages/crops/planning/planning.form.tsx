@@ -55,9 +55,9 @@ import {
 import { StepIconProps } from '@material-ui/core/StepIcon';
 import { styled } from '@material-ui/core/styles';
 import {
-  IconCactus,
   IconCheck,
   IconCoins,
+  IconEdit,
   IconPlant,
   IconQuestionMark,
 } from '@tabler/icons-react';
@@ -1099,9 +1099,9 @@ const CropPlanningForm = ({ type = 'Add' }) => {
 
     const icons: { [index: string]: React.ReactElement } = {
       0: <IconCheck />,
-      1: <IconCactus />,
+      1: <IconEdit />,
       2: <IconPlant />,
-      3: <IconCactus />,
+      3: <HarvestIcon className="ml-1.5" />,
       4: <IconCoins />,
       5: <IconQuestionMark />,
     };
@@ -1117,7 +1117,7 @@ const CropPlanningForm = ({ type = 'Add' }) => {
     );
   }
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}

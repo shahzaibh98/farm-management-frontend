@@ -285,38 +285,32 @@ const ManageCropsPlanning = () => {
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name}
-            </p>
+            <p className="text-center">{info.getValue()?.name}</p>
           </div>
         ),
       },
       {
-        header: 'PROVINCE',
+        header: 'Province',
         accessorKey: 'province',
         size: 50,
         minSize: 50,
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name}
-            </p>
+            <p className="text-center">{info.getValue()?.name}</p>
           </div>
         ),
       },
 
       {
-        header: 'DIVISION',
+        header: 'Division',
         accessorKey: 'division',
         size: 50,
         minSize: 50,
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name}
-            </p>
+            <p className="text-center">{info.getValue()?.name}</p>
           </div>
         ),
       },
@@ -328,9 +322,7 @@ const ManageCropsPlanning = () => {
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name}
-            </p>
+            <p className="text-center">{info.getValue()?.name}</p>
           </div>
         ),
       },
@@ -342,23 +334,19 @@ const ManageCropsPlanning = () => {
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()?.name}
-            </p>
+            <p className="text-center">{info.getValue()?.name}</p>
           </div>
         ),
       },
       {
-        header: 'TOTAL PROFIT',
+        header: 'PROFIT',
         accessorKey: 'totalProfit',
         size: 50,
         minSize: 50,
         maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -409,7 +397,7 @@ const ManageCropsPlanning = () => {
   };
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={`w-full min-h-screen relative bg-darkColors-700`}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -434,7 +422,6 @@ const ManageCropsPlanning = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
         mih={'70%'}

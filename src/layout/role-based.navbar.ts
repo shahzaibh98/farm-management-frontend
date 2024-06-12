@@ -1,11 +1,11 @@
 import {
   IconBuildingWarehouse,
+  IconCalendar,
   IconCarrot,
   IconDashboard,
   IconListDetails,
   IconReceipt2,
 } from '@tabler/icons-react';
-import { GiPlantRoots } from 'react-icons/gi';
 import { MdGrass, MdOutlineAdminPanelSettings } from 'react-icons/md';
 import { PiPawPrint as IconPiPawPrint, PiUsers } from 'react-icons/pi';
 import { TfiMapAlt } from 'react-icons/tfi';
@@ -72,6 +72,12 @@ export function getNavBarAgainstRole(currentRole: string | number) {
         label: 'Crops',
         icon: IconCarrot,
         activeLinks: ['/crops', '/planning'],
+      },
+      {
+        link: '/crop-plan',
+        label: 'Crop Plan',
+        icon: IconCalendar,
+        activeLinks: ['/crop-plan'],
       },
     ],
     1: [

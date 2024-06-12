@@ -292,14 +292,15 @@ export function capitalizeFirstLetter(inputString: string) {
   return inputString.charAt(0).toUpperCase() + inputString.slice(1);
 }
 
-export function capitalizeEveryWord(
-  sentence: string | undefined | null
-): string {
+export function capitalizeEveryWord(sentence: any): string {
   if (!sentence) return '';
 
   return sentence
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map(
+      (word: string) =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
     .join(' ');
 }
 
@@ -392,3 +393,12 @@ export function capitalizeFirstLetterSentence(
 
   return capitalizedText;
 }
+export const formatDate = (dateString: string | number | Date) => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+  return date.toLocaleDateString('en-US', options);
+};

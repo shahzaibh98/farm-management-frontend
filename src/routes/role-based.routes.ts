@@ -10,6 +10,7 @@ import {
   profileRoutes,
   publicRoutes,
   taskRoutes,
+  cropPlanRoutes,
 } from './route';
 
 import { landRoutes } from './route/land.routes';
@@ -18,7 +19,7 @@ export function getRoutesAgainstRole(currentRole: string) {
   const commonRoutes = [...dashboardRoutes, ...profileRoutes, ...publicRoutes];
 
   const roleRoutesMapping: any = {
-    0: [...farmAdminRoutes, ...cropsRoutes],
+    0: [...farmAdminRoutes, ...cropsRoutes, ...cropPlanRoutes],
     1: [
       ...taskRoutes,
       ...plantingRoutes,

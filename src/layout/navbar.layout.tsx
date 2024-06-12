@@ -1,6 +1,8 @@
 // Mantine library imports
 import { Code, Group, Tooltip, useMantineTheme } from '@mantine/core';
 
+import appIcon from '../assets/svg/app-icon.svg';
+
 // Tabler icons imports
 
 // React icon imports
@@ -49,20 +51,34 @@ function Navbar({ onClick }: { onClick: () => void }) {
   // Create links for navigation using the data array
   const links = data?.map(item => (
     <Link
-      // Apply Tailwind CSS classes for styling
-      className={`flex items-center text-md font-medium rounded-md px-4 py-3 mb-2 border-none hover:bg-secondaryColors-100 hover:text-darkColors-100 hover:border-none ${
+      className={`group flex items-center text-md font-medium rounded-l-full pl-4 py-3 mb-2 border-none hover:bg-[#0F783B] hover:text-[#ffffff] ${
         item.activeLinks?.find((e: string) => e === `/${currentUrl}`)
-          ? 'bg-secondaryColors-100 text-darkColors-100'
-          : 'text-lightColors-100'
+          ? 'bg-[#0F783B] text-[#ffffff]'
+          : 'text-[#414141]'
       }`}
       to={item.link}
       key={item.label}
       onClick={() => onClick()}
     >
       {/* Render the icon */}
-      <item.icon className="w-6 h-6 mr-2" stroke={'1.5'} />
-      {/* Display the label */}
-      <span>{item.label}</span>
+      {item.activeLinks?.find((e: string) => e === `/${currentUrl}`) ? (
+        <>
+          <item.icon className="w-6 h-6 mr-3 text-[#ffffff]" stroke={'1.5'} />
+          <span className="font-montserrat font-medium text-[14px]">
+            {item.label}
+          </span>
+        </>
+      ) : (
+        <>
+          <item.icon
+            className="w-6 h-6 mr-3 text-[#BE8B45] group-hover:text-[#ffffff]"
+            stroke={'1.5'}
+          />
+          <span className="font-montserrat font-medium text-[14px]">
+            {item.label}
+          </span>
+        </>
+      )}
     </Link>
   ));
 
@@ -72,30 +88,33 @@ function Navbar({ onClick }: { onClick: () => void }) {
       // Set the text and background colors based on the theme
       style={{
         color: theme.colors.lightColors[6],
-        backgroundColor: theme.colors.darkColors[0],
+        backgroundColor: '#F3FBF2',
+        borderRight: '1px solid #BFE1C8',
       }}
     >
       {/* Header section with application version */}
-      <div className="h-[11%] overflow-hidden mt-8 ml-4">
-        <Group>
-          <Code
-            color={theme.colors.secondaryColors[3]}
-            c={theme.colors.darkColors[0]}
-          >
-            <Text fw={550} c={theme.colors.darkColors[0]}>
-              F.M v1.0
-            </Text>
-          </Code>
-        </Group>
+      <div className="h-[11%] overflow-hidden">
+        <div className="flex flex-row mt-8 ml-4">
+          <img src={appIcon} />
+          <div className="ml-2 mt-1">
+            <div className="font-bold text-[15px] text-[#0F783B] font-montserrat">
+              FARM MANAGEMENT
+            </div>
+            <div className="font-normal text-[12px] text-[#000000] font-montserrat">
+              System
+            </div>
+          </div>
+        </div>
       </div>
+      <hr className="border-t border-t-[#BFE1C8] my-8" />
 
       {/* Main navigation links */}
       <div className="h-[82%] overflow-y-auto">
-        <div className="flex flex-col p-2">{links}</div>
+        <div className="flex flex-col pl-4">{links}</div>
       </div>
 
       {/* Footer section with user profile and logout button */}
-      <div className="h-[30%] lg:h-[7%] border-t-2 border-t-skin-light flex justify-between items-center gap-5 py-1 px-3">
+      <div className="h-[30%] lg:h-[7%] border-t border-t-[#BFE1C8] flex justify-between items-center gap-5 py-1 px-3">
         {/* User profile and avatar */}
         <div
           className="flex items-center rounded-sm cursor-pointer"
@@ -106,7 +125,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
               navigate('/view-profile');
               onClick();
             }}
-            className="w-6 rounded-md ring ring-secondaryColors-100 ring-offset-2 hover:ring-offset-4 transition-all duration-300 delay-300"
+            className="w-6 rounded-md ring ring-[#0F783B] ring-offset-2 hover:ring-offset-4 transition-all duration-300 delay-400 ease-in-out"
           >
             {/* Avatar image */}
             <img
@@ -121,7 +140,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
           <div className="ml-4">
             {/* User name */}
             <div
-              className="hover:text-secondaryColors-100 capitalize"
+              className="hover:text-[#0F783B] capitalize text-[#414141] font-montserrat text-[12px] font-semibold"
               onClick={() => {
                 navigate('/view-profile');
                 onClick();
@@ -130,16 +149,15 @@ function Navbar({ onClick }: { onClick: () => void }) {
               {userInfo?.name}
             </div>
             {/* View profile link */}
-            <Text
-              size="sm"
-              className="hover:text-secondaryColors-100"
+            <div
+              className="hover:text-['#0F783B'] font-montserrat text-[10px] font-medium text-[#414141]"
               onClick={() => {
                 navigate('/view-profile');
                 onClick();
-              }} // Use navigate to redirect}
+              }}
             >
               View Profile
-            </Text>
+            </div>
           </div>
         </div>
         {/* Logout button with tooltip */}
@@ -148,11 +166,11 @@ function Navbar({ onClick }: { onClick: () => void }) {
           withArrow
           position="left"
           transitionProps={{ transition: 'skew-up', duration: 300 }}
-          color={theme.colors.lightColors[3]}
+          color={theme.colors.darkColors[1]}
         >
           {/* Logout button */}
           <div
-            className="flex items-center text-sm font-medium rounded-sm hover:text-secondaryColors-100 cursor-pointer"
+            className="flex text-[#414141] items-center text-sm font-medium rounded-sm hover:text-[#0F783B] cursor-pointer"
             onClick={() => dispatch(clearUserInfo())}
           >
             {/* Right arrow icon */}

@@ -285,9 +285,7 @@ const BedsView = () => {
           const id = info?.row?.original?.bedId;
           return (
             <div className="flex ml-2" onClick={() => handleViewClick(id)}>
-              <p className="text-sm lg:text-base text-center">
-                {info.getValue()}
-              </p>
+              <p className="text-center">{info.getValue()}</p>
             </div>
           );
         },
@@ -302,9 +300,7 @@ const BedsView = () => {
           const rowData = info?.row?.original;
           return (
             <div className="flex flex-row">
-              <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.length}
-              </p>
+              <p className="text-center ml-4">{rowData?.length}</p>
             </div>
           );
         },
@@ -320,9 +316,7 @@ const BedsView = () => {
 
           return (
             <div className="flex flex-row">
-              <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.width}
-              </p>
+              <p className="text-center ml-4">{rowData?.width}</p>
             </div>
           );
         },
@@ -337,7 +331,7 @@ const BedsView = () => {
           const rowInfo = info?.row?.original;
           return (
             <div className="flex">
-              <p className="text-sm lg:text-base text-center">
+              <p className="text-center">
                 {`${Number(rowInfo?.area) > 0.01 ? Number(rowInfo?.area).toFixed(2) + ' ' + getReferenceName('areaUnit', rowInfo?.areaUnitId) : Number(rowInfo?.area) === 0 ? '' : 'Less than 0.01'} `}
               </p>
             </div>
@@ -396,7 +390,7 @@ const BedsView = () => {
   );
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -420,7 +414,6 @@ const BedsView = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >

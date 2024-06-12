@@ -134,7 +134,7 @@ module.exports = {
         400: 'rgba(29, 43, 57, 0.45)', // 3 --color-dark-dark : rgba(29, 43, 57, 0.45);
         500: 'rgba(29, 43, 57, 0.25)', // 4 --color-dark-dark : rgba(29, 43, 57, 0.25);
         600: 'rgba(29, 43, 57, 0.15)', // 5 --color-dark-dark : rgba(29, 43, 57, 0.15);
-        700: 'rgba(29, 43, 57, 0.03)', // index[6] background color for section
+        700: '#F8F7EF', // index[6] background color for section
         800: 'rgba(29, 43, 57, 0.01)', // index[7] background color for section
         900: 'rgba(29, 43, 57, 0.02)',
         1000: 'rgba(29, 43, 57, 0.08)',

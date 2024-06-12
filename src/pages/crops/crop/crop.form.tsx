@@ -128,7 +128,7 @@ const CropForm = ({
     console.log('Image URL', formik.values?.image);
   }
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -153,7 +153,6 @@ const CropForm = ({
         onButtonClick={formik.handleSubmit} // Call handleAddFarmAdmin function when button is clicked
       />
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
         mih={'70%'}
