@@ -114,7 +114,7 @@ const UserProfile = () => {
   };
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {/* Render notification if enabled */}
       {notification.isEnable && (
         <Notification
@@ -137,7 +137,6 @@ const UserProfile = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >

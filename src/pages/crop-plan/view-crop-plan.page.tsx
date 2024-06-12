@@ -2,41 +2,38 @@ import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI c
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
-import { SearchButton } from '../../../concave.agri/components/searchbar';
-import ResetButton from '../../../concave.agri/components/searchbar/resetButton';
+import { SearchButton } from '../../concave.agri/components/searchbar';
+import ResetButton from '../../concave.agri/components/searchbar/resetButton';
 
 // Importing a custom hook to get the screen size
-import useScreenSize from '../../../hooks/useScreenSize';
+import useScreenSize from '../../hooks/useScreenSize';
 
 // Importing custom components and layouts
-import { TableMenu } from '../../../layout';
-import GenericHeader from '../../../layout/header.layout';
-import SearchComponent from '../../../layout/searchBar.layout';
+import { TableMenu } from '../../layout';
+import GenericHeader from '../../layout/header.layout';
+import SearchComponent from '../../layout/searchBar.layout';
 
 // Importing types and constants
+import { MdOutlineLineStyle } from 'react-icons/md';
 import { useSelector } from 'react-redux';
-import { deleteData, fetchData } from '../../../api/api';
+import { deleteData, fetchData } from '../../api/api';
 import {
   Notification,
   Paper,
   Select,
-  Table,
   Text,
-} from '../../../concave.agri/components';
-import {
-  initialNotification,
-  paginationInfoValue,
-} from '../../../utils/common/constant.objects';
+} from '../../concave.agri/components';
+import CardTable from '../../concave.agri/components/tableCard/cardTable';
+import { initialNotification } from '../../utils/common/constant.objects';
 import {
   extractPageInfo,
   handleSetParams,
   removeEmptyValueFilters,
-} from '../../../utils/common/function';
-import { initialSearchValues } from './initial.values';
-import { MdOutlineLineStyle } from 'react-icons/md';
-import { handlePaginationValue } from '../../../utils/common/pagination.Helper';
+} from '../../utils/common/function';
+import { handlePaginationValue } from '../../utils/common/pagination.Helper';
+import { initialSearchValues, paginationInfoValue } from './initial.values';
 
-const ManageCrops = ({
+const ManageCropsWithPlan = ({
   pageLabel,
   apiEndPoint,
   routeName,
@@ -395,7 +392,7 @@ const ManageCrops = ({
               </Grid.Col>
             )}
           </Grid>
-          <Table
+          <CardTable
             isLoading={isLoading}
             data={tableData}
             columns={columns}
@@ -404,9 +401,8 @@ const ManageCrops = ({
           />
         </div>
       </Paper>
-
       <div className="h-4" />
     </main>
   );
 };
-export default ManageCrops;
+export default ManageCropsWithPlan;

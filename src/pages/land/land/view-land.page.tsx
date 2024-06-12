@@ -320,9 +320,7 @@ const LandView = () => {
           const id = info?.row?.original?.landId;
           return (
             <div className="flex ml-2" onClick={() => handleViewClick(id)}>
-              <p className="text-sm lg:text-base text-center">
-                {info.getValue()}
-              </p>
+              <p className="text-center">{info.getValue()}</p>
             </div>
           );
         },
@@ -340,9 +338,7 @@ const LandView = () => {
               <IconBorderCorners
                 color={getLandColors(rowData?.locationType?.name ?? '')}
               />
-              <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.locationType?.name}
-              </p>
+              <p className="text-center ml-4">{rowData?.locationType?.name}</p>
             </div>
           );
         },
@@ -357,7 +353,7 @@ const LandView = () => {
           const rowInfo = info?.row?.original;
           return (
             <div className="flex">
-              <p className="text-sm lg:text-base text-center">
+              <p className="text-center">
                 {`${Number(rowInfo?.convertedArea) < 0.01 ? 'Less than 0.01' : Number(rowInfo?.convertedArea).toFixed(2)}  ${AreaUnitEn.ACRES}`}
               </p>
             </div>
@@ -373,9 +369,7 @@ const LandView = () => {
         cell: (info: { getValue: () => any }) => {
           return (
             <div className="flex">
-              <p className="text-sm lg:text-base text-center">
-                {info.getValue()?.name ?? ''}
-              </p>
+              <p className="text-center">{info.getValue()?.name ?? ''}</p>
             </div>
           );
         },
@@ -450,7 +444,7 @@ const LandView = () => {
   );
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -473,7 +467,6 @@ const LandView = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >

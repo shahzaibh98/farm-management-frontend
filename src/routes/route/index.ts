@@ -1,4 +1,4 @@
-import { cropsRoutes, plantingRoutes } from './crops.routes';
+import { cropPlanRoutes, cropsRoutes, plantingRoutes } from './crops.routes';
 import { dashboardRoutes } from './dashboard.routes';
 import { financialRoutes } from './finanical.routes';
 import { inventoryRoutes } from './inventory.routes';
@@ -23,4 +23,5 @@ export {
   profileRoutes,
   publicRoutes,
   taskRoutes,
+  cropPlanRoutes,
 };

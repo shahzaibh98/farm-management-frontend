@@ -236,7 +236,7 @@ const SoilTestView = () => {
           const id = info?.row?.original?.soilTestId;
           return (
             <div className="flex ml-2" onClick={() => handleViewClick(id)}>
-              <p className="text-sm lg:text-base text-center hover:text-secondaryColors-100">
+              <p className="text-center hover:text-secondaryColors-100">
                 {formatTimestamp(info.getValue()) ?? ''}
               </p>
             </div>
@@ -251,7 +251,7 @@ const SoilTestView = () => {
         maxSize: 500, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
-            <p className="text-sm lg:text-base text-center hover:cursor-default">
+            <p className="text-center hover:cursor-default">
               {info.getValue() ?? ''}
             </p>
           </div>
@@ -267,9 +267,7 @@ const SoilTestView = () => {
           const rowData = info?.row?.original;
           return (
             <div className="flex flex-row">
-              <p className="text-sm lg:text-base text-center ml-4">
-                {info.getValue()?.name ?? ''}
-              </p>
+              <p className="text-center ml-4">{info.getValue()?.name ?? ''}</p>
             </div>
           );
         },
@@ -282,7 +280,7 @@ const SoilTestView = () => {
         maxSize: 500, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
-            <p className="text-sm lg:text-base text-center">
+            <p className="text-center">
               {info.getValue() ? info.getValue() + ' %' : ''}
             </p>
           </div>
@@ -296,7 +294,7 @@ const SoilTestView = () => {
         maxSize: 500, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
-            <p className="text-sm lg:text-base text-center">
+            <p className="text-center">
               {info.getValue() ? info.getValue() + ' %' : ''}
             </p>
           </div>
@@ -328,7 +326,7 @@ const SoilTestView = () => {
   );
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -351,7 +349,6 @@ const SoilTestView = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >

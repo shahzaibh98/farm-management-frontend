@@ -1,7 +1,6 @@
 // Import necessary components and hooks from Mantine and other libraries
-import { Anchor, Breadcrumbs, useMantineTheme } from '@mantine/core';
-import { IoChevronBackOutline } from 'react-icons/io5';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Breadcrumbs, useMantineTheme } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 import { Button, Text } from '../concave.agri/components';
 
 interface IBreadCrumbs {
@@ -45,9 +44,8 @@ const GenericHeader: React.FC<Props> = ({
     <div key={index} onClick={() => item.href !== '' && navigate(item.href)}>
       <Text
         key={index}
-        className={`"text-skin-caption ${item.href !== '' ? 'hover:underline hover:underline-offset-4 hover:cursor-pointer' : ''}`}
+        className={`text-skin-caption ${item.href !== '' ? 'hover:underline hover:underline-offset-4 hover:cursor-pointer' : ''}`}
         tt="capitalize"
-        fs="italic"
         style={theme => ({
           color: theme.colors.darkColors[3],
           lineHeight: theme.other.lineHeights.sm,
@@ -69,18 +67,9 @@ const GenericHeader: React.FC<Props> = ({
     >
       {/* Left section with back button and header text */}
       <div className="flex items-center">
-        {/* Back button */}
-        {isBackendButton && (
-          <IoChevronBackOutline
-            size={24}
-            onClick={() => navigate(-1)}
-            color={theme.colors.darkColors[11]}
-            className="cursor-pointer"
-          />
-        )}
         {/* Header text and breadcrumbs */}
         <div className="ml-4">
-          <p className="font-mono text-2xl font-semibold">{headerText}</p>
+          <p className="font-montserrat text-2xl font-bold">{headerText}</p>
           <Breadcrumbs>{items}</Breadcrumbs>
         </div>
       </div>
@@ -103,18 +92,23 @@ const GenericHeader: React.FC<Props> = ({
         )}
         {isAddOrUpdateButton && (
           <Button
-            variant="outline"
             autoContrast
             m={5}
-            color={theme.colors.secondaryColors[3]}
             loading={isAddOrUpdateButtonLoading}
             size="md"
             onClick={() => onButtonClick()}
             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+            styles={{
+              root: {
+                borderRadius: '20px',
+                background: '#F3FBF2',
+                border: '1px solid rgba(15, 120, 59, 0.1)',
+              },
+            }}
           >
-            <Text tt="capitalize" fs="italic" p={2}>
+            <div className="font-montserrat font-semibold text-[12px] text-[#0F783B]">
               {buttonContent}
-            </Text>
+            </div>
           </Button>
         )}
       </div>

@@ -356,9 +356,7 @@ const TaskView = () => {
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -371,7 +369,7 @@ const TaskView = () => {
           const rowData = info?.row?.original;
           return (
             <div className="flex items-center justify-center">
-              <p className="text-sm lg:text-base text-center">
+              <p className="text-center">
                 {rowData?.assigned?.systemUser?.name}
               </p>
             </div>
@@ -386,9 +384,7 @@ const TaskView = () => {
         maxSize: 500, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -420,9 +416,7 @@ const TaskView = () => {
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -431,7 +425,7 @@ const TaskView = () => {
         accessorKey: 'startDateTime',
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
+            <p className="text-center">
               {formatTimestamp(info.getValue()) ?? ''}
             </p>
           </div>
@@ -556,7 +550,7 @@ const TaskView = () => {
   };
 
   return (
-    <main className={'w-full h-screen relative bg-darkColors-700'}>
+    <main className={'w-full min-h-screen relative bg-darkColors-700'}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -576,7 +570,6 @@ const TaskView = () => {
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >

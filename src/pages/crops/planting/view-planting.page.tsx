@@ -244,9 +244,7 @@ const PlantingView = ({
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -260,9 +258,7 @@ const PlantingView = ({
           const rowData = info?.row?.original;
           return (
             <div className="flex flex-row">
-              <p className="text-sm lg:text-base text-center ml-4">
-                {rowData?.type}
-              </p>
+              <p className="text-center ml-4">{rowData?.type}</p>
             </div>
           );
         },
@@ -277,7 +273,7 @@ const PlantingView = ({
           const rowInfo = info?.row?.original;
           return (
             <div className="flex">
-              <p className="text-sm lg:text-base text-center"></p>
+              <p className="text-center"></p>
             </div>
           );
         },
@@ -291,9 +287,7 @@ const PlantingView = ({
         cell: (info: { getValue: () => any }) => {
           return (
             <div className="flex">
-              <p className="text-sm lg:text-base text-center">
-                {info.getValue()}
-              </p>
+              <p className="text-center">{info.getValue()}</p>
             </div>
           );
         },
@@ -306,9 +300,7 @@ const PlantingView = ({
         maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
-            <p className="text-sm lg:text-base text-center">
-              {info.getValue()}
-            </p>
+            <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
@@ -337,7 +329,7 @@ const PlantingView = ({
   );
 
   return (
-    <main className={`w-full h-screen relative bg-darkColors-700`}>
+    <main className={`w-full min-h-screen relative bg-darkColors-700`}>
       {notification.isEnable && (
         <Notification
           title={notification.title}
@@ -357,7 +349,6 @@ const PlantingView = ({
       />
 
       <Paper
-        shadow="xs"
         className="flex justify-between items-center m-2 md:m-4 lg:m-8 radius-2xl min-h-[60%] p-4"
         radius={12}
       >
