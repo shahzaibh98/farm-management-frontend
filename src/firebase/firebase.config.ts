@@ -18,8 +18,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Cloud Messaging and get a reference to the service
-const messaging = getMessaging(app);
+// Check if messaging is supported
+let messaging: any;
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').then(() => {
+      messaging = getMessaging(app);
+    });
+  }
+}
 
 /**
  * Request Token

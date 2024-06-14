@@ -1,4 +1,4 @@
-import { Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Modal, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 import { deleteData, fetchData } from '../../../api/api';
@@ -229,9 +229,7 @@ const SoilTestView = () => {
       {
         header: <div className="flex text-start ml-2">REPORT DATE</div>,
         accessorKey: 'testReportDate',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: any) => {
           const id = info?.row?.original?.soilTestId;
           return (
@@ -246,9 +244,7 @@ const SoilTestView = () => {
       {
         header: <div className="flex text-start">LABORATORY NAME</div>,
         accessorKey: 'laboratoryName',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
             <p className="text-center hover:cursor-default">
@@ -260,9 +256,7 @@ const SoilTestView = () => {
       {
         header: <div className="flex text-start">SOIL TYPE</div>,
         accessorKey: 'soilType',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -275,9 +269,7 @@ const SoilTestView = () => {
       {
         header: <div className="flex text-start">PH</div>,
         accessorKey: 'pH',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
             <p className="text-center">
@@ -289,9 +281,7 @@ const SoilTestView = () => {
       {
         header: <div className="flex text-start">EC</div>,
         accessorKey: 'eC',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
             <p className="text-center">
@@ -302,22 +292,25 @@ const SoilTestView = () => {
       },
 
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'soilTestId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.soilTestId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: 'Soil Test' })
-              }
-              onEditClick={handleEditClick}
-              onViewClick={handleViewClick}
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={id =>
+                  setDeleteInfo({
+                    isOpened: true,
+                    id,
+                    resourceName: 'Soil Test',
+                  })
+                }
+                onEditClick={handleEditClick}
+                onViewClick={handleViewClick}
+              />
+            </Center>
           );
         },
       },

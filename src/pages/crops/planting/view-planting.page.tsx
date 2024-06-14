@@ -1,4 +1,4 @@
-import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
@@ -239,9 +239,7 @@ const PlantingView = ({
       {
         header: <div className="flex text-start ml-2">PLANTING METHOD</div>,
         accessorKey: 'Planting Method',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex ml-2">
             <p className="text-center">{info.getValue()}</p>
@@ -251,9 +249,7 @@ const PlantingView = ({
       {
         header: <div className="flex text-start">ROW SPACING</div>,
         accessorKey: 'row spacing',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -266,9 +262,7 @@ const PlantingView = ({
       {
         header: <div className="flex text-start">SEED COMPANY</div>,
         accessorKey: 'area',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowInfo = info?.row?.original;
           return (
@@ -281,9 +275,7 @@ const PlantingView = ({
       {
         header: <div className="flex text-start">ACTUAL YIELD</div>,
         accessorKey: 'soilType',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => {
           return (
             <div className="flex">
@@ -295,9 +287,7 @@ const PlantingView = ({
       {
         header: 'PLANTING STATUS',
         accessorKey: 'status',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -305,22 +295,22 @@ const PlantingView = ({
         ),
       },
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'landId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
+
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: pageLabel })
-              }
-              onEditClick={handleEditClick}
-              onViewClick={handleViewClick}
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={id =>
+                  setDeleteInfo({ isOpened: true, id, resourceName: pageLabel })
+                }
+                onEditClick={handleEditClick}
+                onViewClick={handleViewClick}
+              />
+            </Center>
           );
         },
       },

@@ -351,9 +351,7 @@ const TaskView = () => {
       {
         header: 'TITLE',
         accessorKey: 'taskTitle',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -362,9 +360,7 @@ const TaskView = () => {
       },
       {
         header: 'ASSIGNED TO',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -379,9 +375,7 @@ const TaskView = () => {
       {
         header: 'ASSOCIATED TO',
         accessorKey: 'associatedTo',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -391,9 +385,7 @@ const TaskView = () => {
       {
         header: 'PRIORITY',
         accessorKey: 'priority',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
           return (
@@ -411,9 +403,7 @@ const TaskView = () => {
       {
         header: 'STATUS',
         accessorKey: 'taskStatus',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -432,34 +422,33 @@ const TaskView = () => {
         ),
       },
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'taskId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.taskId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={handleDeleteById}
-              onEditClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'Edit',
-                  objectData: info?.row?.original,
-                  isReadOnly: false,
-                })
-              }
-              onViewClick={() =>
-                setModalInfo({
-                  isOpen: true,
-                  type: 'View',
-                  objectData: info?.row?.original,
-                  isReadOnly: true,
-                })
-              }
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={handleDeleteById}
+                onEditClick={() =>
+                  setModalInfo({
+                    isOpen: true,
+                    type: 'Edit',
+                    objectData: info?.row?.original,
+                    isReadOnly: false,
+                  })
+                }
+                onViewClick={() =>
+                  setModalInfo({
+                    isOpen: true,
+                    type: 'View',
+                    objectData: info?.row?.original,
+                    isReadOnly: true,
+                  })
+                }
+              />
+            </Center>
           );
         },
       },

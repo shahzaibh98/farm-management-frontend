@@ -1,4 +1,4 @@
-import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useParams, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
@@ -280,9 +280,6 @@ const ManageCropsPlanning = () => {
       {
         header: 'Land Type',
         accessorKey: 'landType',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()?.name}</p>
@@ -292,9 +289,6 @@ const ManageCropsPlanning = () => {
       {
         header: 'Province',
         accessorKey: 'province',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()?.name}</p>
@@ -305,9 +299,6 @@ const ManageCropsPlanning = () => {
       {
         header: 'Division',
         accessorKey: 'division',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()?.name}</p>
@@ -317,9 +308,6 @@ const ManageCropsPlanning = () => {
       {
         header: 'DISTRICT',
         accessorKey: 'district',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()?.name}</p>
@@ -329,9 +317,6 @@ const ManageCropsPlanning = () => {
       {
         header: 'TEHSIL',
         accessorKey: 'tehsil',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()?.name}</p>
@@ -341,31 +326,26 @@ const ManageCropsPlanning = () => {
       {
         header: 'PROFIT',
         accessorKey: 'totalProfit',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
           </div>
         ),
       },
-
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'cropPlanId',
-        size: 55,
-        minSize: 55,
-        maxSize: 55,
         cell: (info: any) => {
           const id = info?.row?.original?.cropPlanId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={handleDeleteById}
-              onViewClick={handleViewClick}
-              onEditClick={handleEditClick}
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={handleDeleteById}
+                onViewClick={handleViewClick}
+                onEditClick={handleEditClick}
+              />
+            </Center>
           );
         },
       },

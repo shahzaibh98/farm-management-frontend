@@ -77,17 +77,23 @@ const GenericHeader: React.FC<Props> = ({
       <div>
         {isSecondButton && (
           <Button
-            variant="outline"
-            m={5}
             autoContrast
-            color={theme.colors.secondaryColors[3]}
+            m={5}
+            loading={isAddOrUpdateButtonLoading}
             size="md"
             onClick={() => onSecondButtonClick()}
             style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+            styles={{
+              root: {
+                borderRadius: '20px',
+                background: '#F3FBF2',
+                border: '1px solid rgba(15, 120, 59, 0.1)',
+              },
+            }}
           >
-            <Text tt="capitalize" fs="italic" p={2}>
+            <div className="font-montserrat font-semibold text-[12px] text-[#0F783B]">
               {secondButtonContent}
-            </Text>
+            </div>
           </Button>
         )}
         {isAddOrUpdateButton && (

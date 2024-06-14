@@ -93,7 +93,7 @@ function Navbar({ onClick }: { onClick: () => void }) {
       }}
     >
       {/* Header section with application version */}
-      <div className="h-[11%] overflow-hidden">
+      <div className="lg:h-[11%] sm:h-[20%] overflow-hidden">
         <div className="flex flex-row mt-8 ml-4">
           <img src={appIcon} />
           <div className="ml-2 mt-1">

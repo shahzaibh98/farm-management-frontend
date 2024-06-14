@@ -1,4 +1,4 @@
-import { Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
+import { Center, Grid, useMantineTheme } from '@mantine/core'; // Importing Mantine UI components
 import { useEffect, useMemo, useState } from 'react'; // Importing React hooks
 import { useNavigate, useSearchParams } from 'react-router-dom'; // Importing routing-related hooks
 
@@ -240,9 +240,6 @@ const ManageCrops = ({
       {
         header: <div className="flex text-start ml-2 font-sans">Crop Name</div>,
         accessorKey: 'image',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: any) => {
           const cropInfo = info?.row?.original;
           return (
@@ -268,9 +265,6 @@ const ManageCrops = ({
       {
         header: 'CATEGORY',
         accessorKey: 'category',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -280,9 +274,6 @@ const ManageCrops = ({
       {
         header: 'SEASON',
         accessorKey: 'cropType',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -292,9 +283,6 @@ const ManageCrops = ({
       {
         header: 'START METHOD',
         accessorKey: 'startMethod',
-        size: 50,
-        minSize: 50,
-        maxSize: 500,
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -302,27 +290,26 @@ const ManageCrops = ({
         ),
       },
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'userId',
-        size: 55,
-        minSize: 55,
-        maxSize: 55,
         cell: (info: any) => {
           const id = info?.row?.original?.refFarmCropId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={handleDeleteById}
-              onViewClick={handleViewClick}
-              onEditClick={handleEditClick}
-              additionalMenuItems={[
-                {
-                  label: 'Crop Plan',
-                  icon: <MdOutlineLineStyle />,
-                  onClick: () => navigate(`/crops/${id}/planning`),
-                },
-              ]}
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={handleDeleteById}
+                onViewClick={handleViewClick}
+                onEditClick={handleEditClick}
+                additionalMenuItems={[
+                  {
+                    label: 'Crop Plan',
+                    icon: <MdOutlineLineStyle />,
+                    onClick: () => navigate(`/crops/${id}/planning`),
+                  },
+                ]}
+              />
+            </Center>
           );
         },
       },

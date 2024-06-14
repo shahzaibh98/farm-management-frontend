@@ -270,9 +270,7 @@ const ManageUser = () => {
   const commonColumns = [
     {
       header: 'NAME',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -287,9 +285,7 @@ const ManageUser = () => {
     },
     {
       header: 'EMAIL ADDRESS',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -301,9 +297,7 @@ const ManageUser = () => {
     },
     {
       header: 'PHONE NUMBER',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -339,53 +333,52 @@ const ManageUser = () => {
       },
     },
     {
-      header: '',
+      header: 'Action',
       accessorKey: 'userId',
-      size: 55,
-      minSize: 55,
-      maxSize: 55,
       cell: (info: any) => {
         const rowData = info?.row?.original;
         const id = rowData?.farmUserId;
         const farmId = rowData?.farm?.farmId;
         return (
-          <TableMenu
-            id={id}
-            onDeleteClick={handleDeleteById}
-            onViewClick={handleViewClick}
-            onEditClick={handleEditClick}
-            additionalMenuItems={[
-              {
-                label:
-                  roleId !== '0'
-                    ? rowData?.systemUser?.isActive
-                      ? 'Blocked'
-                      : 'Active'
-                    : rowData?.farm?.isActive
-                      ? 'Blocked'
-                      : 'Active',
-                icon:
-                  roleId !== '0' ? (
-                    rowData?.systemUser?.isActive ? (
+          <Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onViewClick={handleViewClick}
+              onEditClick={handleEditClick}
+              additionalMenuItems={[
+                {
+                  label:
+                    roleId !== '0'
+                      ? rowData?.systemUser?.isActive
+                        ? 'Blocked'
+                        : 'Active'
+                      : rowData?.farm?.isActive
+                        ? 'Blocked'
+                        : 'Active',
+                  icon:
+                    roleId !== '0' ? (
+                      rowData?.systemUser?.isActive ? (
+                        <MdDisabledVisible />
+                      ) : (
+                        <VscVmActive />
+                      )
+                    ) : rowData?.farm?.isActive ? (
                       <MdDisabledVisible />
                     ) : (
                       <VscVmActive />
-                    )
-                  ) : rowData?.farm?.isActive ? (
-                    <MdDisabledVisible />
-                  ) : (
-                    <VscVmActive />
-                  ),
-                onClick: () =>
-                  handleChangeStatus(
-                    roleId === '0' ? farmId : id,
-                    roleId === '0'
-                      ? rowData?.farm?.isActive
-                      : rowData?.systemUser?.isActive
-                  ),
-              },
-            ]}
-          />
+                    ),
+                  onClick: () =>
+                    handleChangeStatus(
+                      roleId === '0' ? farmId : id,
+                      roleId === '0'
+                        ? rowData?.farm?.isActive
+                        : rowData?.systemUser?.isActive
+                    ),
+                },
+              ]}
+            />
+          </Center>
         );
       },
     },

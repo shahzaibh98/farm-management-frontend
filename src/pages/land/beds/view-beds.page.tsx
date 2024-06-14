@@ -278,9 +278,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start ml-2">NAME</div>,
         accessorKey: 'name',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: any) => {
           const id = info?.row?.original?.bedId;
           return (
@@ -293,9 +291,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">LENGTH</div>,
         accessorKey: 'length',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -308,9 +304,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">WIDTH</div>,
         accessorKey: 'width',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
 
@@ -324,9 +318,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">AREA</div>,
         accessorKey: 'area',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowInfo = info?.row?.original;
           return (
@@ -366,22 +358,21 @@ const BedsView = () => {
         },
       },
       {
-        header: '',
+        header: 'Action',
         accessorKey: 'bedId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.bedId;
           return (
-            <TableMenu
-              id={id}
-              onDeleteClick={id =>
-                setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
-              }
-              onEditClick={handleEditClick}
-              onViewClick={handleViewClick}
-            />
+            <Center>
+              <TableMenu
+                id={id}
+                onDeleteClick={id =>
+                  setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
+                }
+                onEditClick={handleEditClick}
+                onViewClick={handleViewClick}
+              />
+            </Center>
           );
         },
       },
