@@ -8,6 +8,7 @@ import store from './redux';
 import reportWebVitals from './reportWebVitals';
 import { theme } from './theme/index';
 import { ErrorBoundary } from './pages/error/index';
+import { register as registerServiceWorker } from './serviceWorkerRegistration';
 // core styles are required for all packages
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
@@ -18,21 +19,8 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/firebase-messaging-sw.js')
-      .then(registration => {
-        console.log(
-          'Service Worker registration successful with scope: ',
-          registration.scope
-        );
-      })
-      .catch(err => {
-        console.log('Service Worker registration failed: ', err);
-      });
-  });
-}
+// Register the service worker
+registerServiceWorker();
 
 root.render(
   <MantineProvider defaultColorScheme={'light'} theme={theme}>
