@@ -313,9 +313,7 @@ const LandView = () => {
       {
         header: <div className="flex text-start ml-2">NAME</div>,
         accessorKey: 'name',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
           return (
@@ -328,9 +326,7 @@ const LandView = () => {
       {
         header: <div className="flex text-start">TYPE</div>,
         accessorKey: 'locationTypeId',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -346,9 +342,7 @@ const LandView = () => {
       {
         header: <div className="flex text-start">AREA</div>,
         accessorKey: 'area',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowInfo = info?.row?.original;
           return (
@@ -363,9 +357,7 @@ const LandView = () => {
       {
         header: <div className="flex text-start">SOIL TYPE</div>,
         accessorKey: 'soilType',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => {
           return (
             <div className="flex">
@@ -378,6 +370,7 @@ const LandView = () => {
       {
         header: 'BOUNDARIES',
         accessorKey: 'coordinates',
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -403,11 +396,8 @@ const LandView = () => {
         },
       },
       {
-        header: '',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'landId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
           const rowData = info?.row?.original;

@@ -351,9 +351,7 @@ const TaskView = () => {
       {
         header: 'TITLE',
         accessorKey: 'taskTitle',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -362,9 +360,7 @@ const TaskView = () => {
       },
       {
         header: 'ASSIGNED TO',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -379,9 +375,7 @@ const TaskView = () => {
       {
         header: 'ASSOCIATED TO',
         accessorKey: 'associatedTo',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -391,29 +385,22 @@ const TaskView = () => {
       {
         header: 'PRIORITY',
         accessorKey: 'priority',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
           return (
-            <Center>
-              <div className="flex flex-wrap">
-                <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
-                />
-                <Text>{priority}</Text>
-              </div>
-            </Center>
+            <div className="flex flex-wrap">
+              <div
+                className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
+              />
+              <Text>{priority}</Text>
+            </div>
           );
         },
       },
       {
         header: 'STATUS',
         accessorKey: 'taskStatus',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -432,11 +419,8 @@ const TaskView = () => {
         ),
       },
       {
-        header: '',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'taskId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.taskId;
           return (

@@ -2,7 +2,6 @@
 import { useState } from 'react';
 
 // React icon imports
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
 // Mantine core theme hook
@@ -19,7 +18,6 @@ import { TableProps } from '../../../types/table.type';
 // Component imports
 import { Select } from '../dropdown';
 import { TextInput } from '../inputField';
-import { Text } from '../text';
 
 const Table = ({
   data,
@@ -32,6 +30,11 @@ const Table = ({
   const [goToPage, setGoToPage] = useState('');
   const theme = useMantineTheme();
   const table = useReactTable({
+    defaultColumn: {
+      size: 200, //starting column size
+      minSize: 50, //enforced during column resizing
+      maxSize: 500, //enforced during column resizing
+    },
     data,
     columns,
     enableColumnResizing: true,
@@ -76,11 +79,11 @@ const Table = ({
                     }}
                     className={`text-[#ffffff] font-montserrat font-semibold text-[12px] capitalize ${
                       header.index === 0
-                        ? 'rounded-tl-lg p-4'
+                        ? 'rounded-tl-lg py-4 pl-4'
                         : header.headerGroup.headers?.length - 1 ===
                             header.index
-                          ? 'rounded-tr-lg p-4'
-                          : 'p-4'
+                          ? 'rounded-tr-lg pl-4'
+                          : 'py-4'
                     }`}
                   >
                     {header.isPlaceholder
@@ -163,7 +166,7 @@ const Table = ({
 
       {data?.length !== 0 && (
         <>
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col mt-4">
             <div className="w-full h-9 border border-solid border-[rgba(15, 120, 59, 0.1)] justify-center rounded-3xl bottom-0">
               <div className="flex flex-row justify-between">
                 <div className="flex flex-row m-1.5">

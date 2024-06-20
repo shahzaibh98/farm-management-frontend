@@ -270,9 +270,7 @@ const ManageUser = () => {
   const commonColumns = [
     {
       header: 'NAME',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -287,9 +285,7 @@ const ManageUser = () => {
     },
     {
       header: 'EMAIL ADDRESS',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -301,9 +297,7 @@ const ManageUser = () => {
     },
     {
       header: 'PHONE NUMBER',
-      size: 50,
-      minSize: 50,
-      maxSize: 500,
+
       cell: (info: any) => {
         const rowObject = info?.row?.original;
         return (
@@ -339,11 +333,8 @@ const ManageUser = () => {
       },
     },
     {
-      header: '',
+      header: <div className="flex text-start">Action</div>,
       accessorKey: 'userId',
-      size: 55,
-      minSize: 55,
-      maxSize: 55,
       cell: (info: any) => {
         const rowData = info?.row?.original;
         const id = rowData?.farmUserId;

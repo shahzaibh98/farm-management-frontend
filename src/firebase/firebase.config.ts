@@ -18,20 +18,30 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Cloud Messaging and get a reference to the service
-const messaging = getMessaging(app);
+// Check if messaging is supported
+let messaging: any;
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js').then(() => {
+      messaging = getMessaging(app);
+    });
+  }
+}
 
 /**
  * Request Token
  */
 export const requestForToken = () => {
+  if (!messaging) {
+    console.error('Firebase Messaging is not initialized');
+    return Promise.resolve(null);
+  }
+
   return getToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_KEY })
-    .then((currentToken: string | PromiseLike<string | null> | null) => {
+    .then((currentToken: string | null) => {
       if (currentToken) {
         return currentToken;
-        // Perform any other neccessary action with the token
       } else {
-        // Show permission request UI
         console.log(
           'No registration token available. Request permission to generate one.'
         );
@@ -47,11 +57,15 @@ export const requestForToken = () => {
  * Message listener
  * @returns Message promise
  */
-export const onMessageListener = () =>
-  new Promise(resolve => {
-    setTimeout(() => {
-      onMessage(messaging, payload => {
-        resolve(payload);
-      });
-    }, 500);
+export const onMessageListener = () => {
+  if (!messaging) {
+    console.error('Firebase Messaging is not initialized');
+    return Promise.resolve(null);
+  }
+
+  return new Promise(resolve => {
+    onMessage(messaging, payload => {
+      resolve(payload);
+    });
   });
+};

@@ -111,7 +111,7 @@ export const plantingRoutes = [
           <PrivateRoute>
             <DocumentTitle title="Planting" />
             <PlantingView
-              pageLabel="Planting"
+              pageLabel="Crop"
               apiEndPoint="planting"
               routeName="planting"
             />

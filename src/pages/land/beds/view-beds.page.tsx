@@ -278,9 +278,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start ml-2">NAME</div>,
         accessorKey: 'name',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 200, //enforced during column resizing
+
         cell: (info: any) => {
           const id = info?.row?.original?.bedId;
           return (
@@ -293,9 +291,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">LENGTH</div>,
         accessorKey: 'length',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
           return (
@@ -308,9 +304,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">WIDTH</div>,
         accessorKey: 'width',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowData = info?.row?.original;
 
@@ -324,9 +318,7 @@ const BedsView = () => {
       {
         header: <div className="flex text-start">AREA</div>,
         accessorKey: 'area',
-        size: 50, //starting column size
-        minSize: 50, //enforced during column resizing
-        maxSize: 500, //enforced during column resizing
+
         cell: (info: any) => {
           const rowInfo = info?.row?.original;
           return (
@@ -345,32 +337,27 @@ const BedsView = () => {
           const rowData = info?.row?.original;
           return (
             !isEmpty(rowData?.coordinates) && (
-              <Center mt={5}>
-                <FarmIcon
-                  height={24}
-                  width={24}
-                  opacity={0.8}
-                  className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
-                  onClick={() =>
-                    setMapModalDetails({
-                      isOpened: true,
-                      isReadOnly: true,
-                      isMultiple: false,
-                      data: rowData,
-                    })
-                  }
-                />
-              </Center>
+              <FarmIcon
+                height={24}
+                width={24}
+                opacity={0.8}
+                className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
+                onClick={() =>
+                  setMapModalDetails({
+                    isOpened: true,
+                    isReadOnly: true,
+                    isMultiple: false,
+                    data: rowData,
+                  })
+                }
+              />
             )
           );
         },
       },
       {
-        header: '',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'bedId',
-        size: 55, //starting column size
-        minSize: 55, //enforced during column resizing
-        maxSize: 55, //enforced during column resizing
         cell: (info: any) => {
           const id = info?.row?.original?.bedId;
           return (

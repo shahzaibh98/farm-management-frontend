@@ -2,12 +2,12 @@ import { DocumentTitle } from '../../concave.agri/components/title';
 import { AppShell } from '../../pages/app-layout';
 import { ErrorPage } from '../../pages/error';
 import ManageLand from '../../pages/land/land/land.foam';
-import BedsView from '../../pages/land/beds/view-beds.page';
 import LandView from '../../pages/land/land/view-land.page';
 import PrivateRoute from '../private/private.routes';
 import ManageBed from '../../pages/land/beds/beds.from';
 import SoilTestView from '../../pages/land/soil-test/view-soil-tests.page';
 import SoilTestForm from '../../pages/land/soil-test/soil-test.form';
+import BedsView from '../../pages/land/beds/view-beds.page';
 
 export const landRoutes = [
   {
