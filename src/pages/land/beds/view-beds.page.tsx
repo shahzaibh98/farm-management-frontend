@@ -337,42 +337,38 @@ const BedsView = () => {
           const rowData = info?.row?.original;
           return (
             !isEmpty(rowData?.coordinates) && (
-              <Center mt={5}>
-                <FarmIcon
-                  height={24}
-                  width={24}
-                  opacity={0.8}
-                  className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
-                  onClick={() =>
-                    setMapModalDetails({
-                      isOpened: true,
-                      isReadOnly: true,
-                      isMultiple: false,
-                      data: rowData,
-                    })
-                  }
-                />
-              </Center>
+              <FarmIcon
+                height={24}
+                width={24}
+                opacity={0.8}
+                className="cursor-pointer hover:scale-110 transition-transform duration-500 ease-in-out"
+                onClick={() =>
+                  setMapModalDetails({
+                    isOpened: true,
+                    isReadOnly: true,
+                    isMultiple: false,
+                    data: rowData,
+                  })
+                }
+              />
             )
           );
         },
       },
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'bedId',
         cell: (info: any) => {
           const id = info?.row?.original?.bedId;
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={id =>
-                  setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
-                }
-                onEditClick={handleEditClick}
-                onViewClick={handleViewClick}
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={id =>
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Bed' })
+              }
+              onEditClick={handleEditClick}
+              onViewClick={handleViewClick}
+            />
           );
         },
       },

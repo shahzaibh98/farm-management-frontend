@@ -287,26 +287,24 @@ const ManageCropsWithPlan = ({
         ),
       },
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'userId',
         cell: (info: any) => {
           const id = info?.row?.original?.refFarmCropId;
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={handleDeleteById}
-                onViewClick={handleViewClick}
-                onEditClick={handleEditClick}
-                additionalMenuItems={[
-                  {
-                    label: 'Crop Plan',
-                    icon: <MdOutlineLineStyle />,
-                    onClick: () => navigate(`/crops/${id}/planning`),
-                  },
-                ]}
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onViewClick={handleViewClick}
+              onEditClick={handleEditClick}
+              additionalMenuItems={[
+                {
+                  label: 'Crop Plan',
+                  icon: <MdOutlineLineStyle />,
+                  onClick: () => navigate(`/crops/${id}/planning`),
+                },
+              ]}
+            />
           );
         },
       },

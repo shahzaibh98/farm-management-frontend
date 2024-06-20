@@ -53,7 +53,7 @@ export function TaskForm({
 
   useEffect(() => {
     fetchData(
-      `farm-user?filter={"filter":[{"field":"farmId","operator":"eq","value":${currentUser.farmId}}]}`
+      `farm-user?filter={"filter":[{"field":"farmId","operator":"eq","value":"${currentUser.farmId}"}]}`
     )
       .then((response: any) => {
         console.log('Response', response);

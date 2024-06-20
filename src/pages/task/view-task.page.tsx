@@ -389,21 +389,18 @@ const TaskView = () => {
         cell: (info: { getValue: () => any }) => {
           const priority = info.getValue();
           return (
-            <Center>
-              <div className="flex flex-wrap">
-                <div
-                  className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
-                />
-                <Text>{priority}</Text>
-              </div>
-            </Center>
+            <div className="flex flex-wrap">
+              <div
+                className={`w-3 h-3 rounded-full m-1 mr-2 ${priority === 'Low' ? 'bg-green-light' : priority === 'Medium' ? 'bg-yellow-light' : 'bg-red-light'}`}
+              />
+              <Text>{priority}</Text>
+            </div>
           );
         },
       },
       {
         header: 'STATUS',
         accessorKey: 'taskStatus',
-
         cell: (info: { getValue: () => any }) => (
           <div className="flex items-center justify-center">
             <p className="text-center">{info.getValue()}</p>
@@ -422,33 +419,31 @@ const TaskView = () => {
         ),
       },
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'taskId',
         cell: (info: any) => {
           const id = info?.row?.original?.taskId;
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={handleDeleteById}
-                onEditClick={() =>
-                  setModalInfo({
-                    isOpen: true,
-                    type: 'Edit',
-                    objectData: info?.row?.original,
-                    isReadOnly: false,
-                  })
-                }
-                onViewClick={() =>
-                  setModalInfo({
-                    isOpen: true,
-                    type: 'View',
-                    objectData: info?.row?.original,
-                    isReadOnly: true,
-                  })
-                }
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onEditClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'Edit',
+                  objectData: info?.row?.original,
+                  isReadOnly: false,
+                })
+              }
+              onViewClick={() =>
+                setModalInfo({
+                  isOpen: true,
+                  type: 'View',
+                  objectData: info?.row?.original,
+                  isReadOnly: true,
+                })
+              }
+            />
           );
         },
       },

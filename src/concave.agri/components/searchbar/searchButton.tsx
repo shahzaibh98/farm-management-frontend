@@ -8,7 +8,7 @@ const SearchButton = ({
   return (
     <button
       onClick={onSearchButtonClick}
-      className="p-2.5 text-sm font-medium text-white bg-secondaryColors-100 rounded-lg border border-secondaryColors-50 hover:bg-secondaryColors-80 hover:ring-4 hover:outline-none hover:ring-lightColors-lightShade3 dark:bg-blue-600 dark:hover:bg-blue-700 dark:hover:ring-blue-800"
+      className="p-2.5 text-sm font-medium text-white bg-[#e3f3e1] rounded-lg border border-[#0F783B] hover:bg-[#e6fef0] hover:ring-4 hover:outline-none hover:ring-[#e6fef0]"
     >
       <svg
         className="w-4 h-3.5"
@@ -18,7 +18,7 @@ const SearchButton = ({
         viewBox="0 0 20 20"
       >
         <path
-          stroke="currentColor"
+          stroke="#0F783B"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2"

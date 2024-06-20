@@ -292,25 +292,23 @@ const SoilTestView = () => {
       },
 
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'soilTestId',
         cell: (info: any) => {
           const id = info?.row?.original?.soilTestId;
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={id =>
-                  setDeleteInfo({
-                    isOpened: true,
-                    id,
-                    resourceName: 'Soil Test',
-                  })
-                }
-                onEditClick={handleEditClick}
-                onViewClick={handleViewClick}
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={id =>
+                setDeleteInfo({
+                  isOpened: true,
+                  id,
+                  resourceName: 'Soil Test',
+                })
+              }
+              onEditClick={handleEditClick}
+              onViewClick={handleViewClick}
+            />
           );
         },
       },

@@ -36,10 +36,10 @@ const TableMenu = ({
   return (
     <div className="flex">
       {isEdit && (
-        <div className="bg-[#DDEEE0] p-2 mx-2 rounded-full border border-[rgb(15, 120, 59, 0.1)]">
+        <div className="bg-[#DDEEE0] p-2 ml-2 rounded-full border border-[rgb(15, 120, 59, 0.1)]">
           <HiOutlinePencil
             color="#0F783B"
-            style={{ width: rem(14), height: rem(14) }}
+            style={{ width: rem(15), height: rem(15) }}
             onClick={() => onEditClick(id)}
           />
         </div>
@@ -48,7 +48,7 @@ const TableMenu = ({
       {isDelete && (
         <div className="bg-[#FFECEC] p-2 mx-2 border border-[#E9B4B4] rounded-full">
           <IconTrash
-            style={{ width: rem(14), height: rem(14) }}
+            style={{ width: rem(15), height: rem(15) }}
             onClick={() => onDeleteClick(id)}
             color="#D63535"
           />
@@ -68,7 +68,7 @@ const TableMenu = ({
           floatingStrategy="fixed"
         >
           <Menu.Target>
-            <BsThreeDotsVertical />
+            <BsThreeDotsVertical size={18} />
           </Menu.Target>
 
           <Menu.Dropdown>

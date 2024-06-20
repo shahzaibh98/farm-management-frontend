@@ -333,52 +333,50 @@ const ManageUser = () => {
       },
     },
     {
-      header: 'Action',
+      header: <div className="flex text-start">Action</div>,
       accessorKey: 'userId',
       cell: (info: any) => {
         const rowData = info?.row?.original;
         const id = rowData?.farmUserId;
         const farmId = rowData?.farm?.farmId;
         return (
-          <Center>
-            <TableMenu
-              id={id}
-              onDeleteClick={handleDeleteById}
-              onViewClick={handleViewClick}
-              onEditClick={handleEditClick}
-              additionalMenuItems={[
-                {
-                  label:
-                    roleId !== '0'
-                      ? rowData?.systemUser?.isActive
-                        ? 'Blocked'
-                        : 'Active'
-                      : rowData?.farm?.isActive
-                        ? 'Blocked'
-                        : 'Active',
-                  icon:
-                    roleId !== '0' ? (
-                      rowData?.systemUser?.isActive ? (
-                        <MdDisabledVisible />
-                      ) : (
-                        <VscVmActive />
-                      )
-                    ) : rowData?.farm?.isActive ? (
+          <TableMenu
+            id={id}
+            onDeleteClick={handleDeleteById}
+            onViewClick={handleViewClick}
+            onEditClick={handleEditClick}
+            additionalMenuItems={[
+              {
+                label:
+                  roleId !== '0'
+                    ? rowData?.systemUser?.isActive
+                      ? 'Blocked'
+                      : 'Active'
+                    : rowData?.farm?.isActive
+                      ? 'Blocked'
+                      : 'Active',
+                icon:
+                  roleId !== '0' ? (
+                    rowData?.systemUser?.isActive ? (
                       <MdDisabledVisible />
                     ) : (
                       <VscVmActive />
-                    ),
-                  onClick: () =>
-                    handleChangeStatus(
-                      roleId === '0' ? farmId : id,
-                      roleId === '0'
-                        ? rowData?.farm?.isActive
-                        : rowData?.systemUser?.isActive
-                    ),
-                },
-              ]}
-            />
-          </Center>
+                    )
+                  ) : rowData?.farm?.isActive ? (
+                    <MdDisabledVisible />
+                  ) : (
+                    <VscVmActive />
+                  ),
+                onClick: () =>
+                  handleChangeStatus(
+                    roleId === '0' ? farmId : id,
+                    roleId === '0'
+                      ? rowData?.farm?.isActive
+                      : rowData?.systemUser?.isActive
+                  ),
+              },
+            ]}
+          />
         );
       },
     },

@@ -396,7 +396,7 @@ const LandView = () => {
         },
       },
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'landId',
         cell: (info: any) => {
           const id = info?.row?.original?.landId;
@@ -417,17 +417,15 @@ const LandView = () => {
             additionalMenuItems.splice(0, 1);
           }
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={id =>
-                  setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
-                }
-                onEditClick={handleEditClick}
-                onViewClick={handleViewClick}
-                additionalMenuItems={additionalMenuItems}
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={id =>
+                setDeleteInfo({ isOpened: true, id, resourceName: 'Land' })
+              }
+              onEditClick={handleEditClick}
+              onViewClick={handleViewClick}
+              additionalMenuItems={additionalMenuItems}
+            />
           );
         },
       },

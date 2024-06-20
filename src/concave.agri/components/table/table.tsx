@@ -79,11 +79,11 @@ const Table = ({
                     }}
                     className={`text-[#ffffff] font-montserrat font-semibold text-[12px] capitalize ${
                       header.index === 0
-                        ? 'rounded-tl-lg p-4'
+                        ? 'rounded-tl-lg py-4 pl-4'
                         : header.headerGroup.headers?.length - 1 ===
                             header.index
-                          ? 'rounded-tr-lg'
-                          : 'p-4'
+                          ? 'rounded-tr-lg pl-4'
+                          : 'py-4'
                     }`}
                   >
                     {header.isPlaceholder

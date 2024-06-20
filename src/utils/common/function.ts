@@ -402,3 +402,24 @@ export const formatDate = (dateString: string | number | Date) => {
   };
   return date.toLocaleDateString('en-US', options);
 };
+
+export function getStagePercentage(stageName: string) {
+  switch (stageName?.toLowerCase()) {
+    case 'seed':
+      return 5;
+    case 'germination':
+      return 5;
+    case 'seeding':
+      return 10;
+    case 'vegetative':
+      return 20;
+    case 'flowering':
+      return 30;
+    case 'ripening':
+      return 75;
+    case 'complete':
+      return 100;
+    default:
+      return 0; // Return 0 or handle unrecognized stage names as per your requirement
+  }
+}

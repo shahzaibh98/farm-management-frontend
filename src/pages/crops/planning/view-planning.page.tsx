@@ -333,19 +333,17 @@ const ManageCropsPlanning = () => {
         ),
       },
       {
-        header: 'Action',
+        header: <div className="flex text-start">Action</div>,
         accessorKey: 'cropPlanId',
         cell: (info: any) => {
           const id = info?.row?.original?.cropPlanId;
           return (
-            <Center>
-              <TableMenu
-                id={id}
-                onDeleteClick={handleDeleteById}
-                onViewClick={handleViewClick}
-                onEditClick={handleEditClick}
-              />
-            </Center>
+            <TableMenu
+              id={id}
+              onDeleteClick={handleDeleteById}
+              onViewClick={handleViewClick}
+              onEditClick={handleEditClick}
+            />
           );
         },
       },
